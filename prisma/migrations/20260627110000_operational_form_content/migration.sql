@@ -1,0 +1,2 @@
+ALTER TABLE "CAPA" ADD COLUMN "formContent" TEXT;
+ALTER TABLE "Complaint" ADD COLUMN "formContent" TEXT;

@@ -1,0 +1,103 @@
+{
+  "id": "case-2-class-i",
+  "title": "Class I Non-Sterile Examination Tool",
+  "standardScope": "MDR",
+  "product": {
+    "name": "Reusable Diagnostic Penlight",
+    "brand": "Yılmaz Bio Medikal",
+    "model": "PEN-LT-01",
+    "deviceClass": "CLASS_I",
+    "intendedPurpose": "Hand-held penlight for clinical examination (pupillary response, oral cavity).",
+    "indications": "General physical examination by healthcare professionals.",
+    "contraindications": "None known.",
+    "isSterile": false,
+    "sterilization": "NON_STERILE",
+    "isInvasive": false,
+    "containsSoftware": false,
+    "hasMeasuringFn": false,
+    "materials": "ABS housing, LED, alkaline battery",
+    "appliedStandards": "ISO 13485, ISO 14971, IEC 60601-1",
+    "technicalSections": [
+      { "id": "ts1", "key": "device-description", "title": "Device Description and Specification", "annexRef": "Annex II 1.1", "status": "APPROVED", "updatedAt": "2026-01-01T00:00:00.000Z" },
+      { "id": "ts2", "key": "clinical-evaluation", "title": "Clinical Evaluation", "annexRef": "Annex XIV", "status": "APPROVED", "updatedAt": "2026-01-01T00:00:00.000Z" },
+      { "id": "ts3", "key": "pms-plan", "title": "Post-Market Surveillance Plan", "annexRef": "Annex III", "status": "DRAFT", "updatedAt": "2026-01-01T00:00:00.000Z" }
+    ],
+    "gsprItems": [
+      { "id": "g1", "gsprNo": "10.1", "requirementSummary": "Chemical, physical and biological properties", "applicable": "NO", "justification": "No body contact during normal use." },
+      { "id": "g2", "gsprNo": "23.1", "requirementSummary": "Information supplied with the device", "applicable": "YES", "status": "APPROVED", "evidenceDocument": "IFU rev B" }
+    ],
+    "riskItems": [
+      { "id": "r1", "hazard": "Bright light exposure to eye", "harm": "Transient visual discomfort", "initialSeverity": 2, "initialProbability": 3, "initialRiskLevel": "MEDIUM", "riskControlMeasure": "Output limited; warning in IFU", "residualSeverity": 2, "residualProbability": 1, "residualRiskLevel": "LOW", "verificationOfControl": "Photometric test report PR-12", "linkedReferences": "IFU rev B" }
+    ]
+  },
+  "snapshot": {
+    "qmsTitles": [
+      "Document Control Procedure",
+      "Record Control Procedure",
+      "CAPA Procedure",
+      "Internal Audit Procedure",
+      "Management Review Procedure",
+      "Complaint Handling Procedure",
+      "Risk Management Procedure"
+    ],
+    "qmsApproved": 7,
+    "qmsTotal": 7,
+    "uploadedFiles": 6,
+    "analyzedFiles": 6,
+    "capaTotal": 1,
+    "capaOpen": 0,
+    "capaOverdue": 0,
+    "evidenceItemsTotal": 3,
+    "evidenceItemsWithEvidence": 3
+  },
+  "expected": {
+    "gaps": [
+      "Medical Device File Incomplete"
+    ],
+    "clauses": [
+      "ISO 13485",
+      "MDR 2017/745"
+    ],
+    "evidence": [
+      "Approve the outstanding technical file sections"
+    ],
+    "recommendations": [
+      "Complete, review and approve the outstanding technical file sections"
+    ]
+  },
+  "audit": {
+    "standard": "ISO_13485",
+    "assessmentType": "SURVEILLANCE",
+    "answers": [
+      { "standardCode": "ISO 13485", "clauseNo": "4.2.4", "question": "Is there a documented procedure for document control?", "expectedEvidence": "Document Control Procedure", "weight": 9, "answerText": "Yes, document control procedure QP-01 with controlled records." },
+      { "standardCode": "ISO 13485", "clauseNo": "8.5.2", "question": "Is there a CAPA procedure with records?", "expectedEvidence": "CAPA Procedure", "weight": 9, "answerText": "Yes, CAPA procedure QP-08 and CAPA register maintained." },
+      { "standardCode": "ISO 13485", "clauseNo": "5.6", "question": "Is management review conducted and recorded?", "expectedEvidence": "Management review records", "weight": 7, "answerText": "No formal management review records for the last cycle." },
+      { "standardCode": "ISO 13485", "clauseNo": "7.5", "question": "Is production controlled with work instructions?", "expectedEvidence": "Work instructions", "weight": 6, "answerText": "Yes, documented work instructions and production records." }
+    ],
+    "expectedFindings": [
+      { "severity": "MINOR", "label": "5.6 management review" }
+    ],
+    "expectedCapa": [
+      "management review"
+    ]
+  },
+  "composer": {
+    "type": "IFU_DRAFT",
+    "requiredSections": [
+      "Intended Purpose",
+      "Indications",
+      "Contraindications",
+      "Warnings",
+      "Instructions for Use",
+      "Storage",
+      "Symbols"
+    ]
+  },
+  "fileAnalysis": {
+    "fileName": "penlight-IFU-revB.pdf",
+    "documentKind": "IFU",
+    "text": "Instructions for use. Intended purpose: hand-held penlight for clinical examination. Indications, contraindications, warnings and precautions. Symbols per ISO 15223-1. Manufacturer information.",
+    "expectedKind": "IFU",
+    "expectedStandards": ["ISO 15223"]
+  }
+}

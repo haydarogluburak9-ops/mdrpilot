@@ -1,0 +1,502 @@
+ÝÇERÝK TABLOSU 
+1.	RÝSK YÖNETÝM PLANI KAPSAMI :	3
+2.	ÖZET VE AMAÇ:	3
+3.	RÝSK YÖNETÝM PLANININ KAPSAMI:	3
+3.1	ÜRÜN TANIMI VE AÇIKLAMASI:	3
+3.1.1	ÜRÜN TANIMI	3
+3.1.2	KULLANIM AMACI:	3
+3.1.3	UYGUNLUK DEÐERLENDÝRME ROTASI	3
+3.1.4	ENDÝKASYONLAR, KONTRENDÝKASYONLAR:	4
+3.1.4.1	ENDÝKASYONLAR:	4
+3.1.4.2	KONTRENDÝKASYONLAR:	4
+3.1.5	BÝOUYUMLULUK SINIFI	4
+3.1.6	AMBALAJ MALZEME BÝLGÝSÝ:	4
+3.1.7	ÜRÜN LÝSTESÝ	4
+3.1.8	GMDN NO VE AÇIKLAMASI	4
+3.1.9	STERÝLÝZASYON METODU	5
+3.1.10	ÜRÜN SINIFLANDIRMASI	5
+3.1.11	RÝSK YÖNETÝMÝ YAÞAM DÖNGÜSÜ UYGULAMASI	6
+3.1.11.1	TASARIM GELÝÞTÝRME PLANLAMASI:	6
+3.1.11.2	TASARIM GELÝÞTÝRME:	6
+3.1.11.3	TASARIM GELÝÞTÝRME DOÐRULANMASI:	7
+3.1.11.4	TASARIM GELÝÞTÝRME GEÇERLÝLÝÐÝ:	7
+3.1.11.5	SATIN ALMA:	7
+3.1.11.6	ÜRETÝM:	7
+3.1.11.7	KALÝTE KONTROL:	7
+3.1.11.8	DEPOLAMA:	7
+3.1.11.9	SATIÞ:	8
+3.1.11.10	SATIÞ SONRASI AÞAMA:	8
+3.1.11.11	ÝZLEME	8
+4	YETKÝ VE SORUMLULUK ATAMALARI	8
+5	RÝSK YÖNETÝM GÖZDEN GEÇÝRME GEREKSÝNÝMLERÝ	9
+6	TABLO E.1-TEHLÝKE ÖRNEKLERÝ	10
+7	TABLO E.2-TETÝKLEYEN OLAY VE DURUM ÖRNEKLERÝ	14
+8	ZARAR MEYDANA GELME OLASIÐI TAHMÝN EDÝLEMEDÝÐÝNDE RÝSKLERÝN KABUL EDÝLME KRÝTERLERÝNÝ DE ÝÇEREN RÝSK KABUL EDÝLEBÝLÝRLÝK KRÝTERLERÝ	17
+8.1	DEÐERLENDÝRME KRÝTERLERÝ	17
+8.1.1	DEÐERLENDÝRME KRÝTERLERÝ AFAP (MÜMKÜN OLDUÐUNCA):	17
+8.1.2	RÝSK SEVÝYELERÝ:	18
+8.2	DOÐRULAMA FAALÝYETLERÝ	20
+8.3	ÜRETÝM SONRASI BÝLGÝLERÝN NASIL ELDE EDÝLECEÐÝ	21
+8.3.1	SATIÞ SONRASI GERÝ BESLEME:	21
+8.3.2	MÜÞTERÝ ÞÝKAYETLERÝ:	22
+8.3.3	SATIÞ SONRASI GÖZETÝM	22
+8.4	RÝSK YÖNETÝMÝ GÖZDEN GEÇÝRME RAPORU	22
+9	SONUÇ:	22
+
+
+
+
+
+
+Revizyon Tarihçesi - Revision HistoryRev. No.Rev. Tr.
+Rev. Dt.Toplam Sayfa Total PagesRevizyon Sebebi
+Reason of Revision002.01.2015-Ýlk Yayýn - First Issue115.12.2015Tüm BölümlerRisk analizi güncellendi. 
+ALARP, AFAP olarak tanýmlandý.210.06.2016Tüm BölümlerRisk analizi gözden geçirildi ve güncellendi. 
+Risk/fayda analizi güncellendi.
+Toplam artýk risk deðerlendirildi.
+Satýþ sonrasý gözetim verileri ile ürünün faydasýnýn riskinin üzerinde kaldýðý görüldü. Muadil, eþdeðer ürünlerin geri bildirimleri tanýmlandý.317.11.2016Tüm BölümlerRisk analizi gözden geçirildi ve güncellendi. Risk deðerlendirmede göz ardý edilmiþ olan eksiklikler gözden geçirildi. 
+Denetimde tespit edilen uygunsuzluklar giderildi.402.01.2017Tüm BölümlerRisk analizi gözden geçirildi ve güncellendi.501.12.2021Tüm Bölümler- Risk analizi ve yönetim dokümanýnýn EN ISO 14971:2012'ye göre risk analiz planý (04.01), EK-C soru listesi EK-A olarak yeniden düzenlenmiþ (04.02), FMEA tablosu (04.03) ve Risk yönetim raporu (04.04) olarak 4 ayrý parçaya ayrýlmýþtýr. Risk Politikasý oluþturulmuþtur.
+- FMEA tablosundaki risk numaralarý, risk yönetim raporu içerisindeki 7 nolu deðerlendirme baþlýðý altýnda bulunan "RÝSK KONTROLÜ ÖNCESÝ RÝSK KABUL EDÝLEBÝLÝRLÝKLERÝ vee RÝSK KONTROLÜ SONRASI RÝSK KABUL EDÝLEBÝLÝRLÝKLERÝ" tablolarýnda belirtilmiþtir
+- ISO 14971:2019 standardý VE ISO/TR 24971:2020 kýlavuzuna göre düzenlemeler yapýlmýþtýr.
+- ISO 14971:2019 kapsamýnda "8.4 RÝSK YÖNETÝMÝ GÖZDEN GEÇÝRME RAPORU" maddesi eklenmiþtir.603.31.2025Logo- Firma nevi deðiþikliði yapmýþtýr.
+1. 
+RÝSK YÖNETÝM PLANI KAPSAMI	: 
+ORYUM/OVEM/EYETECH STERÝL OFTALMÝK BIÇAK
+2. ÖZET ve AMAÇ:
+Bu risk yönetimi planýnýn amacý ORYUM/OVEM/EYETECH STERÝL OFTALMÝK BIÇAK kullanýmý ile ilgili kullanýcý, operatörler ve hastalara herhangi bir zarar meydana gelmesi veya ürün kullanýmýnýn gerçekleþememesi olasýlýðýnýn önlenmesi için tehlikelerin tanýmlanmasý, tüm ürün ile ilgili proseslerin (Tasarým ve geliþtirme [Bundan böyle TG olarak adlandýrýlacaktýr], üretim) yaþam döngülerinden kaynaklanabilecek potansiyel risklerin veya zararlarýn önlenmesi veya minimize edilmesidir. TG prosesi içinde TG planlamasý, TG, TG doðrulamasý ve TG geçerliliði proseslerini içermektedir. Üretim prosesi içinde satýn alma, üretim, kalite kontrol, depolama ve satýþ alt proseslerini içerir.
+Bu plan ISO 14971:2019 standardýnda tanýmlanmýþ risk yönetimi proseslerinin tüm unsurlarýnýn ve hasta ile kullanýcýlara düþük riskli ürünleri sunulmasý için risk yönetiminin etkili bir þekilde yürütüldüðünden emin olmak için oluþturulmuþtur.
+3. RÝSK YÖNETÝM PLANININ KAPSAMI:
+Bu bölümde týbbi cihaz ve planýn için geçerli olan her öðe için yaþam döngüsü aþamalarý tanýmlanmakta ve açýklanmaktadýr. 
+3.1 Ürün Tanýmý ve Açýklamasý:
+3.1.1 Ürün Tanýmý
+Katarakt operasyonlarýnda, gonyotomi ve gonyopuncture gibi iðne ucu kullanýlan oftalmik yöntemlerde kullanýlan ince bir cerrahi býçaktýr. Býçak sadece ön ve orta korneaya yöneliktir.
+Uzak ucunda keskin, tek taraflý kesici býçaðý ve yakýn ucunda bir sapý bulunan tek parça bir alet olarak tasarlanmýþtýr. Býçak kenarlarý farklý þekillerde, örneðin fako (küt veya keskin), hilal, düz ve mikrofako (mikro insizyon katarakt cerrahisi için) olabilir.
+Ürün biyouyumlu ve tek kullanýmlýktýr. Pembe saplý býçaklar MVR olarak, Yeþil saplý býçaklar Cresent ve Slit býçak, Mavi saplý býçaklar Stab býçak olarak tanýmlanmýþtýr.
+3.1.2 Kullaným Amacý:
+Göz ve çevresindeki yapýlarý ilgilendiren oftalmik cerrahilerde göz dokusunda hassas insizyonlar (kesiler) yapmak amacýyla kullanýlýr.
+3.1.3 Uygunluk Deðerlendirme Rotasý
+2017/745 MDR, 93/42/EEC, 2007/47/EC Sýnýf II týbbi cihaz için, Týbbi Cihaz Yönetmeliði Ek-V prosedürler izlenmektedir.
+
+3.1.4 Endikasyonlar, Kontrendikasyonlar:
+3.1.4.1 Endikasyonlar:
+Oftalmik Cerrahi Operasyonlarýnda ön ve orta korneada hassas kesiler yapýlmasý.
+3.1.4.2 Kontrendikasyonlar:
+Metallere karþý duyarlýlýðý ve alerjisi olan hastalarda kontraendikedir.
+YAN ETKÝLER: Biilinen bir yan etkisi bulunmamaktadýr. 
+KONTRENDÝKASYONLAR: Metallere karþý duyarlýlýðý ve alerjisi olan hastalarda kontraendikedir.
+Göz ameliyatý dýþýnda baþka amaçlarla kullanmayýn.
+Göz küresinden baþka bölümlere çarparsa veya temas ederse, býçaðý kullanmayýn. Býçak hasar görebilir ve keskinliðini kaybedebilir.
+Yeniden kullanmayýn veya tekrar sterilize etmeyin. Yeniden kullaným veya yeniden sterilizasyon, yapýsal bütünlüðünden ciddi olarak ödün verebilir ve/veya hastalara zarar verebilir veya enfeksiyona neden olabilir.
+3.1.5 Biouyumluluk Sýnýfý
+STERÝL OFTALMÝK BIÇAKKemik / DokuA*A-Sýnýrlý (<24h), B-Uzamýþ (24H ila 30 gün), C- Kalýcý (>30 gün)
+3.1.6 Ambalaj Malzeme Bilgisi: 
+Kullanýlan Cihaz Özellikleri
+Marka	: HIPAI
+Model	: HP-270	
+Seri No	: 12627
+Kullanýlan Paketleme Kaðýdý: TYVEK 1073B/10MP
+Tedarikçi: OLIVER TOLAS HEALTHCARE PACKING
+Kullanýlan Ambalaj Malzemesi: PET Blister Ambalaj
+Tedarikçi: GÜNCAN PLASTÝK
+3.1.7 Ürün Listesi
+Detaylý ürün listesi için Teknik Dosya TF.04.02 ÜRÜN ÜRETÝM BÝLGÝLERÝ- Ürün Modeli Bölümü
+3.1.8 GMDN No ve Açýklamasý
+46741: Göz ve çevresindeki yapýlarý ilgilendiren oftalmik cerrahilerde göz dokusunda hassas insizyonlar yapmak için kullanýlan oftalmik cerrahi alet. Tipik olarak uzak ucunda keskin, tek taraflý kesici býçaðý ve yakýn ucunda bir sapý bulunan tek parça bir alet olarak tasarlanmýþtýr. Býçak kenarlarý farklý þekillerde, ör., fako (künt veya keskin), hilal, düz ve mikrofako (mikro insizyon katarakt cerrahisi için) olabilir. Genellikle yüksek kalitede paslanmaz çelikten yapýlmýþtýr ve bazý tiplerinde silikon (ör., kýrýlgan bir materyal) býçaklar kullanýlabilir. Tek kullanýmlýk bir cihazdýr.
+3.1.9 Sterilizasyon Metodu
+Ürünlerimiz Gama ve EO Steril olarak piyasaya sürülmektedir.
+3.1.10 Ürün Sýnýflandýrmasý
+93/42/EEC No'lu Direktif; Ek 9'a Göre Ürün SýnýflandýrmasýKuralKural TanýmýUygulanabilir TanýmKabul Edilen Sýnýf93/42/EEC-
+Ek 9, Kural
+6Bütün geçici kullanýmlý cerrahi invaziv cihazlar Sýnýf IIa'ya girer. Ancak:
+- Özellikle kalpte veya merkezî dolaþým sistemindeki bir bozukluðu vücudun bu bölümlerine doðrudan temas ederek kontrol eden, teþhis eden, izleyen veya düzelten cerrahi invaziv cihazlar Sýnýf III'e girer.
+- Tekrar kullanýlabilir cerrahi aletler Sýnýf I'e girer.
+- Özellikle merkezi sinir sistemine doðrudan temas ederek kullanýlan cerrahi invaziv cihazlar, Sýnýf III'e girer.
+- Ýyonlaþtýrýcý radyasyon formunda enerji saðlamayý amaçlayan cerrahi invaziv cihazlar Sýnýf IIb'ye girer.
+- Biyolojik etkiye sahip veya tamamý ya da büyük bir çoðunluðu absorbe edilen cerrahi invaziv cihazlar Sýnýf IIb'ye girer.
+- Ýlaçlarý vücuda vermek amacýyla kullanýlan cerrahi invaziv cihazlar, kullaným þekli bakýmýndan potansiyel bir tehlike oluþturuyor ise, bu durumda Sýnýf IIb'ye girer.Hastalarýn açýk alerji belirtileri gösterdiði ama alerjenin net olarak bilinmediði durumlarda, alerjen sývýlarýn epidermis tabakaya uygulanmasýný saðlamak amaçlý kullanýlýr.
+Kýsa süreli vücut içine girmektedir. Bu yüzden ve aþaðýda tanýmlanan kurala uygun olduðu için de Kural 6, Sýnýf IIa olarak deðerlendirilmektedir.IIa
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3.1.11 Risk Yönetimi Yaþam Döngüsü Uygulamasý
+Ürünün yaþam döngüleri aþaðýdaki þemada resimleþtirilmiþtir:
+
+Þema - 1 Risk Yönetimi Aþamalarý için Ürün Süreçleri Yaþam Döngüleri Þemasý
+
+Ürünlerin yaþam döngüsünün her aþamasýnda uygulanmasý gereken faaliyetler þunlardýr:
+3.1.11.1  Tasarým Geliþtirme Planlamasý:
+"TG" þikayetleri ve satýþ sonrasý aþamanýn durumu risk faktörlerini analiz etmek için incelenecektir. Belirlenmiþ tüm risk faktörleri için, risk seviyesi normal ve anormal kullanma koþullarýnda deðerlendirilecektir. Kuruluþ, tespit edilen risklerin oluþuma olasýlýðýnýn deðerlendirme sonucunda azaltýlýp azaltýlmadýðýný ve sonuçlarýn tasarým girdi faktörleri olarak kullanýlýr olup olmadýðýný belirleyecektir. "TG" planlamasý adýmýn tüm süreçlerinde Yönetim Temsilcisi ve Genel Müdür katýlacaktýr. Yönetim Temsilcisi süreci hazýrlayan, bilgileri bir araya getiren Genel Müdür ise gözden geçirip onaylayan olacaktýr.
+3.1.11.2 Tasarým Geliþtirme:
+TG hasta gereksinimlerini, kullanýcý gereksinimlerini, kullaným amacýný, güvenlik gereksinimlerini ve yasal gereklilikleri oluþturmaktadýr; ancak, bunlarla sýnýrlý deðildir. Tahmin edilebilir risk faktörleri listesi ilgili standartlar ve benzer ürünlerin güvenlik bilgilerinin analiz edilmesi ile oluþturulabilir. Belirlenmiþ risk faktörleri, risk yönetimi aracý olarak TG içinde saðlanacaktýr.
+3.1.11.3  Tasarým Geliþtirme Doðrulanmasý:
+Nesnel rapor dokümanlarý tanýmlanmýþ risklere doðru risk yönetimi metotlarýnýn uygulandýðýndan, risk yönetimi metodunun geçerli kýlýndýðýndan ve sonuçlarýn kabul kriterlerini karþýladýðýndan emin olunduðunu göstermek için yapýlacaktýr.
+3.1.11.4  Tasarým Geliþtirme Geçerliliði:
+Kuruluþ, týbbi cihazýn kullanýcý gereksinimlerini, kullaným amacý þartlarýný ve arta kalan tüm risklerin tüm kabul kriterlerini karþýlayýp karþýlamadýðýný belirleyecektir. 
+3.1.11.5 Satýn Alma:
+Kuruluþ, ham maddelerin satýn alýnmasý süresince olabilecek zararlarý önlemek ve kontrol altýna almak için satýn alma prosedürü oluþturacaktýr. Yanlýþ hammadde kullanýmýný önlemek amacýyla istikrarlý ve sürekliliði olan bir þekilde tedarik edilmiþ hammaddenin üretim izni verildiðinde onaylý olmasý ve risk yönetiminde satýn alma sýrasýnda oluþabileceði tanýmlanmýþ diðer risk faktörleri için kritik hammaddelere düzenli kontroller uygulanacaktýr. 
+3.1.11.6 Üretim:
+Þirket, üretim süreci, üretimin bakým ve kalibrasyon döngüsü, ölçme ve izleme cihazlarý ile ilgili riskleri göz önünde bulundurarak, uygunluðunu belirleyecektir. Üretim ortamý ve çalýþanlar risk yönetim metotlarý ile kontrol ve dokümante edilecek, düzenli olarak deðerlendirilecektir. Üretim sürecinin doðrulamasý risk yönetimi önlemlerinin sonucundan etkilenir ve FMEA gibi risk yönetimi yöntemi kullanýlarak gerçekleþtirilir.
+3.1.11.7 Kalite Kontrol:
+Kuruluþ, ekipmanlar ve kontrol prosesi ile ilgili hammadde ve bitmiþ ürünlerin kontrolü için kullanýlan ölçüm cihazlarýnýn kalibrasyon ve bakým döngüsünün uygunluðunu belirleyecektir. Kuruluþ, kontrol iþlemlerini kalite planý, teknik resim ve kalite yönetim prosedürlerine göre gerçekleþtirecektir. Bu dokümanlar risk yönetiminde yansýtýlan önlemler dikkate alýnarak hazýrlanacaktýr.
+3.1.11.8 Depolama:
+Kuruluþ, ürünlerin depolama safhasýnda karþýmasýný engelleyici risk önlemlerini belirleyecek ve kalite dokümantasyonunu risk yönetimi sonucu ortaya çýkan önlemlerin içine dahil edildiðinden emin olarak hazýrlayacaktýr.
+3.1.11.9 Satýþ:
+Kuruluþ, doðru ürünün doðru evraklarla doðru müþteriye doðru zamanda ulaþmasýný engelleyici unsurlar üzerine risk yönetimini gerçekleþtirecek ve kalite dokümantasyonunu risk yönetim sonuçlarý tarafýndan yansýtýlan önlemleri dahil ederek hazýrlayacaktýr.
+3.1.11.10 Satýþ Sonrasý Aþama:
+Kuruluþ, kalite yönetim sisteminde tanýmlanmýþ ilgili prosedürlere uygun þekilde müþteriye sevk edilmiþ ürünlerle ilgili müþteri þikayetleri ve satýþ sonrasý elde dilen bilgileri içerecek þekilde müþteri geri bilgilerini toplayacaktýr. Ek olarak risk yönetimi satýþ sonrasý edinilen bilgiler ýþýðýnda risk analizi tekrarlanacak ve risk yönetim raporu gözden geçirilip gerekli olduðu durumda revize edilecektir.
+3.1.11.11 Ýzleme
+Kuruluþ, ürün tüm yaþam döngüsü aþamalarýnda riskleri izleyecek ve buradan elde bilgileri kullanýlarak istatistiksel analizler yerine getirecektir.
+4 YETKÝ ve SORUMLULUK ATAMALARI
+Risk yönetimi çalýþmasýný gerçekleþtirecek kiþilerin ünvanlarý YILMAZ MEDÝKAL'e ait olan KP.09 Risk Analizi Prosedüründe belirlenmiþtir. Bu çalýþmada rol alacak ekip Tablo - 2 'de açýklanmýþtýr.  Bu çalýþmada gerçekleþtirecek aþamalar bazýnda risk yönetim ekibi Tablo -3 'de açýklanmýþtýr.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GöreviÝlgili Organizasyon BirimiAdý SoyadýTecrübe ve EðitimSorumluluklarYetkinlikRisk BelirlemeRisk DeðerlendirmeArtýk Risk DeðerlendirmeRisk/Fayda AnaliziRisk Analizi Gözden GeçirmeÜst YönetimGenel MüdürMustafa NAZLIER21 Yýl / Risk Yönetimi Eðitimi (ISO14971)Kaynaklarýn saðlanmasý, risk azaltma kararlarýnýn alýnmasý.Ürün Uzmanlýðý, Üretim Proses Bilgisi, EN ISO 14971:2019 Risk Analizi Eðitimi X--XXXÜretim, Kalite KontrolÜretim SorumlusuMustafa NAZLIER21 Yýl / Risk Yönetimi Eðitimi (ISO14971)Üretim prosesindeki, kullaným esnasýndaki risklerin tespit edilemesi ve önlemlerin alýnmasý ile ilgili çalýþmalarýn yapýlmasý.  Ürün Uzmanlýðý, Literatür Arama, Üretim Proses Bilgisi, EN ISO 14971:2019 Risk Analizi Eðitimi XXXXXPazarlama, 
+Satýþ SonrasýPazarlama ve Satýþ SorumlusuPýnar ÖZÇUBUKÇU14 Yýl / Risk Yönetimi Eðitimi (ISO14971)Ürünlerin pazarda deðerlendirilmesi, satýþ sonrasý gözetim verilerinin toplanmasý, hasta þikayetlerinin alýnmasý ve bildirilmesi, düzeltici faaliyetlerin belirlenmesi, risklerin belirlenmesi, puanlarýn incelenmesi, gözden geçirme faaliyetlerinin deðerlendirilmesi.Raporlama Yapabilme, Ürün Pazar Bilgisi, EN ISO 14971:2019 Risk AnaliziXXXXXKalite YönetimYönetim TemsilcisiPýnar ÖZÇUBUKÇU14 Yýl / Risk Yönetimi Eðitimi (ISO14971)Risklerin belirlenmesi, düzeltici faaliyetlerin belirlenmesi, puanlama çalýþmalarýnýn yapýlmasý, risk düzeltici faaliyetlerle ilgili dokümanlarýn hazýrlanmasý, gözden geçirme faaliyetlerinin deðerlendirilmesi. Raporlama Yapabilme, Ürün Pazar Bilgisi, EN ISO 14971:2019 Risk AnaliziXXXXXBaðýmsýz KlinisyenDoktorDr. Tuncer
+ÞENOL25 Yýl / Týbbi Uzmanlýk EðitimiÜrünün hasta saðlýðý açýsýndan deðerlendirilmesi ve risklerin incelenmesi, hasta þikayetlerinin ürün bazlý deðerlendirilmesi ve risk puanlarýna etkilerinin incelenmesi, gözden geçirme faaliyetlerinin deðerlendirilmesi.Ürün Uzmanlýðý, Literatür Tarama, Klinik Datalarýn DeðerlendirilmesiXXXXX
+Tablo - 2 Risk Yönetimi Çalýþma Ekibi ve Rolleri
+5 RÝSK YÖNETÝM GÖZDEN GEÇÝRME GEREKSÝNÝMLERÝ
+Risk yönetim aktiviteleri ile ilgili ürün yaþam döngüsüne ait her bir basamak için gerçekleþtirilecek olan risk yönetim gözden geçirme gereksinimleri Tablo - 3 'te verilmiþtir.
+NoAþamaGözden Geçirme Gereksinimleri1TG PlanlamasýBenzer veya ayný ürünler ile ilgili bilimsel veriler, saha ve klinik verilerden yararlanýlacaktýr. TG planlamasý aþamasýnda oluþabilecek riskler tanýmlanacaktýr. Þirket bu tarz risklerin oluþumunu azaltmak için önlemler uygulayacak ve sonuçlarý deðerlendirecektir.2TGKuruluþ, uygulanabilir uyumluluk ve performans standartlarýnýn ve ölçülerin yansýttýðý toleranslar çerçevesinde riskleri düþürecektir.3TG DoðrulamaKuruluþ, kontrol ile oluþan risklerin, riskleri gözden geçirme kriterlerini veya tasarým girdi faktörlerini karþýlayýp karþýlamadýðýný doðrulayacaktýr. Tanýmlanmýþ herhangi bir risk giderilecektir. Gerekirse bir kontrol veya ikame hesaplama yapýlacaktýr.4TG GeçerliliðiKuruluþ, fiili çalýþma ortamýnda oluþabilecek risklerin taramasýný ve deðerlendirmesini gerçek kullaným durumlarý raporlarýndan (klinik çalýþmalar) ve bunlarla ilgili akademik dergiler, iþletme kayýtlarý veya benzer ürünlerden saðlayacaktýr.5Satýn AlmaKuruluþ, tedarikçiden temin edeceði ham maddelerin uygunluðunu doðrulayacaktýr. 6ÜretimKuruluþ, üretim sýrasýnda oluþan riskleri tanýmlayacak ve bunlarý elimine edecek veya düþürecektir.7Kalite KontrolKuruluþ, ürün üzerinde hasar olup olmadýðýný doðrulayacaktýr.8DepolamaKuruluþ, depolama esnasýnda oluþan riskleri tanýmlayacak ve deðerlendirecektir.9SatýþKuruluþ, satýþ süreci esnasýnda oluþan riskleri tanýmlayacak ve deðerlendirecektir.10Üretim Sonrasý AþamaKuruluþ, satýþ sonrasý oluþabilecek öngörülmeyen riskleri tanýmlayacak ve bu riskleri azaltmak için gerekli tedbirleri alacaktýr.11ÝzlemeKuruluþ, her aþamanýn izlenmesini ve risk oluþumunu müþteri geri beslemeleri ve vaka raporlarýný kullanarak azaltýlmasýný saðlayacaktýr.Tablo 3- Risk Yönetim Gözden Geçirme Gereksinimleri
+Ürünle ilgili risk belirlemeleri ISO 14971:2019 standardýnýn (Bu standardýn adýnýn geçtiði yerlerde TSE 'nin ve ISO'nun resmî sitesinde bulunan güncel versiyonu anlaþýlacaktýr) 
+Güvenlikle ilgili tehlike ve karakteristikler ISO/TR 24971'ün EK A'sýna göre tanýmlanýr. 
+Tablo E.1 ve Tablo E.2 'de bulunan bilgiler doðrultusunda yürütülecektir.
+6 TABLO E.1-TEHLÝKE ÖRNEKLERÝ
+Riskli etkiler   þeklinde iþaretlenmiþtir.  Uygulanmayan etkiler için N/A þeklinde tanýmlama yapýlmýþtýr.
+Enerji Tehlikeleri
+Elektromanyetik Enerji*Þebeke gerilimiN/ACihaz aktif cihaz deðildir. 
+The device is not an active device.*Kaçak akýmN/ACihaz aktif cihaz deðildir. 
+The device is not an active device.*Elektrikli alanlarN/ACihaz aktif cihaz deðildir. 
+The device is not an active device.*Manyetik alanlarN/ACihaz aktif cihaz deðildir. 
+The device is not an active device.Radyasyon enerjisi*Ýyonlaþtýrýcý radyasyonN/AÝyonlaþtýrýcý radyosyon bulunmamaktadýr. 
+There is no ionizing radiation.*Ýyonlaþtýrýcý olmayan radyasyonN/AÝyonlaþtýrýcý olmayan radyasyon bulunmamaktadýr. 
+There is no non-ionizing radiation.Termal Enerji*Yüksek sýcaklýkAPaket mukavemet testlerinde belirtilen sýcaklýðýn üstüne çýkmasý sonucu sterilizasyonun bozulmasý çapraz enfeksiyona sebep olabilir.
+Deterioration of sterilization as a result of exceeding the temperature specified in the package strength tests may cause cross-infection.*Düþük sýcaklýkAPaket mukavemet testlerinde belirtilen sýcaklýðýn altýnda olmasý sonucu sterilizasyonun bozulmasý çapraz enfeksiyona sebep olabilir.
+If the package is below the temperature specified in the strength tests, the deterioration of sterilization may cause cross-infection.Mekanik Enerji*YerçekimATaþýma sýrasýnda düþme sonrasý paketin hasar görerek sterilizasyonu yitirmesi
+Loss of sterilization by damaging the package after falling during transportation*VibrasyonN/AVibrasyon enerjisi bulunmamaktadýr. 
+There is no vibration energy.*Depolanan enerjiN/ADepolanan enerji bulunmamaktadýr. 
+There is no stored energy.*Hareketli parçalarN/AHareketli parça bulunmamaktadýr. 
+There are no moving parts.*Burulma, kesme, çekme kuvvetiN/ABurulma, kesme, çekme kuvveti bulunmamaktadýr. 
+There is no torsion, shear or tensile force.*Hasta konumlandýrýlmasý ve hareketiABükülme, kýrýlma ve gerilme uygulama esnasýnda daha fazla güç harcanmasý, Ürün performansýnýn bozulmasý yaþanabilir.
+During bending, breaking and stretching, more power is consumed, and the performance of the product may deteriorate.*Akustik enerjiN/AAkustik enerji bulunmamaktadýr. 
+There is no acoustic energy.  -ultrasonik enerjiN/AAkustik enerji bulunmamaktadýr. 
+There is no acoustic energy.  -infrasound enerjiN/AAkustik enerji bulunmamaktadýr. 
+There is no acoustic energy.  -sesN/AAkustik enerji bulunmamaktadýr. 
+There is no acoustic energy.*Yüksek basýnçlý sývý enjeksiyonN/AYüksek basýnçlý sývý enjeksiyon bulunmamaktadýr. 
+There is no high pressure liquid injection.
+Biyolojik ve Kimyasal Tehlikeler
+Biyolojik 
+Biological*Bakteri 
+* BacteriaAKullaným öncesi uygun olmayan sterilizasyon sonucu bakteri içerebilir
+Improper sterilization may cause bacteria containment before usage.*Virüsler
+* VirusesAKullaným öncesi uygun olmayan sterilizasyon sonucu virüs içerebilir
+Improper sterilization may cause virus containment before usage.*Diðer ajanlar (örnek,prionlar)
+* Other agents (e.g. prions)AKullaným öncesi uygun olmayan sterilizasyon sonucu diðer ajanlarý içerebilir
+Improper sterilization may cause other agents containment before usage.*Tekrarlayan ya da çapraz enfeksiyon 
+* Re- or cross-infectionAKullaným öncesi uygun olmayan sterilizasyon sonucu çapraz enfeksiyona sebep olabilir
+Improper sterilization may cause cross-infection before usage.Kimyasal 
+Chemical*Çevresel ya da ürün özelliðinden dolayý solunum yolunun, dokularýn yabancý maddelere maruz kalmasý
+* Exposure of airway, tissues, environment or property, e.g. to foreign materialsAUygun olmayan malzeme kullanýmý dokularda ve vücutta biyouyumsuzluk yaratabilir.
+The use of unsuitable materials can cause undesired biocompatibility effect and tissue in the body.*Asitlik, alkalilik
+* Acids or alkalisN/AÜrün kimyasal olarak aktif deðildir
+Product is non-active as chemically*Kalýntý 
+* ResiduesABaþarýsýz yýkama durumunda ürün temizleme ajanlarý ve üretim kalýntýlarý bulunabilir
+Product cleaning agents or production residuals may be found  because of fail of cleaning*Kontaminasyon 
+* ContaminatesABaþarýsýz yýkama durumunda ürün temizleme ajanlarý ve üretim kalýntýlarý bulunabilir
+Product cleaning agents or production residuals may be found  because of fail of cleaning*Katký maddesi veya iþleme yardýmcýlarý
+* Additives or processing aidsAÜründe katký maddesi yoktur, baþarýsýz yýkama durumunda ürün üzerinde ürün temizleme ajanlarý ve üretim kalýntýlarý bulunabilir
+There is no additivies on product, product cleaning agents or production residuals may be found  because of fail of cleaning*Temizleme, dezenfeksiyon veya test ajanlarý
+* Cleaning, disinfecting or testing agentsABaþarýsýz yýkama durumunda ürün temizleme ajanlarý bulunabilir
+Product cleaning agents may be found  because of fail of cleaning*Medikal gazlar
+* Medical gassesN/AÜründe medikal gaz mevcut deðildir
+There is no medical gases in product*Aneztezik ürünler
+* Anaesthetic productsN/AÜründe anestezik ürünler mevcut deðildir
+There is no anaesthetic products in product*Bozunmuþ ürünler 
+* Degradation products
+N/AÜrün bozunmamaktadýr
+Product does not degradeBiyouyumluluk 
+Biocompatibility *Kimyasal bileþenlerin toksisitesi
+*Physical and/orchmeical InformationAYüzey cihazlarý sýnýfýnda deri ile temas etmektedir. Temas süresi 24 saatten azdýr (A Sýnýfý).
+In the class of surface devices, it comes into contact with the skin. Contact time is less than 24 hours (Class A).*Allerji oluþumu / Ýritasyon / Hassasiyet
+* Irritation or Intracutameonus ReactivityAYüzey cihazlarý sýnýfýnda deri ile temas etmektedir. Temas süresi 24 saatten azdýr (A Sýnýfý).
+In the class of surface devices, it comes into contact with the skin. Contact time is less than 24 hours (Class A).*Pirojenite
+*PyrogenityN/ABiouyumluluk test matrisine göre kapsam dýþý.
+Out of scope according to the biocompatibility test matrix.*Sitoksisite
+* CytotoxicityAYüzey cihazlarý sýnýfýnda deri ile temas etmektedir. Temas süresi 24 saatten azdýr (A Sýnýfý).
+In the class of surface devices, it comes into contact with the skin. Contact time is less than 24 hours (Class A).*Genotoksisite
+* GenotoxicityN/ABiouyumluluk test matrisine göre kapsam dýþý.
+Out of scope according to the biocompatibility test matrix.*Subkronik toksisite / Akut Sistemik Toksisite
+* Subacute Toxicity / Acute Systemic ToxicityN/ABiouyumluluk test matrisine göre kapsam dýþý.
+Out of scope according to the biocompatibility test matrix.*Implantasyon
+* ImplantaonN/ABiouyumluluk test matrisine göre kapsam dýþý.
+Out of scope according to the biocompatibility test matrix.Operasyonel Tehlikeler 
+Fonksiyon 
+Function*Yanlýþ veya uygunsuz çýkýþ veya iþlevsellik (fonksiyonellik)
+* Incorrect or inappropriate output or functionalityAHatalý kullaným ya da üretim sonucu uygunsuz iþlevsellik olabilir
+As a result of misuse or improper production it can be incorrect functionality*Yanlýþ ölçüm
+* Incorrect measurementN/AÜründe ölçüm ile ilgili bir fonksiyon yoktur.
+There is no function related to measurement of the product.*Hatalý data transferi
+* Erroneous data transferN/AÜrün data transferi yapmamaktadýr
+Product does not transfer data*Ýþlevselliðin bozulmasý veya kaybolmasý
+* Loss or deterioration of functionAHatalý kullaným ya da üretim sonucu iþlevsellik bozulabilir, kaybolabilir
+As a result of misuse or improper production function may be lots or deterioratedKullaným Hatalarý - Use error*Dikkat hatasý
+* Attentional failureAHekimde dikkat hatasý oluþabilir
+Attention failure of orthopedist may occur*Bellek hatasý
+* Memory failureAHekimde bellek hatasý oluþabilir
+Memory failure of orthopedist may occur*Kural bazlý hata
+* Rule-based failureACerrahi protokol uygulanmazsa hata oluþabilir
+Errors may occur if surgical protocol is not applied*Bilgi bazlý hata
+* Knowledge-based failureAEksik veya yanlýþ bilgi hata oluþturabilir
+Missing or incorrect information may generate errors*Rutin ihlali
+* Routine violationACerrahi protokol uygulanmazsa hata oluþabilir
+Errors may occur if surgical protocol is not applied
+Bilgilendirme Tehlikeleri
+Etiketleme
+Labelling*Eksik kullaným kýlavuzu
+* Incomplete instructions for useAEksik kullaným kýlavuzu hataya sebep olabilir
+Incomplete instructions for use may cause error*Ürün performans özelliklerinin yetersiz tanýmlanmasý
+* Inadequate description of performance characteristicsAÜrün performans özelliklerinin yetersiz tanýmlanmasý hataya sebep olabilir
+Inadequate description of performance characteristics may cause error*Amaçlanan kullaným özelliklerinin yetersiz anlatýlmasý
+* Inadequate specification of intended useAAmaçlanan kullaným özelliklerinin yetersiz anlatýlmasý hatalý kullanýma sebep olabilir
+Inadequate specification of intended use may cause misuse*Limitlerin yetersiz tanýmlanmasý
+*Inadequate disclosure of limitationsN/ASpesifik limit mevcut deðildir
+There is no specific limits.Çalýþtýrma Bilgileri
+Operating instructions*Kullaným öncesi kontrol özelliklerinin yetersizliði
+*Inadequate specification of pre-use checksAEtiket ve kullaným kýlavuzunun kontrol edilmemesi hataya sebep olabilir
+Not control of label and instruction for use may cause failure*Aþýrý karmaþýk kullaným bilgileri (Kullaným kýlavuzunda yer alan bilgilerin aþýrý karmaþýk olmasý)
+* Over-complicated operating instructionsAAþýrý karmaþýk kullaným bilgileri hatalý kullanýma sebep olabilir
+Over-complicated operating instructions may cause improper useUyarýlar - Warnings*Yan etkiler, uyarýlar
+* Of side effectsAUyarý ve yan etki tanýmlanmamasý baþarýszlýða sebep olabilir
+Non description of side effects and warnings may cause failure*Tek kullanýmlýk týbbi cihazýn tekrar kullanýlma riskleri (steril ürünler için)
+* Of hazards likely with re-use of single-use medical devicesA
+Ürün sterildir ve tekrar kullanýlmamalýdýr.
+Product Is sterile and is not re-usable.*Servis ve bakým özellikleri
+*Specification of service and maintenanceN/AÜrün servis ve bakým gerektirmez.
+Producy does not need service or maintenance.
+
+
+
+
+
+7 TABLO E.2-TETÝKLEYEN OLAY VE DURUM ÖRNEKLERÝ
+Riskli etkiler   þeklinde iþaretlenmiþtir.  Uygulanmayan etkiler için N/A þeklinde tanýmlama yapýlmýþtýr.
+Risk affects signed with . Not applicable effects signed with N/A. 
+Genel Kategori
+General CategoryTetikleyen olay ve durum örnekleri
+Examples of initiating events and circumstancesTamamlanmamýþ Gereksinimler
+Incomplete requirementsYetersiz Özellikler 
+Inadequate specification*Tasarým parametreleri
+* Design parametersATamamlanmamýþ tasarým parametreleri hataya sebep olabilir
+Incomplete Design parameters can cause failure*Operasyon parametreleri
+*Operating parametersATamamlanmamýþ uygulama parametreleri hataya sebep olabilir Incomplete application parameters can cause failure*Performans gereklilikleri
+*Performance requirementsATamamlanmamýþ perofrmans gereklilikleri hataya sebep olabilir Incomplete performance requirements can cause failure*Hizmet gereklilikleri (bakým vb.)
+*In-service requirements (e.g. maintenance, reprocessing)AÜrün kullanýmdan önce kullanýcý tarafýndan temizlenmelidir. Tamamlanmamýþ temizlik gereklilikleri hataya sebep olabilir. Bakým gerektirmez.
+Product must be cleaned prior of usage by user. Incomplete cleaning requirements can cause failure. Don't need maintenance. *Raf ömrü
+*Shelf lifeARaf ömrü 3 yýldýr.
+Shelf life is 3 years.Üretim Prosesi
+Manufacturing ProcessÜretim prosesindeki deðiþikliklerin yetersiz kontrolü
+Insufficient control of changes in manufacturing processesAÜretim sürecindeki deðiþiklerin yetersiz kontrolü hataya sebep olabilir
+Insufficient control of changes in manufacturing process may cause errorYetersiz hammadde / hammadde uyumluluðu kontrolü
+Insufficient control of rawmaterial/raw materials compatibility AYetersiz hammadde / hammadde uyumluluðu kontrolü üründe fonksiyon yetersizliði
+Insufficient control of rawmaterials/raw materials compatibility may cause unsufficient function of productYetersiz üretim prosesi kontrolü
+Insufficient control of manufacturing processesAYetersiz üretim prosesi kontrolü baþarýsýzlýða sebep olabilir
+Insufficient control of manufacturing processes may cause failureTaþeron üreticilerin yetersiz kontrolü
+Insufficient control of subcontractorsATaþeron üreticilerin yetersiz kontrolü baþarýsýzlýða sebep olabilir
+Insufficient control of subcontractors may cause errorNakliye ve Depolama
+Transport and StorageYetersiz ambalajlama 
+Inadequate packagingABozulmuþ ambalaj baþarýsýzlýða sebep olabilir                             
+Corrupted packaging may cause failureKontaminasyon veya bozulma 
+Contamination or deteriorationAÜrün non steril olarak satýlmaktadýr.
+Product is sold as non sterile.Uygunsuz çevre koþullarý
+Inappropriate environmental conditionsAÜrün steril olarak satýlmaktadýr. Saklama koþulunu ambalajý belirler.
+Product is sold as sterile. Package defines the specific condition for storageÇevresel Faktörler
+Environmental factorsFiziksel (sýcaklýk, basýnç, zaman) 
+Physical (e.g. heat, pressure, time)AUygun materyal kullanýlmamasý soruna yol açar.
+Using unsuitable material cause problem.Kimyasal (korozyon, bozulma, kontaminasyon)
+Chemical (e.g. corrosions, degradation, contamination)AUygun materyal kullanýlmamasý soruna yol açar.
+Using unsuitable material cause problem.Elektromanyetik alanlar
+Electromagnetic fields (e.g. susceptibility to electromagnetic disturbance)N/AElektromanyetik alanlar ürünü etkilemez                                   Electromagnetic fiels do not affect productYetersiz besleme enerjisi
+Inadequate supply of powerN/AEnerji kaynaðý ile çalýþmaz.
+No energy supply.Yetersiz soðutucu beslemesi
+Inadequate supply of coolantN/AÜrün bir soðutucu ile beslenmemektedir    
+Product does not supplied by coolantTemizlik, dezenfeksiyon, sterilizasyon
+
+Cleaning, disinfection and
+sterilizationYetersiz valide edilmiþ temizlik, dezenfeksiyon, sterilizasyon prosedürleri
+Inadequately validated cleaning, disinfection and sterilization proceduresAYetersiz valide edilmiþ temizlik, dezenfeksiyon ve sterilizasyon prosedürleri enfeksiyona sebep olabilir
+Inadequately validated cleaning, disinfection and sterilization procedures may cause infectionTemizlik, dezenfeksiyon, sterilizasyon konularýnýn yetersiz yürütülmesi
+Inadequate conduct of cleaning, disinfection and sterilizationAYetersiz temizlik, dezenfeksiyon ve sterilizasyon enfeksiyona sebep olur
+Inadequate cleaning, disinfection and sterilization may cause infectionsBertaraf
+Disposal and scrappingÜrün bertarafý ile ilgili yetersiz bilgi 
+inadequate information for product disposalAÜrün bertarafý ile ilgili uyarý olmamasý mevcut düzenlemere aykýrý durum oluþturabilir.
+Lack of warning about the product disposal may create contrary to the existing regulations.Kullaným hatasý
+Usage errorAÜrün bertarafý ile ilgili uyarý olmamasý mevcut düzenlemere aykýrý durum oluþturabilir.
+Lack of warning about the product disposal may create contrary to the existing regulations.Formülasyon
+FormulationBiyolojik bozunma 
+Biodegration N/AÜrün biyolojik olarak bozunmaz
+Non biodegradable productsBiyouyumluluk
+BiocompatibilityAÜrün vücutla temas etmektedir.
+Product contactS with bodyÜrün spesifikasyonlarý ile ilgili yetersiz bilgi
+Inadequate information on product specificationAÜrün spesifikasyonlarý ile ilgili yetersiz bilgi hatalý kullanýma sebep olabilir
+No information or inadequate specification provided can cause improper useYanlýþ formülasyondan kaynaklý tehlikeler
+Hazards based on wrong formulationN/AÜründe yanlýþ kullanýma sebep olacak formülasyon mevcut deðildir
+There is no formulation in productsmay cause improper useKullaným hatasý
+Usage errorN/AÜründe yanlýþ kullanýma sebep olacak formülasyon mevcut deðildir
+There is no formulation in productsmay cause improper useÝnsan Faktörü
+Human FactorsTasarým kusurlarýyla tetiklenen kullaným hatalarý 
+Usage errors triggered by design failure*Eksik veya karmaþýk kullaným kýlavuzu
+*Confusing or missing instructions for useAEksik veya karmaþýk kullaným kýlavuzu yanlýþ kullanýma sebep olabilir
+Confusing or missing instructions for use may cause improper use*Karmaþýk ve yanýltýcý kontrol sistemi
+*Complex or confusing control systemN/AÜründe kontrol sistemi mevcut deðildir
+There is no control system in product*Belirsiz veya açýk olmayan cihaz durumu
+*Ambiguous or unclear device stateAHatalý veya eksik etiletleme yanlýþ kullanýma sebep olabilir
+Incorrect or incomplete labelling may cause improper use*Belirsiz ve açýk olmayan bir þekilde ayarlarýn, ölçmelerin veya diðer bilgilerin sunumu
+*Ambiguous or unclear presentation of settings, measurements or other informationAHatalý veya eksik etiketleme yanlýþ kullanýma sebep olabilir
+Incorrect or incomplete labeling may cause improper use*Sonuçlarýn yanlýþ yorumlanmasý
+*Misinterpretation of resultsN/AÜrün yorumlama yapmamaktadýr
+Product does not interpret*Görünürlüðün, iþitilebilirliðin veya dokunulabilirliðin yetersizliði
+*Insufficient visibility, audibility or tactilityAEtiketin okunabilir olmamasý hatalý kullanýma sebep olabilir
+Insufficient legible of label can cause improper use*Kontrolle hareketin veya görüntülenen bilgi ile gerçek durumun iyi örtüþmemesi
+*Poor mapping of controls to actions, or of displayed information to actual stateN/AÜrün kontrol ile hareket ettirilmemekte, görüntü vermemektedir
+Products are not moved with the control, do not include display*Mevcut cihazla karþýlaþtýrýldýðýnda tartýþmalý modlar veya eþlenmeler
+*Disputable mode or match when it is compared with exsting device N/AÜrünü baþka bir cihaz ile karþýlaþtýrmak mümkün deðildir
+It is not possible to compare product with another device*Cihazýn beceriksiz/eðitimsiz kiþiler tarafýndan kullanýlmasý
+*Use by unskilled/untrained personnelAYetenekli/eðitimli olmayan kiþilerce kullanýlmasý hataya sebep olur
+Unprofessional handling causes error*Yan etkiler için yeterince uyarýlar bulunmamasý
+*Insufficient warning for side effectsAUyarý ve yan etki tanýmlanmamasý baþarýszlýða sebep olabilir
+Non descrption of sideeffectsn and warning may  cause failure*Tek kullanýmlýk týbbi cihazýn tekrar kullanýlmasýyla ilgili tehlike uyarýsýnýn yetersizliði
+*Inadequate warning of hazards associated with re-use of single-use medical devicesAEtiket üzerinde tek kullanýmlýk sembolü mevcuttur.
+Single use symbol is available on label.*Yanlýþ ölçmeler ve diðer metrolojik hususlar
+*Incorrect measurement and other metrological aspectsN/AÖlçüm ve metrolojik fonksiyonlar mevcut deðildir
+Measurement and metrological functions are unavailable.*Tüketim malzemeleri/aksesuarlar/diðer týbbi cihazlarla uyumsuzluk 
+*Incompatibility with consumables/accessories/other medical devicesN/AUygulanamýyor. / unavailable*Keskin kenarlar ve sivri uçlar
+*Slips, laps and mistakesAÇapak mevcudiyeti enfeksiyon yaratýr
+The presence of burrs creates infectionHata Modlarý
+Failure ModesBeklenmeyen elektriksel/mekanik bütünlük kaybý
+Unexpected loss of electrical/mechanical integrityAdoktoru hatasý beklenmeyen mekanik bütünlük kaybý oluþturabilir, elektriksel kayýp mevcut deðildir
+Doctor error may create unexpected loss of mechanical integrity, electrical loss does not exist Yaþlanma, aþýnma ve tekrarlanan kullanýmýn sonucu olarak iþlevselliðin bozulmasý (Örn. sývý/gaz yolunun kademeli oklüzyonu, akýþ direncinin deðiþmesi, elektrik iletkenliði) 
+Deterioration in function (e.g. gradual occlusion of fluid/gas path, or change in resistance
+to flow, electrical conductivity) as a result of ageing, wear and repeated useAÜrünün uygun olmayan yerlerde ve þekilde kullanýmý yaþlanma ve aþýnma oluþabilir
+Depending on unconforming use of location  and shape as a result of ageing, wear and repeated use deterioration in function may occur on the productÜrün yorgunluðu
+Fatigue failureAKullaným þekline baðlý olarak ürün yorgunluðu oluþabilir
+Depending on shape of use, fatigue may occur on the products
+8 ZARAR MEYDANA GELME OLASIÐI TAHMÝN EDÝLEMEDÝÐÝNDE RÝSKLERÝN KABUL EDÝLME KRÝTERLERÝNÝ DE ÝÇEREN RÝSK KABUL EDÝLEBÝLÝRLÝK KRÝTERLERÝ
+ISO 14971:2019 standardýna göre meydana gelme olasýlýðýnýn nicel tahmini doðru ve güvenilir verilerin temelinde yapýlabildiði zaman veya makul nicel bir tahmin mümkün olduðu zaman bir risk tahminindeki güvencenin arttýðý ancak bunun daima baþarýlabilir olmadýðý belirtilmiþtir. Buna yönelik olarak da olasýlýk tahmininin doðruluðu þüpheli olduðu zaman, çoðunlukla olasýlýða iliþkin geniþ bir aralýk oluþturmanýn veya bazý özel deðerden daha kötü olmadýðýný belirlenin gerekli olduðu bildirilmiþtir. Olasýlýklarýn tahmin edilmesinin çok zor olduðu ve 
+YILMAZ MEDÝKAL ORYUM/OVEM/EYETECH Steril Oftalmik Biçak ürünlerine uygun olabilecek örnekler aþaðýdaki gibi verilmiþtir:
+- Durumlar, örneðin bir týbbi cihaza sabotaj veya tahrifat yapma,
+- Belirli toksikolojik tehlikeler, örneðin genotoksik karsinojenler ve duyarlýlýðý artýran etkenler, burada, altýnda zehirli etkilerin meydana gelmediði maruz kalma eþiðini tayin etmek mümkün olmayabilir.
+Bu sebeple bu duruma uyan risklerin olasýlýklarý geniþ bir aralýk oluþturarak tahmin edilmeye çalýþýlacaktýr ve bu sýnýflandýrma bir alttaki bölümde verilmiþtir.
+8.1 DEÐERLENDÝRME KRÝTERLERÝ
+YILMAZ MEDÝKAL bünyesinde risk yönetimi ürün yaþam döngüsü süresince oluþabilecek risklerin sistematik olarak belirlenmesi, azaltýlmasý ya da ortadan kaldýrýlmasý amacýyla yapýlmaktadýr. Bunlarýn dýþýnda risk yönetimi bu çalýþmalarý dokümante etmek ve risklere karþý alýnan önlemlerin etkinliðini rakamlarla görebilmek amacý ile de uygulanýr.
+Uygulama detaylarý için KP.09 Risk Analizi Prosedürü referans alýnmalýdýr.
+Tüm bu çalýþmalar ilgili sorumlular tarafýndan kayýt altýna alýnýr. KP.11 Müþteri Geri Besleme Prosedürü ile belirlenen yöntemle gelen bilgiler, Genel Müdür, Yönetim Temsilcisi ve Klinik Uzman katýlýmý ile deðerlendirilir. Gelen bilgiler neticesinde tasarýmda deðiþiklik yapýlmak isteniyorsa KP.12 Tasarim ve Geliþtirme Prosedürü 'ne göre iþlem yapýlýr ve kayýt altýna alýnýr. Gelen bilgiler sonucunda imalat parametrelerinde deðiþiklik yapýlýrsa risk yönetim ekibinin çalýþmalarý sonucunda önlem alýnmaya çalýþýlýr ve bu çalýþma kayýt altýna alýnýr; ilgili deðiþiklik TF.01-04.03 Hata Modu Etkileri Analizi Formunada yansýtýlýr. 
+8.1.1 DEÐERLENDÝRME KRÝTERLERÝ AFAP (Mümkün olduðunca):
+Risk yönetimi çalýþmasý boyunca tespit edilen tüm risklere risk azaltým faaliyeti uygulanacaktýr. Risk azaltým çalýþmasý süresince oluþan tüm riskler gerek tasarým fonksiyonlarý gerekse mevcut en son ve kabul üretim ve kalite kontrol teknikleri göz önünde bulundurulacaktýr. Risk azaltýmýný saðlayacak faaliyetler TF.01-04.03 Hata Modu Etkileri Analizi Formunda kayýtlandýrýlacaktýr. Risk azaltým çalýþmalarý süresince tanýmlanmýþ tüm risklerin ya ortadan kaldýrýlmasý ya da mümkün olan en az düzeye indirilmesi gerekliliði göz önünde bulundurulacaktýr. Risk indirim çalýþmasýnda ekonomiklilik bir kriter olarak alýnmayacaktýr.
+8.1.2 RÝSK SEVÝYELERÝ:
+Risk yönetimi çalýþmasý neticesinde düþürülen ve arta kalan riskler ürünün hastaya saðlayacaðý yarar gözetilerek deðerlendirilecektir. Bu deðerlendirmede esas olan oluþturan riskin hastaya saðladýðý fayda ile kýyaslandýðýnda makul karþýlanabilip karþýlanamayacaðýdýr. Bu sebeple puanlamaya dayalý bir risk kabul edilebilirlik deðerlendirilmesi yapýlmayacaktýr. Bu deðerlendirme risk yönetim ekibi tarafýndan TF.01-04.03  HATA MODU ETKÝLERÝ ANALÝZÝ FORMU 'nda kayýtlandýrýlacaktýr. Deðerlendirme sonunda bir riskin oluþacak faydaya nazaran makul karþýlanmamasý durumu oluþtuðu taktirde ürünün tasarým ve üretim ile ilgili fonksiyonlarýna geri dönülecektir. Makul durum oluþmadýðý sürece tasarýmýn veya deðiþikliðin yürütülmesine izin verilmeyecektir.
+YILMAZ MEDÝKAL bünyesinde risk yönetimi ürün yaþam döngüsü süresince oluþabilecek risklerin sistematik olarak belirlenmesi, azaltýlmasý ya da ortadan kaldýrýlmasý amacýyla yapýlmaktadýr. Bunlarýn dýþýnda risk yönetimi bu çalýþmalarý dokümante etmek ve risklere karþý alýnan önlemlerin etkinliðini rakamlarla görebilmek amacý ile de uygulanýr.
+Bu doðrultuda risk ISO 14971:2019 standardý doðrultusunda þiddet ve olasýlýðýn bileþkesi olarak tanýmlanmýþtýr.
+Bu uygulamada kullanýlan tanýmlar aþaðýda verilmiþtir:
+S : Hata etkisinin önemi veya þiddeti.
+O: Hata türünün gerçekleþme olasýlýðý.
+
+ÞÝDDETOLASILIK1
+Ýhmal Edilebilir2
+Hafif3
+Þiddetli4
+Kritik5
+Afet1 BeklenmeyenACCACCAFAPAFAPAFAP2 Nadiren (az)ACCAFAPAFAPAFAPNACC3 BazenAFAPAFAPNACCNACCNACC4 MuhtemelAFAPAFAPNACCNACCNACC5 Sýk AFAPNACCNACCNACCTablo 4 Risk Kabul Edilebilirlik Kriterleri
+
+
+
+BÖLGETANIMLAMASARI BÖLGEAFAP (Kabul Edilebilir Risk- Risk Deðerlendirmesinde kritere dayandýrýlarak Kabul Edilebilir. Riski daha düþük seviyelere düþürebilmek için fazladan aksiyonlar gerekebilir)KIRMIZI BÖLGEN/ACC (Tolere Edilemez Risk- Risk Deðerlendirmesinde kritere dayandýrýlarak Kabul Edilemez. Riski daha düþük seviyelere indirebilmek için fazladan aksiyonlar gereklidir) NACC
+Þiddet seviylerinin açýklamalarý aþaðýdaki tabloda verilmiþtir.
+Genel TerimlerMuhtemel AçýklamaKatastrofikHasta ölümü ile sonuçlananKritikKalýcý özürlülük veya hayati tehlikede hasarla sonuçlananÞiddetliProfesyonel týbbi müdahale gerektiren hasarla ve özürlülükle sonuçlananHafifÜrünün kullanýlamamasý, profesyonel týbbi müdahale gerektirmeyen geçici hasarla veya özürlülükle sonuçlananÖnemsizRahatsýzlýk veya geçici huzursuzluk verenTablo 5 Þiddet Seviyelerinin Muhtemel Açýklamasý
+
+Genel TerimlerMuhtemel Ýhtimal AralýðýSýk?10-3Muhtemel<10-3 ve ?10-4Bazen<10-4 ve ?10-5Az<10-5 ve ?10-6Beklenmeyen<10-6Tablo 6 Risk Olasýlýklarýnýn Muhtemel Aralýklarý
+Risk, ISO/TR 24971'in EK C.4 Maddesi'ne göre Tablo 1 de verilen aralýklarda kýrmýzý bölgelere düþen riskler kabul edilemez riskler olarak tanýmlanýr. Bu bölgede bulunan riskler, risk kontrol tedbirleri ile yeþil renkte olan kabul edilebilir bölgeye düþürülmeye çalýþýlýr, bu mümkün deðil ise en azýndan sarý bölgeye düþürülmeye çalýþýlýr. Sarý bölgeler için daha fazla risk azaltma araþtýrmasý yapýlýr. Bir artýk için baþka risk kontrolü uygulanamazsa, tasarlanan kullanýmýn faydalarýnýn bu artýk riskten daha aðýr gelip gelmediðini deðerlendirilir.  Sarý bölgeler AFAP (Mümkün olduðunca düþürülmüþ) olup risk / fayda analizi soucunda kabul edilebilir bulunmalýdýr. Ayrýca bu riskler kullaným kýlavuzunda kullanýcýya bildirilecek ve satýþ sonrasý gözetim faaliyetleri ile takip edilecektir. Riskin azaltýlmasý için yapýlan çalýþmalarda alýnan önlemlerin yeni tehlikelerin veya tehlikeli durumlarýn oluþturup oluþturmadýðý veya önceden tanýmlanan tehlikeli durumlar için tahmin edilen risklerin, risk kontrol önlemlerinin oluþturulmasýndan etkilenip etkilenmediði deðerlendirilir. Yeni tehlikelerin oluþtuðu tespit edilirse, bu tehlikelerin getirdiði riskler belirlenir. Alýnan önlemler yeni tehlikeler oluþturmuyorsa tüm tehlikelerin tekrar incelenmesi safhasýna geçilir.
+Bunun dýþýnda ISO 14971:2019 'a göre , Artýk riskler fayda/risk analizi kapsamýnda deðerlendirilerek, riskine göre faydasý yüksek olan kabul edilebilecek düzeyde olanlar belirlenir ve risk yönetimi gözden geçirme raporunda belirtilir. Kabul edilemeyecek düzeyde olan risk olmasý durumda aþaðýdakilerden biri uygulanýr:
+- Tasarým deðiþikliði
+- Ürünü geri çekme 
+- Ürünü geri çaðýrma 
+Tüm bu çalýþmalar ilgili sorumlular tarafýndan kayýt altýna alýnýr. KP.11 Musteri Geri Besleme Proseduru ile belirlenen yöntemle gelen bilgiler, Genel Müdür, Yönetim Temsilcisi ve Klinik Uzman katýlýmý ile deðerlendirilir. Gelen bilgiler neticesinde tasarýmda deðiþiklik yapýlmak isteniyorsa KP.12 Tasarim Ve Geliþtirme Prosedürü veya KP.22 Týbbi CI·hazlar Uyarý Sistemi (Teyakkuz) Prosedu¨ru¨ne göre iþlem yapýlýr ve kayýt altýna alýnýr (TF.04-04.03 Hata Modu Etkileri Analizi Formu). Gelen bilgiler sonucunda imalat parametrelerinde deðiþiklik yapýlýrsa risk yönetim ekibinin çalýþmalarý sonucunda önlem alýnmaya çalýþýlýr ve bu çalýþma kayýt altýna alýnýr (TF.04-04.03 Hata Modu Etkileri Analizi Formu). 
+Artýk Risklerin Takibi ve Toplam Artýk Risk Deðerlendirmesi / Fayda-Risk Analizi
+Azaltýlan risklerden sonra yine de mevcut olan risklere arta kalan riskler denilmektedir. Bu aþamada arta kalan riskler deðerlendirmesi yapýlýr. Arta kalan riskler fayda/risk analizi kapsamýnda deðerlendirilerek, riskine göre faydasý yüksek olan kabul edilebilecek düzeyde olanlar belirlenir ve risk yönetimi raporunda belirtilir. Kabul edilemeyecek düzeyde olan riskler için ise koruyucu önlemlerin alýnmasý gerekmektedir. Bu önlemler riskten etkilenecek kiþileri uyaracak nitelikte ve yazýlý olmalýdýr. Týbbi cihazýn kullaným amacý ile ilgili faydalar, genel artýk riske karþý tartýlýr. Deðerlendirme kapsamýnda ISO/TR 24971:2020 8.3.a maddesinde belirtildiði gibi amaçlanan týbbi endikasyon, teknoloji ve týpta genel olarak kabul edilen son teknoloji ve alternatif týbbi cihazlarýn veya tedavilerin mevcudiyeti göz önünde bulundurularak yapýlýr. Ayný zamanda 8.3.c maddesinde belirtildiði gibi piyasada mevcut eþdeðer týbbi cihazlar için yapýlan literatür deðerlendirmesi de týbbi cihazýn kullaným amacý ile ilgili faydalarý tespit etmek için kullanýlýr. Toplam artýk risk deðerlendirmesi için ISO/TR 24971:2020'nin 8.3.d maddesinde belirtildiði üzere ürünün ürünün tasarým ve geliþtirilmesine doðrudan katkýsý olmayan, ilgili ürünlere iliþkin klinik veya uygulama deneyimi olan ve benzer týbbi cihazlar hakkýnda bilgi sahibi olan uzman kullanýcýlarýn deðerlendirmesiyle gerçekleþtirilir. (TF.04-04.03 HATA MODU ETKÝLERÝ ANALÝZÝ FORMU).
+Bunun dýþýnda tüm risklerin ürünün toplam faydasýna olan fayda/riskanalizi yapýlarak risk yönetim raporunda kayýtlandýrýlacaktýr.
+8.2 DOÐRULAMA FAALÝYETLERÝ
+Risk tanýmlama ve risk deðerlendirme sürecinde belirlenen herhangi bir risk için, þirket risk kontrol tedbirleri uygulayacaktýr.
+Þirket planlanan risk kontrol önlemi uygulayarak risklerde azalma olup olmadýðýný doðrulayacaktýr. Risk doðrulama aþaðýdaki adýmlara uygun bir þekilde yapýlacaktýr:
+FaaliyetSýklýkKullanýlacak YöntemSorumluKayýtKriterlerin risk analizi sonrasý aldýðý puanlarýn geçerliliðiYýlda 1 kereÝlgili standart ve mevzuatlarda deðiþiklik varsa bakýlýr. Müþteri geri beslemeleri ölçme ve analiz sonuçlarý deðerlendirilir.Risk Analizi Ekibi* Üretim Kayýtlarý
+* Müþteri Memn. Anketi 
+* Müþteri Þikâyet Formu Üretim Akýþ Þemalarýnýn, Risk Analizinin doðrulanmasýYýlda 1 kereÜretimin akýþ þemalarýna uygun olarak iþleyip iþlemediði, risklerde deðiþiklik olup olmadýðý ve risklerin doðruluðu deðerlendirilir.Risk Analizi Ekibi* Teknik Dosya-TF.04.04
+* Üretim Kayýtlarý Risk analizi planýnda yer alan risklere yönelik alýnan tedbirlere iliþkin uygulamalar ile izleme kayýtlarýnýn doðrulanmasý.Yýlda 1 kereKlinik takip planýna göre ürünün satýþ sonrasý gözetimleri yapýlýr. Müþteri geri bildirimleri alýnýr, klinik takip deðerlendirmesi yapýlýr.Yönetim Temsilcisi* Klinik Takip Planý
+* Klinik Takip Deðerlendirme RaporuMüþteri þikâyetlerinin incelenmesiYýlda 1 kereÜrün güvenliði ve emniyeti ile ilgili olarak gelen þikâyetlerin veri analizi yapýlarak en çok tekrar edenler belirlenir.Yönetim Temsilcisi* Müþteri Þikâyet Formu Müþteri Memnuniyet anketlerinin yapýlmasýYýlda 1 kereÜrün güvenliði ve emniyeti ile ilgili müþteri istek ve beklentileri toplanarak elde edilen veriler deðerlendirilir. Yönetim Temsilcisi* Müþteri Memnuniyet AnketiUlusal ve uluslararasý ilgili standart ve mevzuatlardaki deðiþimHer ayTanýmlanan web sayfalarýndan standart ve mevzuatlarýn takibi yapýlýr.Yönetim Temsilcisi* Harmonize Standartlar Listesi 
+* Ýlgili Dokümanlar ListesiTablo 7 - Doðrulama Faaliyetleri (Table 4- Verification Activities)
+8.3 ÜRETÝM SONRASI BÝLGÝLERÝN NASIL ELDE EDÝLECEÐÝ
+Üretim ve üretim sonrasý faaliyetler kapsamýnda bilgiler toplanýr ve gözden geçirilir. Gelen bilgilerde incelenmiþ riskler dýþýnda riskler mevcut ise tespit edilmiþ olan tehlikenin meydana getireceði risklerin tekrar belirlenmesi gerekmektedir. Belirlenmiþ veya kabul edilmiþ riskler ile ilgili gelen bilgilendirmeler için yeniden risk gereksinimlerinin incelenmesine gerek yoktur. 
+ISO 14971:2019 Madde 10 kapsamýnda faaliyetler yürütülür.  Üretim ve üretim sonrasý faaliyetler için üretim ve üretim sürecinin izlenmesi sýrasýnda oluþan bilgi, kullanýcý tarafýndan oluþturulan bilgi, týbbi cihazýn kullanýmýndan sorumlu kiþiler tarafýndan oluþturulan bilgi, tedarik zinciri tarafýndan oluþturulan bilgi, halka açýk bilgi ve genel olarak kabul edilen geliþim seviyesi ile ilgili bilgiler toplanýr.
+Üretim sonrasý safhalarda ürün ile ilgili bilgiler aþaðýda belirtilen kanallardan elde edilecektir:
+8.3.1 Satýþ Sonrasý Geri Besleme:
+Ürün satýþlarýndan sonra her yapýlan kritik müþteri görüþmeleri KP.11 Musterý Gerý Besleme Prosedürüne göre gerçekleþtirilecektir. Bu görüþmeler prosedüre göre kayýt altýna alýnacaktýr. Kritik bir görüþme olmamasý durumunda ürün hakkýnda müþteri görüþü alýnarak ayný prosedüre göre kayýtlandýrýlacaktýr. Yapýlan kayýtlandýrýlmalar Genel Müdür tarafýndan kritikliðine göre o anda veya dönemsel olarak deðerlendirilecektir. Gerekli olan görüþme sonuçlarýna KP.18 Düzeltici Faaliyetler Prosedürü ve KP.19 Önleyici Faalýyetler Prosedürüne göre iþlem yapýlacaktýr.
+8.3.2 Müþteri Þikayetleri:
+Ürün satýþlarýndan sonra müþteri þikâyeti olmasý durumunda her bir þikayet KP.11 Müsteri Geri Besleme Prosedürüne göre kayýtlandýrýlacaktýr. Yapýlan kayýtlandýrýlmalar Genel Müdür tarafýndan kritikliðine göre o anda deðerlendirilecektir. Gerektiði durumda KP.18 Düzeltici Faaliyetler Prosedürü ve KP.19 Önleyici Faalýyetler Prosedürüne göre iþlem yapýlacaktýr. Düzeltici faaliyet açýlmamasý durumunda bu durum prosedüre göre kayýt altýna alýnacaktýr.
+8.3.3 Satýþ Sonrasý Gözetim
+Yýllýk dönemde;
+- Satýþ sonrasý geri besleme 
+- Hem cihaz ile ilgili hem de eþdeðer ürün ile ilgili müþteri þikayetleri, geri çaðýrmalar ve olumsuz olay veri raporlarý 
+- Varsa, eþdeðer ürünle ilgili yeni yayýnlanan klinik literatürler takip edilerek ürün deðerlendirmesi yapýlacak ve gerekirse klinik araþtýrma raporu revize edilecektir. Bu deðerlendirmenin özellikle risk analizde yeni bir risk varsa arta kalan riskleri de içermesi saðlanacaktýr. 
+8.4 RÝSK YÖNETÝMÝ GÖZDEN GEÇÝRME RAPORU
+Yapýlan risk analiz, risk deðerlendirme, risk kontrol ve arta kalan risklerin deðerlendirilmesi (Fayda / Risk Analizi) çalýþmalarýnýn deðerlendirmesinin yapýldýðý ve özellikle giderilemeyen ya da azaltýlamayan risklerin belirtildiði rapordur. 
+Risk yönetim planýnýn uygulanmasý gözden geçirilir. Bu gözden geçirme ile risk yönetim planýnýn uygun bir þekilde yerine getirildiði, toplam artýk risk deðerlendirmesi, ve üretim ve üretim sonrasý faaliyetlerden toplanan ve gözden geçirilen verilerin deðerlendirmesi yapýlýr ve Risk Yönetim Raporu ve Satýþ sonrasý gözetim raporlarýnýn içerisinde yýllýk olarak deðerlendirilmektedir.
+9 SONUÇ:
+Tüm yukarýda elde edilen bilgilerden aþaðýdaki maddelerin oluþmasý durumunda risk yönetimi dosyasý revize edilecektir:
+- Daha önce deðerlendirilmemiþ risklerin ortaya çýkmasý,
+- Arta kalan risklerle ilgili olumsuz bilgilerin alýnmasý,
+- Ürün üzerinde yapýlan revizyonlar.
+- Standartlar veya yönetmeliklerde oluþan deðiþiklikler.
+Yukarýda verilmiþ maddelerin risk yönetimini etkilememesi halinde risk yönetim dosyasýnda revizyon yapýlmasý gerekmeyecektir.
+
+
+RÝSK YÖNETÝM PLANI
+RÝSK MANAGEMENT PLANDOKÜMAN NO: TF.04-04.01YAYIN TARÝHÝ: 02.01.2015REV.NO: 06REV.TARÝHÝ: 31.03.2025SAYFA NO: 22 / 22
+
+
+
+H A Z I R L A Y A N
+YÖNETÝM TEMSÝLCÝSÝ
+Pýnar ÖZÇUBUKÇUO N A Y L A Y A N
+GENEL MÜDÜR
+Mustafa NAZLIER
+
+
+
+
+

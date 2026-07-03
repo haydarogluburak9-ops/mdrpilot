@@ -1,0 +1,109 @@
+{
+  "id": "case-4-software-device",
+  "title": "Software as a Medical Device (SaMD)",
+  "standardScope": "MDR",
+  "product": {
+    "name": "AI Retinal Screening Software",
+    "brand": "Yılmaz Bio Medikal",
+    "model": "RET-AI-2.0",
+    "deviceClass": "CLASS_IIB",
+    "intendedPurpose": "Software that analyses fundus images to flag signs of diabetic retinopathy for clinician review.",
+    "indications": null,
+    "contraindications": null,
+    "isSterile": false,
+    "sterilization": "NON_STERILE",
+    "isInvasive": false,
+    "containsSoftware": true,
+    "hasMeasuringFn": true,
+    "materials": null,
+    "appliedStandards": "ISO 13485, ISO 14971, IEC 62304, IEC 82304-1",
+    "technicalSections": [
+      { "id": "ts1", "key": "device-description", "title": "Device Description and Specification", "annexRef": "Annex II 1.1", "status": "APPROVED", "updatedAt": "2026-01-01T00:00:00.000Z" },
+      { "id": "ts2", "key": "clinical-evaluation", "title": "Clinical Evaluation", "annexRef": "Annex XIV", "status": "MISSING", "updatedAt": "2026-01-01T00:00:00.000Z" },
+      { "id": "ts3", "key": "pms-plan", "title": "Post-Market Surveillance Plan", "annexRef": "Annex III", "status": "MISSING", "updatedAt": "2026-01-01T00:00:00.000Z" }
+    ],
+    "gsprItems": [
+      { "id": "g1", "gsprNo": "17.1", "requirementSummary": "Electronic programmable systems and software (lifecycle, repeatability, reliability)", "applicable": "YES", "status": "MISSING" },
+      { "id": "g2", "gsprNo": "23.4", "requirementSummary": "Information in the instructions for use", "applicable": "YES", "status": "MISSING" }
+    ],
+    "riskItems": []
+  },
+  "snapshot": {
+    "qmsTitles": [
+      "Document Control Procedure",
+      "Record Control Procedure",
+      "CAPA Procedure"
+    ],
+    "qmsApproved": 3,
+    "qmsTotal": 3,
+    "uploadedFiles": 0,
+    "analyzedFiles": 0,
+    "capaTotal": 0,
+    "capaOpen": 0,
+    "capaOverdue": 0,
+    "evidenceItemsTotal": 5,
+    "evidenceItemsWithEvidence": 0
+  },
+  "expected": {
+    "gaps": [
+      "Software Lifecycle Documentation Missing",
+      "Clinical Evaluation Missing",
+      "Post-Market Surveillance Plan Missing",
+      "Risk Management File Missing",
+      "Medical Device File Incomplete",
+      "No Objective Evidence Uploaded"
+    ],
+    "clauses": [
+      "IEC 62304",
+      "ISO 14971",
+      "MDR 2017/745 Annex I"
+    ],
+    "evidence": [
+      "Software development plan",
+      "Risk management plan",
+      "Clinical Evaluation Report",
+      "PMS plan"
+    ],
+    "recommendations": [
+      "Establish IEC 62304 software development and verification documentation",
+      "Create the risk management file",
+      "Establish a clinical evaluation plan and report"
+    ]
+  },
+  "audit": {
+    "standard": "ISO_13485",
+    "assessmentType": "CERTIFICATION",
+    "answers": [
+      { "standardCode": "IEC 62304", "clauseNo": "Clause 5", "question": "Is there a documented software development lifecycle?", "expectedEvidence": "Software development plan", "weight": 9, "answerText": "No documented software lifecycle yet." },
+      { "standardCode": "ISO 14971", "clauseNo": "Clause 4", "question": "Is a risk management file maintained?", "expectedEvidence": "Risk management file", "weight": 9, "answerText": "Not established." },
+      { "standardCode": "ISO 13485", "clauseNo": "8.5.2", "question": "Is there a CAPA procedure with records?", "expectedEvidence": "CAPA Procedure", "weight": 9, "answerText": "Yes, CAPA procedure QP-08 is in place." },
+      { "standardCode": "IEC 62304", "clauseNo": "Clause 9", "question": "Is there a software problem resolution process?", "expectedEvidence": "Problem resolution records", "weight": 7, "answerText": "No, not defined." }
+    ],
+    "expectedFindings": [
+      { "severity": "MAJOR", "label": "Clause 5 software development lifecycle" },
+      { "severity": "MAJOR", "label": "risk management file" },
+      { "severity": "MINOR", "label": "Clause 9 software problem resolution" }
+    ],
+    "expectedCapa": [
+      "software development",
+      "risk management"
+    ]
+  },
+  "composer": {
+    "type": "CLINICAL_EVALUATION_PLAN",
+    "requiredSections": [
+      "Scope and Device Description",
+      "Clinical Background",
+      "Clinical Evaluation Strategy",
+      "Literature Search Strategy",
+      "Acceptance Criteria"
+    ]
+  },
+  "fileAnalysis": {
+    "fileName": "software-verification-report.pdf",
+    "documentKind": "TEST_REPORT",
+    "text": "Software verification and validation report. Software development lifecycle per IEC 62304. Unit, integration and system level software verification. Software risk analysis per ISO 14971. Cybersecurity considerations per IEC 81001-5-1.",
+    "expectedKind": "TEST_REPORT",
+    "expectedStandards": ["IEC 62304", "ISO 14971"]
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "id": "case-1-eo-cannula",
+  "title": "EO Sterile Ophthalmic Cannula",
+  "standardScope": "MDR",
+  "product": {
+    "name": "EO Sterile Ophthalmic Cannula",
+    "brand": "Yılmaz Bio Medikal",
+    "model": "OPH-CAN-23G",
+    "deviceClass": "CLASS_IIA",
+    "intendedPurpose": "Single-use cannula for intraocular irrigation/aspiration during ophthalmic surgery.",
+    "indications": null,
+    "contraindications": null,
+    "isSterile": true,
+    "sterilization": "EO",
+    "isInvasive": true,
+    "containsSoftware": false,
+    "hasMeasuringFn": false,
+    "materials": "Stainless steel 316L, medical-grade silicone",
+    "appliedStandards": "ISO 13485, ISO 14971, ISO 10993-1, ISO 11135, ISO 11607",
+    "technicalSections": [
+      { "id": "ts1", "key": "device-description", "title": "Device Description and Specification", "annexRef": "Annex II 1.1", "status": "MISSING", "updatedAt": "2026-01-01T00:00:00.000Z" },
+      { "id": "ts2", "key": "clinical-evaluation", "title": "Clinical Evaluation", "annexRef": "Annex XIV", "status": "MISSING", "updatedAt": "2026-01-01T00:00:00.000Z" },
+      { "id": "ts3", "key": "pms-plan", "title": "Post-Market Surveillance Plan", "annexRef": "Annex III", "status": "MISSING", "updatedAt": "2026-01-01T00:00:00.000Z" }
+    ],
+    "gsprItems": [
+      { "id": "g1", "gsprNo": "10.1", "requirementSummary": "Chemical, physical and biological properties (biocompatibility, ISO 10993)", "applicable": "YES", "status": "MISSING" },
+      { "id": "g2", "gsprNo": "23.1", "requirementSummary": "Information supplied with the device (label and IFU)", "applicable": "YES", "status": "MISSING" }
+    ],
+    "riskItems": []
+  },
+  "snapshot": {
+    "qmsTitles": [],
+    "qmsApproved": 0,
+    "qmsTotal": 0,
+    "uploadedFiles": 0,
+    "analyzedFiles": 0,
+    "capaTotal": 0,
+    "capaOpen": 0,
+    "capaOverdue": 0,
+    "evidenceItemsTotal": 5,
+    "evidenceItemsWithEvidence": 0
+  },
+  "expected": {
+    "gaps": [
+      "Device Description Incomplete",
+      "Biocompatibility Evidence Missing",
+      "Sterilization Validation Missing",
+      "GSPR Evidence Gaps",
+      "Risk Management File Missing",
+      "Clinical Evaluation Missing",
+      "Post-Market Surveillance Plan Missing",
+      "Medical Device File Incomplete",
+      "No Objective Evidence Uploaded"
+    ],
+    "clauses": [
+      "ISO 14971",
+      "MDR 2017/745 Annex I",
+      "ISO 13485"
+    ],
+    "evidence": [
+      "ISO 10993 biological evaluation report",
+      "Sterilization validation report",
+      "Packaging validation",
+      "Risk management plan",
+      "Clinical Evaluation Report",
+      "PMS plan"
+    ],
+    "recommendations": [
+      "Complete and approve the full product family structure",
+      "Perform ISO 10993 biological evaluation",
+      "Add sterilization validation"
+    ]
+  },
+  "audit": {
+    "standard": "ISO_13485",
+    "assessmentType": "CERTIFICATION",
+    "answers": [
+      { "standardCode": "ISO 13485", "clauseNo": "4.2.4", "question": "Is there a documented procedure for document control?", "expectedEvidence": "Document Control Procedure", "weight": 9, "answerText": "No, it is not established yet." },
+      { "standardCode": "ISO 13485", "clauseNo": "8.5.2", "question": "Is there a CAPA procedure with records?", "expectedEvidence": "CAPA Procedure", "weight": 9, "answerText": "No CAPA procedure exists." },
+      { "standardCode": "ISO 14971", "clauseNo": "Clause 4", "question": "Is a risk management file maintained for the device?", "expectedEvidence": "Risk management file", "weight": 9, "answerText": "Not yet, we have not started." },
+      { "standardCode": "ISO 13485", "clauseNo": "8.2.4", "question": "Is there an internal audit programme?", "expectedEvidence": "Internal audit records", "weight": 7, "answerText": "Yes, we maintain an internal audit procedure and audit records each year." },
+      { "standardCode": "ISO 13485", "clauseNo": "7.5", "question": "Is production controlled with documented work instructions?", "expectedEvidence": "Work instructions", "weight": 6, "answerText": "Yes, documented work instructions and production records are maintained." }
+    ],
+    "expectedFindings": [
+      { "severity": "MAJOR", "label": "4.2.4 document control" },
+      { "severity": "MAJOR", "label": "8.5.2 CAPA" },
+      { "severity": "MAJOR", "label": "risk management file" },
+      { "severity": "MINOR", "label": "objective evidence records" }
+    ],
+    "expectedCapa": [
+      "document control",
+      "CAPA",
+      "risk management"
+    ]
+  },
+  "composer": {
+    "type": "MDR_TECHNICAL_FILE_NARRATIVE",
+    "requiredSections": [
+      "Device Description",
+      "Intended Purpose",
+      "Classification",
+      "GSPR Conformity",
+      "Risk Management",
+      "Verification and Validation",
+      "Clinical Evaluation",
+      "Conclusion"
+    ]
+  },
+  "fileAnalysis": {
+    "fileName": "EO-sterilization-validation-report.pdf",
+    "documentKind": "TEST_REPORT",
+    "text": "Ethylene oxide sterilization validation report performed according to ISO 11135. Residual ethylene oxide and ECH testing per ISO 10993-7. Sterile barrier packaging validation per ISO 11607-1 and ISO 11607-2. Sterility assurance level SAL 10-6 demonstrated.",
+    "expectedKind": "TEST_REPORT",
+    "expectedStandards": ["ISO 11135", "ISO 10993", "ISO 11607"]
+  }
+}

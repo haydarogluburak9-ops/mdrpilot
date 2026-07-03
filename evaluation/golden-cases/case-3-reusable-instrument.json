@@ -1,0 +1,115 @@
+{
+  "id": "case-3-reusable-instrument",
+  "title": "Reusable Surgical Instrument",
+  "standardScope": "MDR",
+  "product": {
+    "name": "Reusable Laparoscopic Grasper",
+    "brand": "Yılmaz Bio Medikal",
+    "model": "LAP-GR-330",
+    "deviceClass": "CLASS_IIA",
+    "intendedPurpose": "Reusable grasping instrument for minimally invasive laparoscopic surgery.",
+    "indications": "Manipulation and grasping of tissue during laparoscopic procedures.",
+    "contraindications": null,
+    "isSterile": false,
+    "sterilization": "STEAM",
+    "isInvasive": true,
+    "containsSoftware": false,
+    "hasMeasuringFn": false,
+    "materials": "Stainless steel 420, PEEK insulation",
+    "appliedStandards": "ISO 13485, ISO 14971, ISO 17664, ISO 10993-1",
+    "technicalSections": [
+      { "id": "ts1", "key": "device-description", "title": "Device Description and Specification", "annexRef": "Annex II 1.1", "status": "APPROVED", "updatedAt": "2026-01-01T00:00:00.000Z" },
+      { "id": "ts2", "key": "clinical-evaluation", "title": "Clinical Evaluation", "annexRef": "Annex XIV", "status": "IN_REVIEW", "updatedAt": "2026-01-01T00:00:00.000Z" },
+      { "id": "ts3", "key": "pms-plan", "title": "Post-Market Surveillance Plan", "annexRef": "Annex III", "status": "MISSING", "updatedAt": "2026-01-01T00:00:00.000Z" }
+    ],
+    "gsprItems": [
+      { "id": "g1", "gsprNo": "10.1", "requirementSummary": "Chemical, physical and biological properties (biocompatibility)", "applicable": "YES", "status": "MISSING" },
+      { "id": "g2", "gsprNo": "11.1", "requirementSummary": "Infection and microbial contamination (reprocessing)", "applicable": "YES", "status": "MISSING" },
+      { "id": "g3", "gsprNo": "23.4", "requirementSummary": "Information in the instructions for use", "applicable": "YES", "status": "APPROVED", "evidenceDocument": "IFU rev A" }
+    ],
+    "riskItems": [
+      { "id": "r1", "hazard": "Inadequate reprocessing leading to cross-contamination", "harm": "Infection", "initialSeverity": 4, "initialProbability": 3, "initialRiskLevel": "HIGH", "riskControlMeasure": "Validated cleaning instructions (ISO 17664)", "residualSeverity": 4, "residualProbability": 2, "residualRiskLevel": "MEDIUM", "verificationOfControl": "Reprocessing validation report RP-07" },
+      { "id": "r2", "hazard": "Insulation failure causing thermal injury", "harm": "Burn", "initialSeverity": 4, "initialProbability": 2, "initialRiskLevel": "MEDIUM", "riskControlMeasure": "PEEK insulation, dielectric test", "residualSeverity": 4, "residualProbability": 1, "residualRiskLevel": "LOW" },
+      { "id": "r3", "hazard": "Mechanical breakage of jaw during use", "harm": "Retained fragment", "initialSeverity": 5, "initialProbability": 2, "initialRiskLevel": "HIGH" }
+    ]
+  },
+  "snapshot": {
+    "qmsTitles": [
+      "Document Control Procedure",
+      "Record Control Procedure",
+      "CAPA Procedure",
+      "Internal Audit Procedure",
+      "Management Review Procedure",
+      "Complaint Handling Procedure",
+      "Risk Management Procedure"
+    ],
+    "qmsApproved": 7,
+    "qmsTotal": 7,
+    "uploadedFiles": 4,
+    "analyzedFiles": 3,
+    "capaTotal": 2,
+    "capaOpen": 1,
+    "capaOverdue": 0,
+    "evidenceItemsTotal": 6,
+    "evidenceItemsWithEvidence": 2
+  },
+  "expected": {
+    "gaps": [
+      "Biocompatibility Evidence Missing",
+      "GSPR Evidence Gaps",
+      "Risk Controls Incomplete",
+      "Post-Market Surveillance Plan Missing",
+      "Medical Device File Incomplete"
+    ],
+    "clauses": [
+      "ISO 14971",
+      "MDR 2017/745 Annex I",
+      "ISO 13485"
+    ],
+    "evidence": [
+      "ISO 10993 biological evaluation report",
+      "PMS plan",
+      "Verification records"
+    ],
+    "recommendations": [
+      "Perform ISO 10993 biological evaluation",
+      "Create a PMS plan",
+      "Define risk control measures and document verification"
+    ]
+  },
+  "audit": {
+    "standard": "ISO_13485",
+    "assessmentType": "CERTIFICATION",
+    "answers": [
+      { "standardCode": "ISO 13485", "clauseNo": "4.2.4", "question": "Is there a documented procedure for document control?", "expectedEvidence": "Document Control Procedure", "weight": 9, "answerText": "Yes, QP-01 document control with controlled distribution." },
+      { "standardCode": "ISO 13485", "clauseNo": "7.5.6", "question": "Are cleaning/reprocessing processes validated?", "expectedEvidence": "Reprocessing validation", "weight": 8, "answerText": "Partially; validation in progress, not all cycles complete." },
+      { "standardCode": "ISO 14971", "clauseNo": "Clause 7", "question": "Are all risk controls verified for effectiveness?", "expectedEvidence": "Verification records", "weight": 8, "answerText": "No, some hazards lack verification of control." },
+      { "standardCode": "ISO 13485", "clauseNo": "8.5.2", "question": "Is there a CAPA procedure with records?", "expectedEvidence": "CAPA Procedure", "weight": 9, "answerText": "Yes, CAPA procedure and register maintained." }
+    ],
+    "expectedFindings": [
+      { "severity": "OBSERVATION", "label": "7.5.6 reprocessing validation" },
+      { "severity": "MAJOR", "label": "Clause 7 risk controls verified" }
+    ],
+    "expectedCapa": [
+      "risk controls"
+    ]
+  },
+  "composer": {
+    "type": "ISO14971_RISK_MANAGEMENT_PLAN",
+    "requiredSections": [
+      "Scope",
+      "Risk Management Process",
+      "Risk Acceptability Criteria",
+      "Risk Analysis",
+      "Verification of Risk Controls",
+      "Post-Production"
+    ]
+  },
+  "fileAnalysis": {
+    "fileName": "reprocessing-validation-RP-07.pdf",
+    "documentKind": "TEST_REPORT",
+    "text": "Reprocessing validation report. Cleaning validation according to ISO 17664 and ISO 15883. Biocompatibility evaluation per ISO 10993-1. Steam sterilization compatibility per ISO 17665.",
+    "expectedKind": "TEST_REPORT",
+    "expectedStandards": ["ISO 17664", "ISO 10993", "ISO 17665"]
+  }
+}

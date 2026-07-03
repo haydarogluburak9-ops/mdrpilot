@@ -1,0 +1,1543 @@
+// ============================================================
+// MedDoc AI - Prisma schema
+// MDR 2017/745 / ISO 13485 / ISO 9001 / ISO 14971 documentation platform
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------- Enums ----------------
+
+enum CompanyRole {
+  OWNER
+  QUALITY_MANAGER
+  REGULATORY_AFFAIRS
+  CONSULTANT
+  VIEWER
+}
+
+enum DeviceClass {
+  CLASS_I
+  CLASS_IS
+  CLASS_IM
+  CLASS_IR
+  CLASS_IIA
+  CLASS_IIB
+  CLASS_III
+}
+
+enum SterilizationMethod {
+  NON_STERILE
+  EO
+  GAMMA
+  STEAM
+  OTHER
+}
+
+enum DocStatus {
+  MISSING
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+// ISO 13485 KYS folder layers (01 manual, 02 procedures, ...)
+enum QmsDocumentLayer {
+  MANUAL
+  PROCEDURE
+  OTHER
+  PLAN
+  DIAGRAM
+  LIST
+  SPECIFICATION
+  JOB_DESCRIPTION
+  INSTRUCTION
+  FORM
+  ASSIGNMENT
+  RECORD
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum GsprApplicability {
+  YES
+  NO
+  JUSTIFICATION
+}
+
+enum CapaStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+  OVERDUE
+}
+
+enum ComplaintStatus {
+  OPEN
+  MONITORING
+  CLOSED
+}
+
+enum OperationalRecordStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+  OVERDUE
+  MONITORING
+}
+
+enum OperationalModuleKind {
+  INTERNAL_AUDIT
+  NCP
+  FSCA
+  VIGILANCE
+  CHANGE_CONTROL
+  MANAGEMENT_REVIEW
+  TRAINING
+  SUPPLIER_EVAL
+  TRACEABILITY
+  CALIBRATION
+}
+
+enum DocumentReviewStepRole {
+  REVIEWER
+  APPROVER
+  RELEASE
+}
+
+enum DocumentReviewStepStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AuditSeverity {
+  MINOR
+  MAJOR
+  CRITICAL
+  OBSERVATION
+}
+
+enum ExportType {
+  TECHNICAL_FILE_DOCX
+  FULL_MDR_TECHNICAL_FILE_ZIP
+  GSPR_XLSX
+  RISK_XLSX
+  IFU_DOCX
+  LABEL_PDF
+  PMS_PMCF_DOCX
+  QMS_PACKAGE_ZIP
+  AUDIT_READINESS_PDF
+  PRODUCT_DOSSIER_ZIP
+  COMPOSER_DOCUMENT_DOCX
+  COMPOSER_DOCUMENT_PDF
+  DEMO_EXECUTIVE_REPORT_PDF
+  AUDIT_SIM_REPORT_PDF
+  AUDIT_SIM_REPORT_DOCX
+  AUDIT_SIM_FINDINGS_XLSX
+  AUDIT_SIM_CAPA_XLSX
+  DHF_DOCX
+  DHF_PDF
+}
+
+enum ExportFormat {
+  WORD
+  PDF
+  EXCEL
+  ZIP
+}
+
+enum ExportStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum AiAnalysisType {
+  TECHNICAL_FILE
+  GSPR
+  RISK
+  IFU
+  CER
+  PMS
+  QMS
+  AUDIT_READINESS
+  FILE_ANALYSIS
+}
+
+enum DocumentKind {
+  TEST_REPORT
+  IFU
+  LABEL
+  CERTIFICATE
+  RISK_FILE
+  CLINICAL_EVALUATION
+  PMS
+  PMCF
+  GSPR_EVIDENCE
+  TECHNICAL_DRAWING
+  OTHER
+}
+
+enum FileAnalysisStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum DocumentComposerType {
+  ISO13485_QUALITY_MANUAL
+  ISO9001_QUALITY_MANUAL
+  ISO13485_DOCUMENT_CONTROL_PROCEDURE
+  ISO13485_CAPA_PROCEDURE
+  ISO13485_INTERNAL_AUDIT_PROCEDURE
+  ISO13485_MANAGEMENT_REVIEW_PROCEDURE
+  ISO13485_RISK_MANAGEMENT_PROCEDURE
+  MDR_TECHNICAL_FILE_NARRATIVE
+  MDR_DECLARATION_OF_CONFORMITY_DRAFT
+  MDR_GSPR_COMPLIANCE_STATEMENT
+  ISO14971_RISK_MANAGEMENT_PLAN
+  ISO14971_RISK_MANAGEMENT_REPORT
+  PMS_PLAN
+  PMCF_PLAN
+  PMCF_EVALUATION_REPORT
+  CLINICAL_EVALUATION_PLAN
+  CLINICAL_EVALUATION_REPORT_DRAFT
+  IFU_DRAFT
+  LABELING_TEXT_DRAFT
+  SUPPLIER_EVALUATION_PROCEDURE
+  STERILIZATION_CONTROL_PROCEDURE
+  COMPLAINT_HANDLING_PROCEDURE
+  VIGILANCE_PROCEDURE
+  CHANGE_CONTROL_PROCEDURE
+  TRAINING_PROCEDURE
+}
+
+enum ComposerStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+model ComposerDocument {
+  id                      String               @id @default(cuid())
+  companyId               String
+  productId               String?
+  createdById             String?
+  approvedById            String?
+  title                   String
+  type                    DocumentComposerType
+  status                  ComposerStatus       @default(DRAFT)
+  version                 Int                  @default(1)
+  contentJson             Json?
+  contentMarkdown         String               @db.Text
+  sourceSnapshotJson      Json?
+  aiModel                 String?
+  aiConfidence            Float                @default(0)
+  missingInformationJson  Json?
+  complianceGapsJson      Json?
+  consistencyWarningsJson Json?
+  evidenceUsedJson        Json?
+  disclaimer              String?              @db.Text
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  approvedAt              DateTime?
+  archivedAt              DateTime?
+
+  company                 Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product                 Product?             @relation(fields: [productId], references: [id], onDelete: SetNull)
+  versions                ComposerDocumentVersion[]
+
+  @@index([companyId])
+  @@index([productId])
+}
+
+model ComposerDocumentVersion {
+  id                 String           @id @default(cuid())
+  composerDocumentId String
+  version            Int
+  contentJson        Json?
+  contentMarkdown    String           @db.Text
+  changeSummary      String?
+  createdById        String?
+  createdAt          DateTime         @default(now())
+
+  document           ComposerDocument @relation(fields: [composerDocumentId], references: [id], onDelete: Cascade)
+
+  @@index([composerDocumentId])
+}
+
+// ---------------- Standards Knowledge Base / RAG ----------------
+
+enum StandardSourceType {
+  PUBLIC_REGULATION
+  USER_UPLOADED_LICENSED
+  INTERNAL_PROCEDURE
+  TEMPLATE_SUMMARY
+}
+
+enum CitationTargetType {
+  COMPOSER_DOCUMENT
+  AI_ANALYSIS
+  AUDIT_FINDING
+  FILE_ANALYSIS
+}
+
+model Standard {
+  id           String             @id @default(cuid())
+  companyId    String?
+  code         String
+  title        String
+  version      String?
+  sourceType   StandardSourceType @default(TEMPLATE_SUMMARY)
+  jurisdiction String?
+  isPublic     Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  company      Company?           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  clauses      StandardClause[]
+
+  @@index([companyId])
+  @@index([code])
+}
+
+model StandardClause {
+  id                       String   @id @default(cuid())
+  standardId               String
+  clauseNo                 String
+  title                    String
+  summary                  String   @db.Text
+  keywords                 String?
+  applicability            String?
+  documentExpectationsJson Json?
+  evidenceExpectationsJson Json?
+  riskRelevanceJson        Json?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  standard                 Standard @relation(fields: [standardId], references: [id], onDelete: Cascade)
+
+  @@index([standardId])
+}
+
+model KnowledgeChunk {
+  id             String             @id @default(cuid())
+  companyId      String?
+  standardId     String?
+  uploadedFileId String?
+  sourceType     StandardSourceType @default(TEMPLATE_SUMMARY)
+  title          String
+  text           String             @db.Text
+  embeddingJson  Json?
+  metadataJson   Json?
+  createdAt      DateTime           @default(now())
+
+  @@index([companyId])
+  @@index([standardId])
+  @@index([uploadedFileId])
+}
+
+model AICitation {
+  id             String             @id @default(cuid())
+  companyId      String
+  targetType     CitationTargetType
+  targetId       String
+  standardId     String?
+  clauseId       String?
+  uploadedFileId String?
+  quoteSnippet   String?
+  summary        String
+  confidence     Float              @default(0)
+  createdAt      DateTime           @default(now())
+
+  @@index([companyId])
+  @@index([targetType, targetId])
+}
+
+// ---------------- Quality Manual Wizard ----------------
+
+enum QualityManualWizardStatus {
+  DRAFT
+  GAP_CHECKED
+  GENERATED
+  ARCHIVED
+}
+
+enum QualityManualStandardMode {
+  ISO_9001
+  ISO_13485
+  BOTH
+}
+
+// ---------------- Audit Simulator ----------------
+
+enum AuditStandardScope {
+  MDR
+  ISO_13485
+  ISO_9001
+  ISO_14971
+  COMBINED
+}
+
+enum AuditAssessmentType {
+  QUICK
+  STANDARD
+  FULL
+}
+
+enum AuditSessionStatus {
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+enum AuditFindingSeverity {
+  MAJOR
+  MINOR
+  OBSERVATION
+  POSITIVE
+}
+
+model AuditSession {
+  id             String              @id @default(cuid())
+  companyId      String
+  productId      String?
+  createdById    String?
+  standard       AuditStandardScope  @default(ISO_13485)
+  assessmentType AuditAssessmentType @default(STANDARD)
+  status         AuditSessionStatus  @default(IN_PROGRESS)
+  score          Int?
+  summaryJson    Json?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  completedAt    DateTime?
+
+  company        Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product        Product?            @relation(fields: [productId], references: [id], onDelete: SetNull)
+  questions      AuditQuestion[]
+  answers        AuditAnswer[]
+  findings       AuditSimFinding[]
+
+  @@index([companyId])
+  @@index([productId])
+}
+
+model AuditQuestion {
+  id            String       @id @default(cuid())
+  sessionId     String
+  order         Int
+  standardCode  String
+  clauseNo      String
+  question      String       @db.Text
+  expectedEvidence String?   @db.Text
+  createdAt     DateTime     @default(now())
+
+  session       AuditSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  answer        AuditAnswer?
+
+  @@index([sessionId])
+}
+
+model AuditAnswer {
+  id              String        @id @default(cuid())
+  sessionId       String
+  questionId      String        @unique
+  answerText      String        @db.Text
+  evidenceFileIdsJson Json?
+  createdById     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  session         AuditSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question        AuditQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model AuditSimFinding {
+  id                String               @id @default(cuid())
+  sessionId         String
+  companyId         String
+  standardCode      String
+  clauseNo          String
+  severity          AuditFindingSeverity @default(MINOR)
+  description       String               @db.Text
+  evidence          String?              @db.Text
+  rootCause         String?              @db.Text
+  correctiveAction  String?              @db.Text
+  dueDateSuggestion DateTime?
+  priority          Int                  @default(0)
+  createdAt         DateTime             @default(now())
+
+  session           AuditSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([companyId])
+}
+
+model QualityManualWizardSession {
+  id                 String                    @id @default(cuid())
+  companyId          String
+  createdById        String?
+  composerDocumentId String?
+  status             QualityManualWizardStatus @default(DRAFT)
+  standardMode       QualityManualStandardMode @default(ISO_13485)
+  currentStep        Int                       @default(1)
+  answersJson        Json?
+  gapCheckJson       Json?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  generatedAt        DateTime?
+
+  company            Company                   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// ---------------- Core / Tenancy ----------------
+
+enum AuthTokenType {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
+model User {
+  id           String          @id @default(cuid())
+  email        String          @unique
+  name         String?
+  passwordHash String?
+  avatarUrl    String?
+  emailVerifiedAt   DateTime?
+  termsAcceptedAt   DateTime?
+  privacyAcceptedAt DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  deletedAt    DateTime?
+
+  memberships  CompanyMember[]
+  auditLogs    AuditLog[]
+  sessions     Session[]
+  authTokens   AuthToken[]
+  invitesSent  CompanyInvite[] @relation("InviteSender")
+  clinicalEvaluationsSubmitted ClinicalEvaluation[] @relation("ClinicalEvaluationSubmittedBy")
+  clinicalEvaluationsApproved  ClinicalEvaluation[] @relation("ClinicalEvaluationApprovedBy")
+  documentApprovals            DocumentApproval[]
+  documentReviewSteps          DocumentReviewStep[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  companyId String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Company {
+  id                String            @id @default(cuid())
+  name              String
+  legalName         String?
+  country           String?
+  address           String?
+  contactEmail      String? // manufacturer contact e-mail (TF / label)
+  contactPhone      String? // manufacturer contact phone (TF / label)
+  manufacturingSites String? // manufacturing site(s) name & address
+  authorizedRep     String? // EU authorised representative (name & address)
+  srnNumber         String? // Single Registration Number (EUDAMED)
+  notifiedBody      String? // Notified Body name
+  notifiedBodyNumber String? // Notified Body 4-digit number (e.g. 0123)
+  profileJson       Json? // onboarding personalization (industry, standards, goal, product count)
+  logoKey           String? // storage key of the uploaded company logo (private uploads storage)
+  logoMime          String? // mime type of the logo (image/png | image/jpeg)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+
+  subscriptionId    String?
+  subscription      SubscriptionPlan? @relation(fields: [subscriptionId], references: [id])
+  // Extra AI tokens purchased (do not reset monthly).
+  extraAiTokens     Int               @default(0)
+  // AI tokens consumed in the current billing period.
+  aiTokensUsed      Int               @default(0)
+  tokenPeriodStart  DateTime          @default(now())
+
+  members           CompanyMember[]
+  products          Product[]
+  qmsDocuments      QMSDocument[]
+  uploadedFiles     UploadedFile[]
+  exportJobs        ExportJob[]
+  auditLogs         AuditLog[]
+  composerDocuments ComposerDocument[]
+  standards         Standard[]
+  qualityManualWizards QualityManualWizardSession[]
+  auditSessions     AuditSession[]
+  complaints        Complaint[]
+  capas             CAPA[]
+  operationalRecords QmsOperationalRecord[]
+  internalAuditCycles InternalAuditCycle[]
+  approvedSuppliers ApprovedSupplier[]
+  documentApprovals DocumentApproval[]
+  documentReviewSteps DocumentReviewStep[]
+  trainingCompetencies TrainingCompetency[]
+  invites           CompanyInvite[]
+  supportTickets    SupportTicket[]
+  aiTokenPurchases  AiTokenPurchase[]
+}
+
+model CompanyMember {
+  id        String      @id @default(cuid())
+  companyId String
+  userId    String
+  role      CompanyRole @default(VIEWER)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  company   Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+  @@index([companyId])
+}
+
+model SubscriptionPlan {
+  id               String    @id @default(cuid())
+  key              String    @unique // starter | basic | plus | pro | enterprise
+  name             String
+  priceMonthly     Int       @default(0)
+  maxProducts      Int       @default(1)
+  maxSeats         Int       @default(1)
+  // Monthly AI token allowance (resets each period). 0 = mock-only unless extra purchased.
+  monthlyAiTokens  Int       @default(0)
+  features         Json?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  companies        Company[]
+}
+
+model AiTokenPurchase {
+  id        String   @id @default(cuid())
+  companyId String
+  packKey   String
+  tokens    Int
+  amountEur Int
+  createdAt DateTime @default(now())
+
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+model AuthToken {
+  id        String        @id @default(cuid())
+  userId    String
+  type      AuthTokenType
+  token     String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+model CompanyInvite {
+  id          String      @id @default(cuid())
+  companyId   String
+  email       String
+  role        CompanyRole @default(VIEWER)
+  token       String      @unique
+  invitedById String
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime    @default(now())
+
+  company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invitedBy   User        @relation("InviteSender", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([email])
+}
+
+model SupportTicket {
+  id        String   @id @default(cuid())
+  companyId String?
+  userId    String?
+  email     String
+  name      String?
+  subject   String
+  message   String   @db.Text
+  attachmentsJson Json? // [{ fileName, storageKey, mimeType, sizeBytes }]
+  status    String   @default("open")
+  createdAt DateTime @default(now())
+
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([status])
+}
+
+// ---------------- Product / Device ----------------
+
+model Product {
+  id                String              @id @default(cuid())
+  companyId         String
+  name              String
+  brand             String?
+  model             String?
+  variantsJson      Json? // device family matrix: brands -> models -> sterilization methods
+  basicUdiDi        String?
+  udiDi             String?
+  emdnCode          String?             // EMDN (European Medical Device Nomenclature)
+  eudamedDeviceId           String?
+  eudamedRegistrationStatus String?           // NOT_REGISTERED | IN_PROGRESS | REGISTERED
+  softwareSafetyClass       String?             // IEC 62304: A | B | C
+  photoKey          String?             // default product image for exports (e.g. DoC)
+  photoMime         String?
+  deviceClass       DeviceClass         @default(CLASS_I)
+  intendedPurpose   String?
+  userProfile       String?
+  patientPopulation String?
+  indications       String?
+  contraindications String?
+  isSterile         Boolean             @default(false)
+  sterilization     SterilizationMethod @default(NON_STERILE)
+  hasMeasuringFn    Boolean             @default(false)
+  containsSoftware  Boolean             @default(false)
+  isInvasive        Boolean             @default(false)
+  // Extended device characteristics that drive section / GSPR applicability.
+  isImplantable           Boolean       @default(false) // implantable device (Art. 18 implant card, SSCP)
+  isActive                Boolean       @default(false) // active device / electrically powered (IEC 60601)
+  isReusable              Boolean       @default(false) // reusable surgical instrument (reprocessing validation)
+  emitsRadiation          Boolean       @default(false) // emits ionising/non-ionising radiation (GSPR 16)
+  administersMedicineOrEnergy Boolean    @default(false) // delivers/removes medicine or energy (GSPR 21)
+  containsMedicinalSubstance Boolean     @default(false) // incorporates a medicinal substance (GSPR 12.1)
+  containsBiologicalMaterial Boolean     @default(false) // materials of human/animal/microbial origin (GSPR 13.1)
+  isAbsorbable            Boolean       @default(false) // absorbed by / dispersed in the body (GSPR 12.2)
+  containsCmrOrEndocrine  Boolean       @default(false) // CMR / endocrine-disrupting substances (GSPR 10.4)
+  containsNanomaterial    Boolean       @default(false) // contains/consists of nanomaterials (GSPR 10.6)
+  isForLayUser            Boolean       @default(false) // intended for use by laypersons (GSPR 22)
+  bodyContactDuration String?           // transient | short-term | long-term
+  materials         String?
+  packagingType     String?
+  shelfLife         String?
+  manufacturingProcess String?
+  criticalSuppliers String?
+  appliedStandards  String?
+  complianceScore   Int                 @default(0) // 0-100
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  technicalSections TechnicalFileSection[]
+  gsprItems         GSPRItem[]
+  riskItems         RiskItem[]
+  riskManagementFile RiskManagementFile?
+  clinicalEvaluation ClinicalEvaluation?
+  pmsPlan           PMSPlan?
+  pmcfPlan          PMCFPlan?
+  ifuDocuments      IFUDocument[]
+  labelDocuments    LabelDocument[]
+  documents         Document[]
+  uploadedFiles     UploadedFile[]
+  auditFindings     AuditFinding[]
+  capas             CAPA[]
+  complaints        Complaint[]
+  operationalRecords QmsOperationalRecord[]
+  aiAnalyses        AIAnalysis[]
+  composerDocuments ComposerDocument[]
+  auditSessions     AuditSession[]
+  designControlRecords DesignControlRecord[]
+  cyberSecurityFile    CyberSecurityFile?
+  softwareLifecycleFile SoftwareLifecycleFile?
+
+  @@index([companyId])
+}
+
+// ---------------- Documents & Versioning ----------------
+
+model Document {
+  id          String            @id @default(cuid())
+  productId   String?
+  companyId   String?
+  title       String
+  category    String // e.g. "Technical File", "Risk", "CER"
+  status      DocStatus         @default(MISSING)
+  ownerName   String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  deletedAt   DateTime?
+
+  product     Product?          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  versions    DocumentVersion[]
+
+  @@index([productId])
+}
+
+model DocumentVersion {
+  id          String   @id @default(cuid())
+  documentId  String
+  version     String // v1.0, v1.1 ...
+  changeNote  String?
+  preparedBy  String?
+  approvedBy  String?
+  content     String?  @db.Text
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+}
+
+model TechnicalFileSection {
+  id            String    @id @default(cuid())
+  productId     String
+  key           String // mdr annex section key
+  title         String
+  order         Int       @default(0)
+  status        DocStatus @default(MISSING)
+  applicable    Boolean   @default(true) // false = not applicable to this device (auto by class/properties)
+  naReason      String? // why the section is not applicable (e.g. "Non-sterile device")
+  ownerName     String?
+  content       String?   @db.Text
+  annexRef      String? // "Annex II 1.1"
+  issueDate     DateTime? // first publication date (fixed once set)
+  revisionNo    Int       @default(0) // REV. NO (0 = first issue)
+  revisionDate  DateTime? // date of the latest revision
+  revisionHistoryJson Json? // [{ rev, date, by, note }]
+  sectionExtrasJson   Json? // PMCF survey (plan) / survey results (report), etc.
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  evidenceLinks TechnicalFileEvidenceLink[]
+
+  @@index([productId])
+}
+
+// ---------------- GSPR (MDR Annex I) ----------------
+
+model GSPRItem {
+  id                  String            @id @default(cuid())
+  productId           String
+  gsprNo              String // "1", "10.4" ...
+  requirementSummary  String
+  applicable          GsprApplicability @default(JUSTIFICATION)
+  justification       String?
+  evidenceDocument    String?
+  evidenceManual      Boolean           @default(false)
+  standardReference   String?
+  complianceStatement String?
+  status              DocStatus         @default(MISSING)
+  aiGapComment        String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  product             Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  evidenceLinks       GSPREvidenceLink[]
+
+  @@index([productId])
+}
+
+// ---------------- ISO 14971 Risk ----------------
+
+model RiskItem {
+  id                    String    @id @default(cuid())
+  productId             String
+  sequenceNo            Int       @default(0)
+  riskNo                String?
+  hazard                String
+  sequenceOfEvents      String?
+  hazardousSituation    String?
+  harm                  String?
+  riskSource            String?   @db.Text
+  tableERef             String?
+  initialSeverity       Int       @default(1) // 1-5
+  initialProbability    Int       @default(1) // 1-5
+  initialRiskLevel      RiskLevel @default(LOW)
+  riskControlMeasure    String?
+  residualSeverity      Int       @default(1)
+  residualProbability   Int       @default(1)
+  residualRiskLevel     RiskLevel @default(LOW)
+  mitigations           Json?
+  residualAssessment    String?   @db.Text
+  benefitRiskJustification String?
+  verificationOfControl String?
+  linkedReferences      String? // IFU / Label / Design control links
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  product               Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  evidenceLinks         RiskEvidenceLink[]
+
+  @@index([productId])
+}
+
+model RiskManagementFile {
+  id                   String    @id @default(cuid())
+  productId            String    @unique
+  plan                 String?   @db.Text
+  report               String?   @db.Text
+  managementPolicy     String?   @db.Text
+  annexAQuestions      String?   @db.Text
+  annexARows           Json?
+  planTableE1Rows      Json?
+  planTableE2Rows      Json?
+  planUploadedFileId     String?
+  reportUploadedFileId   String?
+  policyUploadedFileId   String?
+  fmeaBenefitRiskAnalysis String?  @db.Text
+  status                 DocStatus @default(MISSING)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  product                Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  planFile               UploadedFile? @relation("RiskMgmtPlanFile", fields: [planUploadedFileId], references: [id], onDelete: SetNull)
+  reportFile             UploadedFile? @relation("RiskMgmtReportFile", fields: [reportUploadedFileId], references: [id], onDelete: SetNull)
+  policyFile             UploadedFile? @relation("RiskMgmtPolicyFile", fields: [policyUploadedFileId], references: [id], onDelete: SetNull)
+}
+
+// ---------------- Clinical Evaluation ----------------
+
+model ClinicalEvaluation {
+  id                   String    @id @default(cuid())
+  productId            String    @unique
+  plan                 String?   @db.Text
+  stateOfTheArt        String?   @db.Text
+  equivalentDevices    String?   @db.Text
+  literatureStrategy   String?   @db.Text
+  clinicalDataSummary  String?   @db.Text
+  benefitRiskConclusion String?  @db.Text
+  pmsPmcfInputs        String?   @db.Text
+  report               String?   @db.Text
+  literatureDataJson   Json?
+  clinicalStudiesJson  Json?
+  equivalentDevicesDataJson Json?
+  status               DocStatus @default(MISSING)
+  submittedById        String?
+  approvedById         String?
+  approvedAt           DateTime?
+  revisionNo           Int       @default(0)
+  revisionHistoryJson  Json?
+  gapMatrixJson        Json?
+  qpDocumentsJson      Json?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  product              Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  submittedBy          User?     @relation("ClinicalEvaluationSubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  approvedBy           User?     @relation("ClinicalEvaluationApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+}
+
+// ---------------- PMS / PMCF ----------------
+
+model PMSPlan {
+  id                  String    @id @default(cuid())
+  productId           String    @unique
+  feedbackCollection  String?   @db.Text
+  complaintHandling   String?   @db.Text
+  vigilance           String?   @db.Text
+  literatureMonitoring String?  @db.Text
+  trendReporting      String?   @db.Text
+  capaConnection      String?   @db.Text
+  report              String?   @db.Text
+  status              DocStatus @default(MISSING)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  product             Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model PMCFPlan {
+  id                String    @id @default(cuid())
+  productId         String    @unique
+  objective         String?   @db.Text
+  methods           String?   @db.Text
+  dataSources       String?   @db.Text
+  timeline          String?   @db.Text
+  acceptanceCriteria String?  @db.Text
+  evaluationReport  String?   @db.Text
+  status            DocStatus @default(MISSING)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  product           Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// ---------------- IFU & Labeling ----------------
+
+model IFUDocument {
+  id               String    @id @default(cuid())
+  productId        String
+  version          String    @default("v1.0")
+  intendedPurpose  String?   @db.Text
+  indications      String?   @db.Text
+  contraindications String?  @db.Text
+  warnings         String?   @db.Text
+  precautions      String?   @db.Text
+  instructions     String?   @db.Text
+  storageConditions String?  @db.Text
+  sterilityInfo    String?   @db.Text
+  disposal         String?   @db.Text
+  symbols          String?   @db.Text
+  manufacturerInfo String?   @db.Text
+  udi              String?
+  status           DocStatus @default(DRAFT)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  product          Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model LabelDocument {
+  id            String    @id @default(cuid())
+  productId     String
+  productName   String?
+  sterileSymbol String?
+  lot           String?
+  ref           String?
+  udi           String?
+  expiry        String?
+  manufacturer  String?
+  storageCondition String?
+  singleUse     Boolean   @default(true)
+  caution       String?
+  ifuReference  String?
+  status        DocStatus @default(DRAFT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+// ---------------- QMS (ISO 13485 / ISO 9001) ----------------
+
+model QMSDocument {
+  id           String            @id @default(cuid())
+  companyId    String
+  code         String? // QM-01, SOP-DC-01 ...
+  title        String
+  standard     String // ISO 13485 | ISO 9001
+  layer        QmsDocumentLayer @default(PROCEDURE)
+  parentProcedureCode String? // parent SOP code for forms, WI, diagrams, etc.
+  linkedProcedureCodesJson Json? // e.g. ["SOP-AN","SOP-VG"] — same doc shown under multiple procedures
+  clauseRefs   String? // "4.2.3, 7.5.1"
+  status       DocStatus         @default(MISSING)
+  preparedBy   String?
+  approvedBy   String?
+  version      String            @default("REV00")
+  revisionNo   Int               @default(0)
+  issueDate    DateTime?         // first approved issue date
+  revisionDate DateTime?
+  revisionHistoryJson Json?
+  publishedAt  DateTime?
+  reviewDueDate    DateTime?         // periodic document review (ISO 4.2.4)
+  sourceFileId     String?           // last controlled upload source
+  content      String?           @db.Text
+  contentTranslationsJson Json?  // legacy; prefer ExportTranslationCache
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  deletedAt    DateTime?
+
+  company      Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  revisions    QmsDocumentRevision[]
+
+  @@index([companyId])
+  @@index([companyId, parentProcedureCode])
+  @@index([companyId, reviewDueDate])
+}
+
+model QmsDocumentRevision {
+  id           String   @id @default(cuid())
+  documentId   String
+  revisionNo   Int
+  version      String
+  content      String   @db.Text
+  changeNote   String?
+  preparedBy   String?
+  sourceFileId String?
+  createdAt    DateTime @default(now())
+
+  document     QMSDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, revisionNo])
+  @@index([documentId])
+}
+
+// ---------------- Files ----------------
+
+model UploadedFile {
+  id             String             @id @default(cuid())
+  companyId      String
+  productId      String?
+  uploadedById   String?
+  originalName   String?
+  storedName     String?
+  fileName       String // display name (kept for backward compatibility)
+  storageKey     String // private storage reference
+  mimeType       String
+  extension      String?
+  sizeBytes      Int
+  checksumSha256 String?
+  documentKind   DocumentKind       @default(OTHER)
+  category       String? // legacy free-text category
+  textExtract    String?            @db.Text
+  analysisSummary String?           @db.Text
+  analysisJson   Json?
+  analysisStatus FileAnalysisStatus @default(PENDING)
+  aiSummary      String?            @db.Text
+  linkedGsprNo   String?
+  createdAt      DateTime           @default(now())
+  deletedAt      DateTime?
+
+  company        Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product        Product?           @relation(fields: [productId], references: [id], onDelete: SetNull)
+  gsprLinks          GSPREvidenceLink[]
+  technicalFileLinks TechnicalFileEvidenceLink[]
+  riskLinks          RiskEvidenceLink[]
+  riskMgmtPlanFiles    RiskManagementFile[] @relation("RiskMgmtPlanFile")
+  riskMgmtReportFiles  RiskManagementFile[] @relation("RiskMgmtReportFile")
+  riskMgmtPolicyFiles  RiskManagementFile[] @relation("RiskMgmtPolicyFile")
+
+  @@index([companyId])
+  @@index([productId])
+  @@index([checksumSha256])
+}
+
+model GSPREvidenceLink {
+  id             String       @id @default(cuid())
+  companyId      String
+  productId      String
+  gsprItemId     String
+  uploadedFileId String
+  linkedById     String?
+  note           String?
+  createdAt      DateTime     @default(now())
+
+  gsprItem       GSPRItem     @relation(fields: [gsprItemId], references: [id], onDelete: Cascade)
+  uploadedFile   UploadedFile @relation(fields: [uploadedFileId], references: [id], onDelete: Cascade)
+
+  @@unique([gsprItemId, uploadedFileId])
+  @@index([companyId])
+  @@index([productId])
+}
+
+model TechnicalFileEvidenceLink {
+  id                     String               @id @default(cuid())
+  companyId              String
+  productId              String
+  technicalFileSectionId String
+  uploadedFileId         String
+  linkedById             String?
+  note                   String?
+  createdAt              DateTime             @default(now())
+
+  technicalFileSection   TechnicalFileSection @relation(fields: [technicalFileSectionId], references: [id], onDelete: Cascade)
+  uploadedFile           UploadedFile         @relation(fields: [uploadedFileId], references: [id], onDelete: Cascade)
+
+  @@unique([technicalFileSectionId, uploadedFileId])
+  @@index([companyId])
+  @@index([productId])
+}
+
+model RiskEvidenceLink {
+  id             String       @id @default(cuid())
+  companyId      String
+  productId      String
+  riskItemId     String
+  uploadedFileId String
+  linkedById     String?
+  note           String?
+  createdAt      DateTime     @default(now())
+
+  riskItem       RiskItem     @relation(fields: [riskItemId], references: [id], onDelete: Cascade)
+  uploadedFile   UploadedFile @relation(fields: [uploadedFileId], references: [id], onDelete: Cascade)
+
+  @@unique([riskItemId, uploadedFileId])
+  @@index([companyId])
+  @@index([productId])
+}
+
+// ---------------- Audit & CAPA ----------------
+
+model AuditFinding {
+  id          String        @id @default(cuid())
+  productId   String?
+  title       String
+  description String?       @db.Text
+  severity    AuditSeverity @default(OBSERVATION)
+  clauseRef   String?
+  status      DocStatus     @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  product     Product?      @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([productId])
+}
+
+model CAPA {
+  id               String     @id @default(cuid())
+  companyId        String
+  productId        String?
+  qmsDocumentId    String?    @unique
+  referenceNo      String?
+  title            String
+  rootCause        String?    @db.Text
+  correction       String?    @db.Text
+  correctiveAction String?    @db.Text
+  formContent      String?    @db.Text
+  status           CapaStatus @default(OPEN)
+  dueDate          DateTime?
+  ownerName        String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  company          Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product          Product?   @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([productId])
+  @@index([referenceNo])
+}
+
+model Complaint {
+  id           String           @id @default(cuid())
+  companyId    String
+  productId    String?
+  qmsDocumentId String?         @unique
+  complaintNo  String?
+  title        String
+  description  String?          @db.Text
+  source       String?
+  lotNumber    String?
+  status       ComplaintStatus  @default(OPEN)
+  capaRequired Boolean          @default(false)
+  capaRef      String?
+  ownerName    String?
+  formContent  String?          @db.Text
+  receivedAt   DateTime         @default(now())
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  company      Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product      Product?         @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([productId])
+  @@index([status])
+}
+
+model InternalAuditCycle {
+  id                    String                  @id @default(cuid())
+  companyId             String
+  year                  Int
+  title                 String
+  status                OperationalRecordStatus @default(OPEN)
+  ownerName             String?
+  planQmsDocumentId     String?                 @unique
+  checklistQmsDocumentId String?                @unique
+  reportQmsDocumentId   String?                 @unique
+  planContent           String?                 @db.Text
+  checklistContent      String?                 @db.Text
+  reportContent         String?                 @db.Text
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+
+  company               Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, year])
+  @@index([companyId])
+  @@index([year])
+}
+
+model QmsOperationalRecord {
+  id            String                  @id @default(cuid())
+  companyId     String
+  module        OperationalModuleKind
+  formCode      String
+  referenceNo   String?
+  title         String
+  description   String?                 @db.Text
+  formContent   String?                 @db.Text
+  qmsDocumentId String?                 @unique
+  status        OperationalRecordStatus @default(OPEN)
+  productId     String?
+  ownerName     String?
+  dueDate       DateTime?
+  capaRef       String?
+  eventAt       DateTime?
+  vigilanceSeverity String?
+  relatedRecordId   String?
+  relatedRecordType String?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  company       Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product       Product?                @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, module])
+  @@index([productId])
+  @@index([referenceNo])
+  @@index([status])
+}
+
+enum ApprovedSupplierStatus {
+  APPROVED
+  CONDITIONAL
+  SUSPENDED
+}
+
+model ApprovedSupplier {
+  id          String                 @id @default(cuid())
+  companyId   String
+  name        String
+  scope       String?                @db.Text
+  riskClass   String?
+  status      ApprovedSupplierStatus @default(APPROVED)
+  approvedAt  DateTime?
+  reEvalDue   DateTime?
+  notes       String?                @db.Text
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  company     Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([reEvalDue])
+}
+
+enum DocumentSourceType {
+  QMS
+  TECHNICAL_FILE
+  COMPOSER
+  CLINICAL_EVAL
+}
+
+model DocumentApproval {
+  id             String             @id @default(cuid())
+  companyId      String
+  sourceType     DocumentSourceType
+  sourceId       String
+  documentTitle  String
+  revisionNo     Int                @default(0)
+  approvedById   String
+  approvedByName String
+  intentText     String             @db.Text
+  approvedAt     DateTime           @default(now())
+  ipAddress      String?
+
+  company        Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  approvedBy     User               @relation(fields: [approvedById], references: [id], onDelete: Restrict)
+
+  @@unique([sourceType, sourceId, revisionNo])
+  @@index([companyId])
+  @@index([sourceId])
+}
+
+model DocumentReviewStep {
+  id             String                   @id @default(cuid())
+  companyId      String
+  sourceType     DocumentSourceType
+  sourceId       String
+  revisionNo     Int
+  stepOrder      Int
+  stepRole       DocumentReviewStepRole
+  status         DocumentReviewStepStatus @default(PENDING)
+  assignedRole   CompanyRole?
+  reviewerId     String?
+  reviewerName   String?
+  intentText     String?                  @db.Text
+  reviewedAt     DateTime?
+  ipAddress      String?
+  createdAt      DateTime                 @default(now())
+
+  company        Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  reviewer       User?                    @relation(fields: [reviewerId], references: [id], onDelete: SetNull)
+
+  @@unique([sourceType, sourceId, revisionNo, stepOrder])
+  @@index([companyId])
+  @@index([sourceType, sourceId, revisionNo])
+}
+
+model TrainingCompetency {
+  id              String    @id @default(cuid())
+  companyId       String
+  procedureCode   String
+  roleLabel       String
+  personName      String?
+  department      String?
+  required        Boolean   @default(true)
+  lastTrainedAt   DateTime?
+  nextDueAt       DateTime?
+  trainingRecordId String?
+  status          String    @default("PENDING")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  company         Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, procedureCode])
+  @@index([companyId, status])
+}
+
+enum DesignControlPhase {
+  DESIGN_INPUT
+  DESIGN_OUTPUT
+  DESIGN_REVIEW
+  DESIGN_VERIFICATION
+  DESIGN_VALIDATION
+  DESIGN_TRANSFER
+}
+
+model DesignControlRecord {
+  id              String             @id @default(cuid())
+  productId       String
+  phase           DesignControlPhase
+  title           String
+  description     String?            @db.Text
+  reference       String?
+  status          DocStatus          @default(DRAFT)
+  ownerName       String?
+  completedAt     DateTime?
+  evidenceFileIds Json?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  product         Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, phase])
+}
+
+model CyberSecurityFile {
+  id                   String    @id @default(cuid())
+  productId            String    @unique
+  threatModel          String?   @db.Text
+  sbomReference        String?   @db.Text
+  vulnerabilityProcess String?   @db.Text
+  securityTesting      String?   @db.Text
+  patchManagement      String?   @db.Text
+  clinicalSafetyImpact String?   @db.Text
+  status               DocStatus @default(MISSING)
+  revisionNo           Int       @default(0)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  product              Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model SoftwareLifecycleFile {
+  id                 String    @id @default(cuid())
+  productId          String    @unique
+  safetyClass        String?
+  developmentPlan    String?   @db.Text
+  requirementsSpec   String?   @db.Text
+  architectureDesign String?   @db.Text
+  unitVerification   String?   @db.Text
+  integrationTesting String?   @db.Text
+  systemTesting      String?   @db.Text
+  releaseRecord      String?   @db.Text
+  maintenancePlan    String?   @db.Text
+  status             DocStatus @default(MISSING)
+  revisionNo         Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  product            Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// ---------------- AI & Exports & Audit log ----------------
+
+model AIAnalysis {
+  id          String         @id @default(cuid())
+  productId   String?
+  type        AiAnalysisType
+  inputSummary String?       @db.Text
+  output      Json
+  confidence  Float          @default(0)
+  model       String?
+  createdAt   DateTime       @default(now())
+
+  product     Product?       @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ExportJob {
+  id           String       @id @default(cuid())
+  companyId    String
+  productId    String?
+  createdById  String?
+  type         ExportType
+  format       ExportFormat
+  status       ExportStatus @default(QUEUED)
+  fileKey      String?
+  fileName     String?
+  sizeBytes    Int?
+  errorMessage String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  company      Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([productId])
+}
+
+// Cached markdown translations for export (all document types).
+model ExportTranslationCache {
+  id           String   @id @default(cuid())
+  entityKey    String
+  sourceHash   String
+  targetLocale String
+  markdown     String   @db.Text
+  updatedAt    DateTime @updatedAt
+
+  @@unique([entityKey, sourceHash, targetLocale])
+  @@index([entityKey])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  companyId String?
+  userId    String?
+  action    String
+  entity    String?
+  entityId  String?
+  metadata  Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+}
