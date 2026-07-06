@@ -539,6 +539,7 @@ model User {
   clinicalEvaluationsApproved  ClinicalEvaluation[] @relation("ClinicalEvaluationApprovedBy")
   documentApprovals            DocumentApproval[]
   documentReviewSteps          DocumentReviewStep[]
+  demoAccessGrants             DemoAccess[]
 }
 
 model Session {
@@ -603,6 +604,7 @@ model Company {
   invites           CompanyInvite[]
   supportTickets    SupportTicket[]
   aiTokenPurchases  AiTokenPurchase[]
+  demoAccessGrants  DemoAccess[]
 }
 
 model CompanyMember {
@@ -679,6 +681,28 @@ model CompanyInvite {
 
   @@index([companyId])
   @@index([email])
+}
+
+/// Time-limited demo/trial access granted by platform admins.
+model DemoAccess {
+  id                     String    @id @default(cuid())
+  userId                 String
+  companyId              String
+  expiresAt              DateTime
+  revokedAt              DateTime?
+  trialPlanKey           String    @default("plus")
+  previousSubscriptionId String?
+  notes                  String?
+  createdBy              String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([expiresAt])
 }
 
 model SupportTicket {

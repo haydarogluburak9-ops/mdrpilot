@@ -2,7 +2,9 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/guards";
 import { getPlatformAdminEmails, isPlatformAdmin } from "@/lib/auth/platform-admin";
 import { listAdminCustomers } from "@/lib/admin/customers";
+import { listAdminDemoGrants } from "@/lib/admin/demo";
 import { AdminCustomersPanel } from "@/components/admin/admin-customers-panel";
+import { AdminDemoPanel } from "@/components/admin/admin-demo-panel";
 import { AdminAccessDenied } from "@/components/admin/admin-access-denied";
 
 export default async function AdminPage() {
@@ -14,7 +16,14 @@ export default async function AdminPage() {
     return <AdminAccessDenied signedInAs={ctx.user.email} />;
   }
 
-  const data = await listAdminCustomers();
+  const [customers, demo] = await Promise.all([listAdminCustomers(), listAdminDemoGrants()]);
 
-  return <AdminCustomersPanel {...data} />;
+  return (
+    <>
+      <AdminCustomersPanel {...customers} />
+      <div className="container max-w-7xl pb-12">
+        <AdminDemoPanel initialData={demo} />
+      </div>
+    </>
+  );
 }

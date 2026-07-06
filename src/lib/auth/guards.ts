@@ -79,6 +79,8 @@ export async function requireCompany(): Promise<CompanyContext> {
   if (!ctx.companyId || !ctx.role) {
     throw new ForbiddenError("No active company. Complete onboarding first.");
   }
+  const { assertCompanyDemoAccess } = await import("@/lib/demo/access");
+  await assertCompanyDemoAccess(ctx.companyId);
   return { user: ctx.user, token: ctx.token, companyId: ctx.companyId, role: ctx.role };
 }
 
