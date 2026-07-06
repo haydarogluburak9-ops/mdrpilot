@@ -51,6 +51,7 @@ const SECTIONS: SiteGuideSection[] = [
 - **Contact:** privacy@mdrpilot.com · support@mdrpilot.com`,
   },
   {
+    id: "account-delete",
     keywords:
       /hesab(ı|im)|hesap sil|delete (my )?account|remove (my )?account|kvkk|gdpr|veri sil|firma veri|privacy|gizlilik/i,
     tr: `**Hesabımı silme (KVKK / GDPR)**
