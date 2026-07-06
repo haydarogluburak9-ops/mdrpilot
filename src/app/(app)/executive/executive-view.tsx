@@ -9,6 +9,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
+import { EXPORT_LANGUAGES } from "@/lib/exports/i18n";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { ComplianceBars, RiskPie, SimpleBarChart, TrendLineChart } from "@/components/charts/executive-charts";
 import type { ExecutiveData } from "@/lib/compliance/executive";
@@ -18,10 +19,10 @@ const riskBadge: Record<string, "success" | "warning" | "destructive" | "muted">
 };
 
 export function ExecutiveView({ data, canExport }: { data: ExecutiveData; canExport: boolean }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const router = useRouter();
   const [exporting, setExporting] = useState(false);
-  const [language, setLanguage] = useState<"tr" | "en">("tr");
+  const [language, setLanguage] = useState<"tr" | "en">(lang === "en" ? "en" : "tr");
 
   async function exportReport() {
     setExporting(true);
@@ -46,8 +47,9 @@ export function ExecutiveView({ data, canExport }: { data: ExecutiveData; canExp
               className="rounded-lg border border-input bg-card px-2 py-2 text-sm"
               aria-label={t("common.docLanguage")}
             >
-              <option value="tr">TR</option>
-              <option value="en">EN (rev …e)</option>
+              {EXPORT_LANGUAGES.filter((l) => l.value === "tr" || l.value === "en").map((l) => (
+                <option key={l.value} value={l.value}>{l.label}</option>
+              ))}
             </select>
             <Button onClick={exportReport} disabled={exporting}>
               {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />} {t("executive.exportPdf")}

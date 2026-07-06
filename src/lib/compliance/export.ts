@@ -10,6 +10,7 @@ import { FORMAT_EXT } from "@/lib/exports/types";
 import { tx, generatedLine, coerceLanguage, langFileTag, type ExportLanguage } from "@/lib/exports/i18n";
 import { loadCompanyLogo, type CompanyLogo } from "@/lib/exports/logo";
 import { runConsultantAnalysis } from "./engine";
+import { localizeConsultantForExport, formatGapSeverityForPdf } from "./export-localize";
 import { loadExecutiveData } from "./executive";
 import type { ComplianceStandardScope } from "./types";
 
@@ -58,7 +59,8 @@ function buildPdf(opts: {
       // Top 5 gaps
       pdf.fillColor("#111827").font("Helvetica-Bold").fontSize(13).text(tx(lang, "exec.top5"));
       consult.gaps.slice(0, 5).forEach((g, i) => {
-        pdf.font("Helvetica-Bold").fontSize(10).fillColor("#111827").text(`${i + 1}. [${g.severity}] ${g.title} (${g.standard} ${g.clause})`);
+        const sev = formatGapSeverityForPdf(g.severity, lang);
+        pdf.font("Helvetica-Bold").fontSize(10).fillColor("#111827").text(`${i + 1}. [${sev}] ${g.title} (${g.standard} ${g.clause})`);
         pdf.font("Helvetica").fontSize(9).fillColor("#6b7280").text(`   ${g.recommendedAction}`);
       });
       pdf.moveDown(0.4);
@@ -123,7 +125,8 @@ export async function createDemoExecutiveExport(params: { companyId: string; use
 
     const generatedAt = new Date();
     const buffer = await buildPdf({
-      companyName: company.name, productName: consult.productName, exec, consult,
+      companyName: company.name, productName: consult.productName,
+      exec, consult: localizeConsultantForExport(consult, language),
       generatedBy: u?.name ?? u?.email ?? "—", generatedAt, language, logo,
     });
 

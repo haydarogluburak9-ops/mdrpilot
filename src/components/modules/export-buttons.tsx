@@ -4,6 +4,9 @@ import { useMemo, useState } from "react";
 import { AlertCircle } from "lucide-react";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { DownloadSelectButton } from "@/components/ui/download-select-button";
+import { EXPORT_LANGUAGES } from "@/lib/exports/i18n";
+
+const BILINGUAL_EXPORT_LANGS = EXPORT_LANGUAGES.filter((l) => l.value === "tr" || l.value === "en");
 
 type ExportType =
   | "TECHNICAL_FILE_DOCX"
@@ -36,11 +39,13 @@ export function ExportButtons({
   items,
   disabled,
   onCreated,
+  langOptions = BILINGUAL_EXPORT_LANGS,
 }: {
   productId?: string;
   items: ExportItem[];
   disabled?: boolean;
   onCreated?: () => void;
+  langOptions?: false | typeof BILINGUAL_EXPORT_LANGS;
 }) {
   const { t } = useI18n();
   const [error, setError] = useState<string | null>(null);
@@ -50,12 +55,12 @@ export function ExportButtons({
     [items],
   );
 
-  async function run(type: ExportType) {
+  async function run(type: ExportType, language: string) {
     setError(null);
     const res = await fetch("/api/exports", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, productId }),
+      body: JSON.stringify({ type, productId, language }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -73,11 +78,11 @@ export function ExportButtons({
       <DownloadSelectButton
         disabled={disabled}
         dialogTitle={t("exports.selectTitle")}
-        langOptions={false}
+        langOptions={langOptions}
         formatOptions={formatOptions}
         defaultFormat={items[0]?.type}
         showEnDocNoHint={false}
-        onDownload={({ format }) => run(format as ExportType)}
+        onDownload={({ format, lang }) => run(format as ExportType, lang)}
       />
       {error && (
         <p className="flex items-center gap-1 text-xs text-destructive">

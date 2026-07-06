@@ -6,8 +6,9 @@ import { Sparkles, Loader2, AlertCircle, Zap, ChevronRight, Target, CalendarRang
 import { PageHeader } from "@/components/layout/page-header";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { displayStandardCode } from "@/lib/domain/standards-catalog";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { EXPORT_LANGUAGES } from "@/lib/exports/i18n";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Disclaimer } from "@/components/ui/disclaimer";
@@ -139,9 +140,10 @@ export function ConsultantView({ products, canAnalyze }: { products: ProductLite
 }
 
 function ResultDashboard({ result }: { result: ConsultantResult }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const router = useRouter();
   const [exporting, setExporting] = useState(false);
+  const [exportLang, setExportLang] = useState<"tr" | "en">(lang === "en" ? "en" : "tr");
 
   async function exportExecutive() {
     setExporting(true);
@@ -149,7 +151,11 @@ function ResultDashboard({ result }: { result: ConsultantResult }) {
       const res = await fetch("/api/executive/export", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: result.productId ?? undefined, standard: result.standard }),
+        body: JSON.stringify({
+          productId: result.productId ?? undefined,
+          standard: result.standard,
+          language: exportLang,
+        }),
       });
       if (res.ok) router.push("/exports");
     } finally {
@@ -171,9 +177,21 @@ function ResultDashboard({ result }: { result: ConsultantResult }) {
               <Badge variant="destructive">{result.gaps.filter((g) => g.severity === "Critical").length} {t("consultant.criticalCount")}</Badge>
             </div>
           </div>
-          <Button variant="outline" onClick={exportExecutive} disabled={exporting} className="shrink-0">
-            {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />} {t("consultant.executiveReport")}
-          </Button>
+          <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
+            <select
+              value={exportLang}
+              onChange={(e) => setExportLang(e.target.value as "tr" | "en")}
+              className="rounded-lg border border-input bg-card px-2 py-2 text-sm"
+              aria-label={t("common.docLanguage")}
+            >
+              {EXPORT_LANGUAGES.filter((l) => l.value === "tr" || l.value === "en").map((l) => (
+                <option key={l.value} value={l.value}>{l.label}</option>
+              ))}
+            </select>
+            <Button variant="outline" onClick={exportExecutive} disabled={exporting}>
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />} {t("consultant.executiveReport")}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

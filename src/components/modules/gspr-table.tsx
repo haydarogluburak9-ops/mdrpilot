@@ -2,7 +2,7 @@
 
 
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { Card } from "@/components/ui/card";
 
@@ -100,6 +100,12 @@ function GsprJustificationCell({
     setText(value ?? "");
   }, [value]);
 
+  useLayoutEffect(() => {
+    resize();
+    const t = window.setTimeout(resize, 0);
+    return () => window.clearTimeout(t);
+  }, [text, value, resize]);
+
   useEffect(() => {
     resize();
   }, [text, value, resize]);
@@ -151,10 +157,10 @@ function GsprJustificationCell({
 
 
   return (
-    <div className="relative min-w-[220px] max-w-lg">
+    <div className="relative min-w-[280px]">
       <Textarea
         ref={textareaRef}
-        rows={1}
+        rows={2}
         value={text}
         onChange={(e) => {
           setText(e.target.value);
@@ -162,7 +168,7 @@ function GsprJustificationCell({
         }}
         onBlur={() => save(text)}
         placeholder={placeholder}
-        className={`min-h-0 resize-none overflow-hidden py-2 text-xs leading-relaxed ${needsText ? "border-warning/60 bg-warning/5" : ""}`}
+        className={`min-h-[3.5rem] resize-y py-2 text-xs leading-relaxed ${needsText ? "border-warning/60 bg-warning/5" : ""}`}
         disabled={saving}
       />
       {saving && <Loader2 className="absolute right-2 top-2 h-3.5 w-3.5 animate-spin text-muted-foreground" />}
@@ -467,29 +473,27 @@ export function GsprTable({
 
   return (
 
-    <Card className="overflow-hidden">
-
-      <div className="overflow-x-auto">
-
-        <table className="w-full text-sm">
+    <Card className="overflow-x-auto">
+      <div>
+        <table className="w-full min-w-[1100px] text-sm table-fixed">
 
           <thead className="border-b border-border bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
 
             <tr>
 
-              <th className="px-4 py-3 font-medium">{t("gspr.col.gspr")}</th>
+              <th className="w-[4%] px-3 py-3 font-medium">{t("gspr.col.gspr")}</th>
 
-              <th className="px-4 py-3 font-medium">{t("gspr.col.requirement")}</th>
+              <th className="w-[18%] px-3 py-3 font-medium">{t("gspr.col.requirement")}</th>
 
-              <th className="px-4 py-3 font-medium">{t("gspr.col.applicable")}</th>
+              <th className="w-[8%] px-3 py-3 font-medium">{t("gspr.col.applicable")}</th>
 
-              <th className="px-4 py-3 font-medium">{t("gspr.col.justification")}</th>
+              <th className="w-[22%] px-3 py-3 font-medium">{t("gspr.col.justification")}</th>
 
-              <th className="px-4 py-3 font-medium">{t("gspr.col.evidence")}</th>
+              <th className="w-[16%] px-3 py-3 font-medium">{t("gspr.col.evidence")}</th>
 
-              <th className="px-4 py-3 font-medium">{t("gspr.col.standard")}</th>
+              <th className="w-[12%] px-3 py-3 font-medium">{t("gspr.col.standard")}</th>
 
-              <th className="px-4 py-3 font-medium">{t("gspr.col.status")}</th>
+              <th className="w-[10%] px-3 py-3 font-medium">{t("gspr.col.status")}</th>
 
             </tr>
 
@@ -535,8 +539,8 @@ export function GsprTable({
 
                 >
 
-                  <td className="align-top px-4 py-3 font-semibold">{g.gsprNo}</td>
-                  <td className="align-top max-w-md px-4 py-3 text-muted-foreground">
+                  <td className="align-top px-3 py-3 font-semibold">{g.gsprNo}</td>
+                  <td className="align-top px-3 py-3 text-muted-foreground whitespace-pre-wrap break-words">
 
                     {localizedReq}
 
@@ -558,7 +562,7 @@ export function GsprTable({
 
                   </td>
 
-                  <td className="align-top px-4 py-3">
+                  <td className="align-top px-3 py-3">
                     <GsprJustificationCell
 
                       itemId={g.id}
@@ -577,7 +581,7 @@ export function GsprTable({
 
                   </td>
 
-                  <td className="align-top px-4 py-3">
+                  <td className="align-top px-3 py-3">
                     <GsprEvidenceCell
                       itemId={g.id}
                       gsprNo={g.gsprNo}
@@ -632,9 +636,7 @@ export function GsprTable({
           </tbody>
 
         </table>
-
       </div>
-
     </Card>
 
   );
