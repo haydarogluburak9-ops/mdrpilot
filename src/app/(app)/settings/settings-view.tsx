@@ -15,6 +15,8 @@ import { Input, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TeamPanel } from "@/components/settings/team-panel";
+import { AccountSecurityPanel } from "@/components/settings/account-security-panel";
+import { PrivacyDataPanel } from "@/components/settings/privacy-data-panel";
 import { NOTIFIED_BODIES } from "@/lib/domain/notified-bodies";
 
 interface CompanyProfile {
@@ -71,6 +73,9 @@ export function SettingsView({
         <CompanyProfileCard company={company} canEdit={canEditBranding} />
 
         <TeamPanel canManage={canManageTeam} />
+
+        <AccountSecurityPanel />
+        <PrivacyDataPanel isOwner={currentRole === "OWNER"} />
 
         <Card className="lg:col-span-2">
           <CardHeader><CardTitle>{t("settings.aiConfig")}</CardTitle></CardHeader>
