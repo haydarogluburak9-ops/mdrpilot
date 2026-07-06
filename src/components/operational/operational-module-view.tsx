@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, Download } from "lucide-react";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,7 +34,7 @@ export function OperationalModuleView({
   canEdit: boolean;
   initialProductId?: string;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [records, setRecords] = useState(recordsProp);
@@ -119,12 +119,30 @@ export function OperationalModuleView({
         title={t(def.labelKey)}
         description={t(def.descKey)}
         actions={
-          canEdit ? (
-            <Button size="sm" onClick={() => setCreating((v) => !v)}>
-              <Plus className="h-4 w-4" />
-              {t("operational.newRecord")}
-            </Button>
-          ) : null
+          <div className="flex flex-wrap gap-2">
+            {def.slug === "calibration" && records.length > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  const locale = lang === "en" ? "en" : "tr";
+                  const a = document.createElement("a");
+                  a.href = `/api/operational/calibration/plan-export?lang=${locale}`;
+                  a.rel = "noopener";
+                  a.click();
+                }}
+              >
+                <Download className="h-4 w-4" />
+                {t("operational.calibration.exportPlan")}
+              </Button>
+            )}
+            {canEdit ? (
+              <Button size="sm" onClick={() => setCreating((v) => !v)}>
+                <Plus className="h-4 w-4" />
+                {t("operational.newRecord")}
+              </Button>
+            ) : null}
+          </div>
         }
       />
 
@@ -142,7 +160,7 @@ export function OperationalModuleView({
           <div className="grid gap-3 sm:grid-cols-2">
             <input
               className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-              placeholder={t("operational.titlePlaceholder")}
+              placeholder={def.slug === "calibration" ? t("operational.calibration.titlePlaceholder") : t("operational.titlePlaceholder")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />

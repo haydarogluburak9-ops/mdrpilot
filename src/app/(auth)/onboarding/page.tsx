@@ -97,7 +97,7 @@ export default function OnboardingPage() {
         <div className="space-y-1.5">
           <label className="text-sm font-medium">{t("auth.onboarding.standards")}</label>
           <div className="flex flex-wrap gap-2">
-            {["MDR", "ISO 13485", "ISO 9001"].map((s) => (
+            {["MDR", "ISO 13485"].map((s) => (
               <button
                 key={s}
                 type="button"

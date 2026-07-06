@@ -489,7 +489,7 @@ export default function LandingPage() {
                 {t("nav.help")}
               </Link>
             </div>
-            <p className="text-xs">MDR 2017/745 · ISO 13485 · ISO 9001 · ISO 14971</p>
+            <p className="text-xs">MDR 2017/745 · ISO 13485 · ISO 14971</p>
           </div>
         </div>
       </footer>

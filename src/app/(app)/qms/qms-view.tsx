@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronRight, ExternalLink, FolderOpen, Wand2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -146,7 +145,6 @@ function KysProcedureTree({
 
 export function QmsView({
   iso13485,
-  iso9001,
   companyName,
   canEdit,
   canApprove,
@@ -157,7 +155,6 @@ export function QmsView({
   coverageRows,
 }: {
   iso13485: QmsDoc[];
-  iso9001: QmsDoc[];
   companyName: string;
   canEdit: boolean;
   canApprove: boolean;
@@ -179,7 +176,7 @@ export function QmsView({
           <div className="flex items-center gap-2">
             <QmsBootstrapPackButton canEdit={canEdit} />
             <QmsOperationalPackButton canEdit={canEdit} />
-            <QmsBulkAiButton docs={[...iso13485, ...iso9001]} canEdit={canEdit} />
+            <QmsBulkAiButton docs={iso13485} canEdit={canEdit} />
             <Link href="/wizards/quality-manual" className={buttonVariants({ variant: "default", size: "sm" })}>
               <Wand2 className="mr-1 h-4 w-4" /> {t("qms.generateManual")}
             </Link>
@@ -219,20 +216,7 @@ export function QmsView({
 
       <QmsCreateProcedurePanel canEdit={canEdit} />
 
-      <Tabs defaultValue="iso13485">
-        <TabsList>
-          <TabsTrigger value="iso13485">ISO 13485</TabsTrigger>
-          <TabsTrigger value="iso9001">ISO 9001</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="iso13485">
-          <KysProcedureTree docs={iso13485} canEdit={canEdit} canApprove={canApprove} />
-        </TabsContent>
-
-        <TabsContent value="iso9001">
-          <KysProcedureTree docs={iso9001} canEdit={canEdit} canApprove={canApprove} />
-        </TabsContent>
-      </Tabs>
+      <KysProcedureTree docs={iso13485} canEdit={canEdit} canApprove={canApprove} />
     </div>
   );
 }

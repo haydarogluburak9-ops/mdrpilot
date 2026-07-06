@@ -9,9 +9,8 @@ import { QmsView } from "./qms-view";
 
 export default async function QmsPage() {
   const ctx = await requireCompany();
-  const [iso13485, iso9001, company, kysDocs, wizardAnswers, qmSession] = await Promise.all([
+  const [iso13485, company, kysDocs, wizardAnswers, qmSession] = await Promise.all([
     listQmsDocuments(ctx.companyId, "ISO 13485"),
-    listQmsDocuments(ctx.companyId, "ISO 9001"),
     prisma.company.findUnique({
       where: { id: ctx.companyId },
       select: { name: true, profileJson: true },
@@ -51,7 +50,6 @@ export default async function QmsPage() {
   return (
     <QmsView
       iso13485={iso13485}
-      iso9001={iso9001}
       companyName={company?.name ?? "Company"}
       canEdit={hasRole(ctx.role, "CONSULTANT")}
       canApprove={hasRole(ctx.role, "QUALITY_MANAGER")}

@@ -13,7 +13,6 @@ const PLAN_RANK: Record<PlanKey, number> = {
 const ROUTE_MIN_PLAN: { prefix: string; minPlan: PlanKey; labelKey: string }[] = [
   { prefix: "/audit-simulator", minPlan: "pro", labelKey: "nav.auditSimulator" },
   { prefix: "/executive", minPlan: "pro", labelKey: "nav.executive" },
-  { prefix: "/evaluation", minPlan: "pro", labelKey: "nav.evaluation" },
   { prefix: "/consultant", minPlan: "plus", labelKey: "nav.consultant" },
   { prefix: "/document-translator", minPlan: "basic", labelKey: "nav.documentTranslator" },
   { prefix: "/exports", minPlan: "basic", labelKey: "nav.exports" },

@@ -13,14 +13,14 @@ const OVERVIEW: Record<SiteGuideLocale, string> = {
   tr: `MDRpilot menü yapısı (sol kenar çubuğu):
 - Genel Bakış: Panel (/dashboard), Demo turu (/demo/tour), Ürünler (/products)
 - Regülasyon: Teknik dosya, GSPR, Risk, Klinik, PMS, Kullanım talimatı (IFU)
-- Zeka: Danışman, Denetim simülatörü, Yönetici özeti, Değerlendirme, Belge çevirici
+- Zeka: Danışman, Denetim simülatörü, Yönetici özeti, Belge çevirici
 - Kalite: Belge oluşturucu (/composer), Kalite el kitabı sihirbazı (/wizards/quality-manual), Standartlar, KYS (/qms), Operasyonel kayıtlar (/operational), Eğitim matrisi, Analitik, Belge kaydı, Belge kontrolü, Denetim hazırlığı, Dosyalar, Dışa aktarma
 - Hesap: Yardım (/help), Aktivite günlüğü, Ayarlar (/settings), Faturalandırma (/billing)
 Üst çubuktaki "AI Asistan" düğmesi her sayfadan açılır.`,
   en: `MDRpilot menu (left sidebar):
 - Overview: Dashboard (/dashboard), Demo tour (/demo/tour), Products (/products)
 - Regulatory: Technical file, GSPR, Risk, Clinical, PMS, IFU
-- Intelligence: Consultant, Audit simulator, Executive, Evaluation, Document translator
+- Intelligence: Consultant, Audit simulator, Executive, Document translator
 - Quality: Composer (/composer), Quality manual wizard (/wizards/quality-manual), Standards, QMS (/qms), Operational records (/operational), Training matrix, Analytics, Document register, Document control, Audit readiness, Files, Exports
 - Account: Help (/help), Activity log, Settings (/settings), Billing (/billing)
 The "AI Assistant" button in the top bar is available on every page.`,

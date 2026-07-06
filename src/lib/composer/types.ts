@@ -3,7 +3,6 @@ import { CHANGE_CONTROL_CLAUSE_REFS } from "@/lib/domain/constants";
 import { editionOf } from "@/lib/domain/standards-catalog";
 
 const ISO13485 = editionOf("ISO 13485");
-const ISO9001 = editionOf("ISO 9001");
 const ISO14971 = editionOf("ISO 14971");
 
 export interface ComposerTypeDef {
@@ -16,7 +15,6 @@ export interface ComposerTypeDef {
 
 export const COMPOSER_TYPES: ComposerTypeDef[] = [
   { value: "ISO13485_QUALITY_MANUAL", label: `${ISO13485} Quality Manual`, standard: ISO13485, productScoped: false },
-  { value: "ISO9001_QUALITY_MANUAL", label: `${ISO9001} Quality Manual`, standard: ISO9001, productScoped: false },
   { value: "ISO13485_DOCUMENT_CONTROL_PROCEDURE", label: `${ISO13485} Document Control Procedure`, standard: ISO13485, productScoped: false },
   { value: "ISO13485_CAPA_PROCEDURE", label: `${ISO13485} CAPA Procedure`, standard: ISO13485, productScoped: false },
   { value: "ISO13485_INTERNAL_AUDIT_PROCEDURE", label: `${ISO13485} Internal Audit Procedure`, standard: ISO13485, productScoped: false },

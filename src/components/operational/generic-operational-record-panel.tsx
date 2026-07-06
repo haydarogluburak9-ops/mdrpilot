@@ -8,6 +8,7 @@ import { AiAnalyzingHint } from "@/components/ai/ai-analyzing-hint";
 import { GenericStructuredForm } from "@/components/operational/generic-structured-form";
 import { NcpStructuredForm } from "@/components/operational/ncp-structured-form";
 import { TrainingStructuredForm } from "@/components/operational/training-structured-form";
+import { CalibrationStructuredForm } from "@/components/operational/calibration-structured-form";
 import { OperationalExportButton } from "@/components/operational/operational-export-button";
 import { useI18n } from "@/components/providers/i18n-provider";
 import type { OperationalModuleDef } from "@/lib/operational/modules";
@@ -23,6 +24,11 @@ import {
   type TrainingFormData,
 } from "@/lib/operational/training-form-model";
 import {
+  parseCalibrationFormMarkdown,
+  serializeCalibrationFormMarkdown,
+  type CalibrationFormData,
+} from "@/lib/operational/calibration-form-model";
+import {
   parseCapaFormMarkdown,
   serializeCapaFormMarkdown,
 } from "@/lib/operational/capa-form-model";
@@ -30,11 +36,12 @@ import { buildFormCapa01 } from "@/lib/qms/form-templates";
 import { inferQmsLayerFromCode } from "@/lib/qms/kys-structure";
 import { procedureChildHintPlaceholder } from "@/lib/qms/procedure-hint-examples";
 
-type StructuredFormKind = "ncp" | "training" | null;
+type StructuredFormKind = "ncp" | "training" | "calibration" | null;
 
 function structuredFormKind(formCode: string): StructuredFormKind {
   if (formCode === "FORM-NCP-01") return "ncp";
   if (formCode === "FORM-HR-01") return "training";
+  if (formCode === "FORM-ME-01") return "calibration";
   return null;
 }
 
@@ -74,6 +81,9 @@ export function GenericOperationalRecordPanel({
   const [trainingData, setTrainingData] = useState<TrainingFormData | null>(
     formKind === "training" ? parseTrainingFormMarkdown(formContent, locale) : null,
   );
+  const [calibrationData, setCalibrationData] = useState<CalibrationFormData | null>(
+    formKind === "calibration" ? parseCalibrationFormMarkdown(formContent, locale) : null,
+  );
   const [hint, setHint] = useState(title);
   const [loadingForm, setLoadingForm] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -84,8 +94,11 @@ export function GenericOperationalRecordPanel({
   const serializedStructured = useMemo(() => {
     if (formKind === "ncp" && ncpData) return serializeNcpFormMarkdown(ncpData, locale);
     if (formKind === "training" && trainingData) return serializeTrainingFormMarkdown(trainingData, locale);
+    if (formKind === "calibration" && calibrationData) {
+      return serializeCalibrationFormMarkdown(calibrationData, locale);
+    }
     return "";
-  }, [formKind, ncpData, trainingData, locale]);
+  }, [formKind, ncpData, trainingData, calibrationData, locale]);
 
   const dirty = formKind
     ? serializedStructured.trim() !== initialTrimmed
@@ -95,6 +108,7 @@ export function GenericOperationalRecordPanel({
     setFormContent(content);
     if (formKind === "ncp") setNcpData(parseNcpFormMarkdown(content, locale));
     if (formKind === "training") setTrainingData(parseTrainingFormMarkdown(content, locale));
+    if (formKind === "calibration") setCalibrationData(parseCalibrationFormMarkdown(content, locale));
   }
 
   useEffect(() => {
@@ -134,6 +148,12 @@ export function GenericOperationalRecordPanel({
   function handleTrainingChange(data: TrainingFormData) {
     setTrainingData(data);
     setFormContent(serializeTrainingFormMarkdown(data, locale));
+    setSaveOk(false);
+  }
+
+  function handleCalibrationChange(data: CalibrationFormData) {
+    setCalibrationData(data);
+    setFormContent(serializeCalibrationFormMarkdown(data, locale));
     setSaveOk(false);
   }
 
@@ -289,6 +309,12 @@ export function GenericOperationalRecordPanel({
             <TrainingStructuredForm
               data={trainingData}
               onChange={handleTrainingChange}
+              disabled={!canEdit || generating}
+            />
+          ) : formKind === "calibration" && calibrationData ? (
+            <CalibrationStructuredForm
+              data={calibrationData}
+              onChange={handleCalibrationChange}
               disabled={!canEdit || generating}
             />
           ) : (

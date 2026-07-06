@@ -116,7 +116,7 @@ export function DashboardView({
             <p className="font-semibold">{companyName}</p>
             <p className="text-sm text-muted-foreground">
               {profile?.industry ? `${profile.industry[0]}${profile.industry.slice(1).toLowerCase()} · ` : ""}
-              {profile?.standards?.length ? profile.standards.join(" · ") : "MDR · ISO 13485 · ISO 9001"}
+              {profile?.standards?.length ? profile.standards.join(" · ") : "MDR · ISO 13485"}
             </p>
           </div>
         </div>

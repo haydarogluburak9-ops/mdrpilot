@@ -131,13 +131,6 @@ export function DocumentRegisterView({
         </div>
         <RegisterTable rows={data.iso13485} emptyLabel={t("docRegister.emptyQms")} />
       </Card>
-
-      <Card className="overflow-hidden">
-        <div className="border-b border-border bg-muted/30 px-4 py-3">
-          <h2 className="text-sm font-semibold">{t("docRegister.group.iso9001")}</h2>
-        </div>
-        <RegisterTable rows={data.iso9001} emptyLabel={t("docRegister.emptyQms")} />
-      </Card>
     </div>
   );
 }

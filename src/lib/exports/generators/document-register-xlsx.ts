@@ -76,7 +76,6 @@ export async function buildDocumentRegisterXlsx(
 
   const tfTitle = lang === "tr" ? "Teknik Dosya (MDR)" : "Technical File (MDR)";
   const iso13485Title = lang === "tr" ? "ISO 13485 KYS" : "ISO 13485 QMS";
-  const iso9001Title = lang === "tr" ? "ISO 9001 KYS" : "ISO 9001 QMS";
   const subtitle = [
     data.companyName,
     data.productName ? (lang === "tr" ? `Ürün: ${data.productName}` : `Product: ${data.productName}`) : null,
@@ -86,7 +85,6 @@ export async function buildDocumentRegisterXlsx(
 
   addSheet(wb, lang === "tr" ? "Teknik Dosya" : "Technical File", tfTitle, subtitle, data.technicalFile, lang);
   addSheet(wb, lang === "tr" ? "ISO 13485" : "ISO 13485", iso13485Title, subtitle, data.iso13485, lang);
-  addSheet(wb, lang === "tr" ? "ISO 9001" : "ISO 9001", iso9001Title, subtitle, data.iso9001, lang);
 
   return Buffer.from(await wb.xlsx.writeBuffer());
 }

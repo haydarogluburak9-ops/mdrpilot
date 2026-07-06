@@ -66,7 +66,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { labelKey: "nav.consultant", href: "/consultant", icon: Sparkles },
       { labelKey: "nav.auditSimulator", href: "/audit-simulator", icon: ClipboardCheck },
       { labelKey: "nav.executive", href: "/executive", icon: LineChart },
-      { labelKey: "nav.evaluation", href: "/evaluation", icon: Gauge },
       { labelKey: "nav.documentTranslator", href: "/document-translator", icon: Languages },
     ],
   },

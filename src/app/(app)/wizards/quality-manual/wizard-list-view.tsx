@@ -108,8 +108,6 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
             <label className="mb-1 block text-sm font-medium">{t("qmWizard.standardMode")}</label>
             <select value={mode} onChange={(e) => setMode(e.target.value as StandardMode)} className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm">
               <option value="ISO_13485">ISO 13485</option>
-              <option value="ISO_9001">ISO 9001</option>
-              <option value="BOTH">{t("qmWizard.both")}</option>
             </select>
           </div>
           {error && <p className="flex items-center gap-1 text-sm text-destructive"><AlertCircle className="h-4 w-4" /> {error}</p>}
