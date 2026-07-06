@@ -12,7 +12,7 @@ const I18nContext = createContext<{
 } | null>(null);
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("tr");
+  const [lang, setLangState] = useState<Lang>("en");
 
   useEffect(() => {
     const stored =
@@ -21,6 +21,8 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     if (isAppLocale(stored)) {
       setLangState(stored);
       document.documentElement.lang = stored;
+    } else {
+      document.documentElement.lang = "en";
     }
   }, []);
 
