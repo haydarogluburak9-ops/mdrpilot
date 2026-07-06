@@ -1993,12 +1993,12 @@ export const dictionaries: { en: Record<string, string>; tr: Record<string, stri
     // ai assistant drawer
     "assistant.title": "AI Regulatory Assistant",
     "assistant.greeting":
-      "Hi, I'm your MDRpilot regulatory assistant.\n\nI can help you find gaps, draft documents and prepare for audits.\n\n**Example topics:**\n- MDR technical file and GSPR\n- ISO 14971 risk management\n- PMS / PMCF plan and PMCF report\n- CER and literature search",
+      "Hi, I'm your MDRpilot assistant.\n\nI can help with **regulatory documentation** (MDR, ISO 13485, risk, PMS) and **how to use the platform** (settings, documents, QMS operations, account privacy).\n\n**Examples:**\n- How do I delete my account?\n- Where do I create QMS operational records?\n- What is missing in my technical file?",
     "assistant.error": "Sorry, I couldn't reach the assistant service.",
-    "assistant.placeholder": "Ask about your dossier…",
-    "assistant.sg1": "Is this product Class IIa or IIb?",
-    "assistant.sg2": "What is missing in my technical file?",
-    "assistant.sg3": "Which validations are required for an EO-sterile device?",
+    "assistant.placeholder": "Ask about regulations or how to use MDRpilot…",
+    "assistant.sg1": "How do I delete my account?",
+    "assistant.sg2": "Where do I create documents in QMS?",
+    "assistant.sg3": "What is missing in my technical file?",
     "assistant.sg4": "Am I ready for an ISO 13485 audit?",
 
     // common extra
@@ -4870,12 +4870,12 @@ export const dictionaries: { en: Record<string, string>; tr: Record<string, stri
     // ai assistant drawer
     "assistant.title": "AI Regülasyon Asistanı",
     "assistant.greeting":
-      "Merhaba, ben MDRpilot regülasyon asistanınızım.\n\nEksikleri bulmanıza, doküman taslağı oluşturmanıza ve denetimlere hazırlanmanıza yardımcı olabilirim.\n\n**Örnek konular:**\n- MDR teknik dosya ve GSPR\n- ISO 14971 risk yönetimi\n- PMS / PMCF planı ve PMCF raporu\n- CER ve literatür taraması",
+      "Merhaba, ben MDRpilot asistanınızım.\n\n**Regülasyon** (MDR, ISO 13485, risk, PMS) ve **platform kullanımı** (ayarlar, belge oluşturma, KYS işlemleri, hesap/gizlilik) konularında yardımcı olabilirim.\n\n**Örnekler:**\n- Hesabımı nasıl silerim?\n- KYS operasyonel kayıtları nerede açılır?\n- Teknik dosyamda ne eksik?",
     "assistant.error": "Üzgünüm, asistan servisine ulaşılamadı.",
-    "assistant.placeholder": "Dosyanız hakkında soru sorun…",
-    "assistant.sg1": "Bu ürün Class IIa mı IIb mi?",
-    "assistant.sg2": "Teknik dosyamda ne eksik?",
-    "assistant.sg3": "EO ile sterilize edilen bir cihaz için hangi validasyonlar gerekir?",
+    "assistant.placeholder": "Regülasyon veya MDRpilot kullanımı hakkında sorun…",
+    "assistant.sg1": "Hesabımı nasıl silerim?",
+    "assistant.sg2": "KYS'de belge nasıl oluştururum?",
+    "assistant.sg3": "Teknik dosyamda ne eksik?",
     "assistant.sg4": "ISO 13485 denetimine hazır mıyım?",
 
     // common extra
