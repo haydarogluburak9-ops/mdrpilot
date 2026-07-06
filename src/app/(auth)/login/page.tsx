@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -31,6 +31,16 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [challengeToken, setChallengeToken] = useState<string | null>(null);
+  const [twoFactorCode, setTwoFactorCode] = useState("");
+
+  async function completeLogin(data: {
+    hasCompany?: boolean;
+    requiresVerification?: boolean;
+  }) {
+    router.push(postLoginPath(data, searchParams.get("next")));
+    router.refresh();
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,12 +58,85 @@ function LoginForm() {
         setLoading(false);
         return;
       }
-      router.push(postLoginPath(data, searchParams.get("next")));
-      router.refresh();
+      if (data.requires2fa && data.challengeToken) {
+        setChallengeToken(data.challengeToken);
+        setLoading(false);
+        return;
+      }
+      await completeLogin(data);
     } catch {
       setError(t("auth.networkError"));
       setLoading(false);
     }
+  }
+
+  async function onSubmit2fa(e: React.FormEvent) {
+    e.preventDefault();
+    if (!challengeToken) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/login/2fa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ challengeToken, code: twoFactorCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? t("auth.login.twoFactorFailed"));
+        setLoading(false);
+        return;
+      }
+      await completeLogin(data);
+    } catch {
+      setError(t("auth.networkError"));
+      setLoading(false);
+    }
+  }
+
+  if (challengeToken) {
+    return (
+      <form onSubmit={onSubmit2fa} className="mt-8 space-y-4">
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+          <div className="flex items-center gap-2 font-medium">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            {t("auth.login.twoFactorTitle")}
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">{t("auth.login.twoFactorDesc")}</p>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">{t("auth.login.twoFactorCode")}</label>
+          <Input
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={6}
+            value={twoFactorCode}
+            onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ""))}
+            placeholder="000000"
+            required
+            autoComplete="one-time-code"
+            autoFocus
+          />
+        </div>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <Button type="submit" className="w-full" disabled={loading || twoFactorCode.length !== 6}>
+          {loading ? t("auth.login.twoFactorSubmitting") : t("auth.login.twoFactorSubmit")}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-full"
+          disabled={loading}
+          onClick={() => {
+            setChallengeToken(null);
+            setTwoFactorCode("");
+            setError("");
+          }}
+        >
+          {t("auth.login.twoFactorBack")}
+        </Button>
+      </form>
+    );
   }
 
   return (

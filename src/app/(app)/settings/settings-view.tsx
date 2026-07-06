@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TeamPanel } from "@/components/settings/team-panel";
 import { AccountSecurityPanel } from "@/components/settings/account-security-panel";
+import { TwoFactorPanel } from "@/components/settings/two-factor-panel";
 import { PrivacyDataPanel } from "@/components/settings/privacy-data-panel";
 import { NOTIFIED_BODIES } from "@/lib/domain/notified-bodies";
 
@@ -75,6 +76,7 @@ export function SettingsView({
         <TeamPanel canManage={canManageTeam} />
 
         <AccountSecurityPanel />
+        <TwoFactorPanel />
         <PrivacyDataPanel isOwner={currentRole === "OWNER"} />
 
         <Card className="lg:col-span-2">

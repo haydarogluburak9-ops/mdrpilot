@@ -30,7 +30,12 @@ export async function POST(req: Request) {
 
   await prisma.user.update({
     where: { id: row.userId },
-    data: { passwordHash: await hashPassword(parsed.data.password) },
+    data: {
+      passwordHash: await hashPassword(parsed.data.password),
+      twoFactorSecret: null,
+      twoFactorPendingSecret: null,
+      twoFactorEnabledAt: null,
+    },
   });
 
   await writeAuditLog({

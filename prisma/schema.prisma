@@ -515,6 +515,7 @@ model QualityManualWizardSession {
 enum AuthTokenType {
   EMAIL_VERIFY
   PASSWORD_RESET
+  TWO_FACTOR_LOGIN
 }
 
 model User {
@@ -526,6 +527,9 @@ model User {
   emailVerifiedAt   DateTime?
   termsAcceptedAt   DateTime?
   privacyAcceptedAt DateTime?
+  twoFactorSecret        String?
+  twoFactorPendingSecret String?
+  twoFactorEnabledAt     DateTime?
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   deletedAt    DateTime?
