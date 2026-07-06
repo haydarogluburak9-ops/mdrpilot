@@ -34,6 +34,11 @@ import { AlertCircle, Loader2, Maximize2, Paperclip, Plus, X } from "lucide-reac
 
 
 
+const GSPR_STATUS_COL =
+  "sticky right-0 z-20 min-w-[148px] w-[148px] border-l border-border bg-card shadow-[-8px_0_12px_-8px_rgba(0,0,0,0.12)]";
+const GSPR_STATUS_HEAD =
+  "sticky right-0 z-20 min-w-[148px] w-[148px] border-l border-border bg-muted/95 backdrop-blur-sm";
+
 function applicableBadge(applicable: GsprApplicability): {
 
   variant: React.ComponentProps<typeof Badge>["variant"];
@@ -538,36 +543,27 @@ export function GsprTable({
 
   return (
 
-    <Card className="overflow-hidden">
+    <Card>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1180px] table-fixed border-collapse text-sm">
-          <colgroup>
-            <col className="w-12" />
-            <col className="w-[22%]" />
-            <col className="w-[100px]" />
-            <col className="w-[26%]" />
-            <col className="w-[18%]" />
-            <col className="w-[12%]" />
-            <col className="w-[110px]" />
-          </colgroup>
+        <table className="w-max min-w-full border-collapse text-sm">
 
           <thead className="border-b border-border bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
 
             <tr>
 
-              <th className="px-3 py-3 font-medium">{t("gspr.col.gspr")}</th>
+              <th className="min-w-12 px-3 py-3 font-medium">{t("gspr.col.gspr")}</th>
 
-              <th className="px-3 py-3 font-medium">{t("gspr.col.requirement")}</th>
+              <th className="min-w-[220px] px-3 py-3 font-medium">{t("gspr.col.requirement")}</th>
 
-              <th className="px-3 py-3 font-medium whitespace-normal leading-snug">{t("gspr.col.applicable")}</th>
+              <th className="min-w-[96px] px-3 py-3 font-medium whitespace-normal leading-snug">{t("gspr.col.applicable")}</th>
 
-              <th className="px-3 py-3 font-medium">{t("gspr.col.justification")}</th>
+              <th className="min-w-[260px] px-3 py-3 font-medium">{t("gspr.col.justification")}</th>
 
-              <th className="px-3 py-3 font-medium">{t("gspr.col.evidence")}</th>
+              <th className="min-w-[200px] px-3 py-3 font-medium">{t("gspr.col.evidence")}</th>
 
-              <th className="px-3 py-3 font-medium">{t("gspr.col.standard")}</th>
+              <th className="min-w-[120px] px-3 py-3 font-medium">{t("gspr.col.standard")}</th>
 
-              <th className="px-3 py-3 font-medium">{t("gspr.col.status")}</th>
+              <th className={cn("px-3 py-3 font-medium", GSPR_STATUS_HEAD)}>{t("gspr.col.status")}</th>
 
             </tr>
 
@@ -609,7 +605,10 @@ export function GsprTable({
 
                   key={g.id}
 
-                  className={`border-b border-border last:border-0 hover:bg-muted/30 ${noEvidence ? "bg-destructive/5" : ""}`}
+                  className={cn(
+                    "group border-b border-border last:border-0 hover:bg-muted/30",
+                    noEvidence && "bg-destructive/5",
+                  )}
 
                 >
 
@@ -688,7 +687,13 @@ export function GsprTable({
 
                   </td>
 
-                  <td className="align-top px-3 py-3">
+                  <td
+                    className={cn(
+                      "align-top px-3 py-3 group-hover:bg-muted/30",
+                      GSPR_STATUS_COL,
+                      noEvidence && "bg-destructive/5",
+                    )}
+                  >
                     <GsprStatusCell
                       itemId={g.id}
                       productId={productId}
