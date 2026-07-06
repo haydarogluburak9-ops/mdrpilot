@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { requireCompany, hasRole } from "@/lib/auth/guards";
 import { getQmsOnboardingPath } from "@/lib/qms/onboarding-path";
 import { aiProviderInfo } from "@/lib/ai/provider-factory";
+import { getAiTokenBalance } from "@/lib/billing/ai-tokens";
 import { SettingsView } from "./settings-view";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +27,7 @@ export default async function SettingsPage() {
   });
 
   const ai = aiProviderInfo();
+  const aiBalance = await getAiTokenBalance(ctx.companyId);
 
   return (
     <SettingsView
@@ -55,6 +57,9 @@ export default async function SettingsPage() {
       aiProvider={ai.provider}
       aiModel={ai.model}
       aiConfigured={ai.configured}
+      aiPlanKey={aiBalance.planKey}
+      aiTokensRemaining={aiBalance.remaining}
+      aiAllowsDocumentAi={aiBalance.allowsLiveAi}
     />
   );
 }

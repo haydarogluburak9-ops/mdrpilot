@@ -46,6 +46,9 @@ export function SettingsView({
   aiProvider,
   aiModel,
   aiConfigured,
+  aiPlanKey,
+  aiTokensRemaining,
+  aiAllowsDocumentAi,
 }: {
   company: CompanyProfile;
   members: { name: string; role: string }[];
@@ -57,6 +60,9 @@ export function SettingsView({
   aiProvider: string;
   aiModel: string;
   aiConfigured: boolean;
+  aiPlanKey: string;
+  aiTokensRemaining: number;
+  aiAllowsDocumentAi: boolean;
 }) {
   const { t } = useI18n();
   return (
@@ -99,8 +105,15 @@ export function SettingsView({
               </div>
             </div>
             <Badge variant={aiConfigured ? "success" : "warning"}>
-              {aiConfigured ? t("settings.aiLive") : t("settings.serverManaged")}
+              {aiConfigured ? t("settings.aiServerLive") : t("settings.serverManaged")}
             </Badge>
+            {aiConfigured ? (
+              <p className="text-sm text-muted-foreground">
+                {aiAllowsDocumentAi
+                  ? `${t("settings.aiCompanyQuota")} ${aiPlanKey} · ${aiTokensRemaining.toLocaleString()}`
+                  : t("settings.aiCompanyStarter")}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
       </div>

@@ -272,10 +272,10 @@ export function mockSiteGuideReply(message: string, locale: SiteGuideLocale): st
       : "**To delete your account:**\n1. Left menu → **Settings** (/settings)\n2. Scroll to **Privacy & data (GDPR / KVKK)**\n3. Enter your password and type `HESABIMI SIL` in the confirmation field\n4. Click **Delete my account**\n\nCompany owners can remove all workspace data with `FIRMA VERILERINI SIL` on the same page.";
   }
 
-  if (/parola|şifre|password|2fa|iki adımlı/i.test(m)) {
+  if (/parola|şifre|password|2fa|iki adımlı|değiştiri|degistiri|change.*password/i.test(m)) {
     return isTr
-      ? "**Parola:** Ayarlar → Parola ve güvenlik. Unuttuysanız girişte Parolamı unuttum.\n\n**2FA:** Ayarlar → İki adımlı doğrulama → QR tarayın, kodu onaylayın."
-      : "**Password:** Settings → Password & security. Use Forgot password on login if needed.\n\n**2FA:** Settings → Two-factor authentication → scan QR and confirm with a code.";
+      ? "**Şifrenizi değiştirmek için:**\n1. Sol menü → **Ayarlar** (/settings)\n2. **Parola ve güvenlik** kartını açın\n3. Mevcut parola + yeni parolayı girin → **Parolayı güncelle**\n\nParolayı unuttuysanız giriş sayfasında **Parolamı unuttum** (/forgot-password).\n\n**2FA:** Aynı Ayarlar sayfasında **İki adımlı doğrulama** bölümünden kurulur."
+      : "**To change your password:**\n1. Left menu → **Settings** (/settings)\n2. Open **Password & security**\n3. Enter current + new password → **Update password**\n\nForgot password? Use **Forgot password** on the login page (/forgot-password).\n\n**2FA:** Set up under **Two-factor authentication** on the same Settings page.";
   }
 
   if (/nasıl|how to|nerede|where|kullanırım|işlem/i.test(m) && /kys|qms|operasyonel|operational/i.test(m)) {

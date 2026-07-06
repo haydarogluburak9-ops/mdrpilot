@@ -82,8 +82,8 @@ function mockReply(message: string, locale: "tr" | "en", productName?: string): 
   }
 
   return tr
-    ? "Regülasyon (sınıflandırma, teknik dosya, GSPR, risk, PMS) veya platform kullanımı (ayarlar, belge oluşturma, KYS işlemleri, hesap silme) konularında yardımcı olabilirim. Ne yapmak istediğinizi yazın."
-    : "I can help with regulations (classification, technical file, GSPR, risk, PMS) or using MDRpilot (settings, documents, QMS operations, account deletion). Tell me what you'd like to do.";
+    ? "Regülasyon (sınıflandırma, teknik dosya, GSPR, risk, PMS) veya platform kullanımı (ayarlar, parola, belge oluşturma, KYS işlemleri) konularında yardımcı olabilirim. Ne yapmak istediğinizi yazın."
+    : "I can help with regulations (classification, technical file, GSPR, risk, PMS) or using MDRpilot (settings, password, documents, QMS operations). Tell me what you'd like to do.";
 }
 
 export async function POST(req: Request) {
@@ -145,9 +145,10 @@ export async function POST(req: Request) {
         "",
         "You are MDRpilot's in-app assistant. You help with BOTH:",
         "1) Regulatory documentation (MDR, ISO 13485, ISO 14971, GSPR, CER, PMS, audits)",
-        "2) How to use the MDRpilot platform (navigation, settings, creating documents, QMS operations, account/privacy)",
+        "2) How to use the MDRpilot platform (navigation, settings, creating documents, QMS operations, password & security)",
         "",
-        "When the user asks how to do something in the app (e.g. delete account, change password, create a document, QMS records), answer with numbered steps and exact menu paths from the site guide below. Prefer Turkish menu labels when replying in Turkish.",
+        "When the user asks how to do something in the app (e.g. change password, create a document, QMS records), answer with numbered steps and exact menu paths from the site guide below. Prefer Turkish menu labels when replying in Turkish.",
+        "Do not proactively suggest account deletion unless the user explicitly asks to delete their account.",
         "Never respond to a specific how-to question with only a generic list of topics — always answer the actual question first.",
         langRule,
         "- Use short paragraphs separated by a blank line.",
@@ -173,6 +174,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ reply, source: aiProviderInfo().provider });
     } catch (err) {
       console.error("[assistant] provider failed, using mock", err);
+      const siteReply = mockSiteGuideReply(message, locale);
+      if (siteReply) {
+        return NextResponse.json({ reply: siteReply, source: "mock" });
+      }
     }
   }
 
