@@ -28,7 +28,29 @@ The "AI Assistant" button in the top bar is available on every page.`,
 
 const SECTIONS: SiteGuideSection[] = [
   {
-    id: "account-delete",
+    id: "security-privacy",
+    keywords:
+      /güvenlik|security|korunuyor|korunur|güvende|gizli|private|başkası|başka.*gör|another.*see|other.*company|verilerim|veri güven|data safe|data protect|hack|şifreleme|encrypt|gizlilik politikası/i,
+    tr: `**Veri güvenliği — özet (müşteri soruları)**
+- **Firma izolasyonu:** Her müşterinin verisi ayrı çalışma alanında tutulur. Başka firmaların ürün, KYS, dosya veya dokümanlarına erişemezsiniz; sistem her istekte firma kimliğini doğrular.
+- **Kimler görebilir?** Yalnızca kendi firmanızdaki davetli kullanıcılar (Owner, Kalite müdürü, Danışman, İzleyici vb.) ortak çalışma alanını görür. Rol bazlı yetkiler uygulanır.
+- **Yüklenen dosyalar:** Kanıt dosyaları herkese açık linkle sunulmaz; giriş yapmış ve aynı firmada olan kullanıcılar indirebilir.
+- **Parola:** Parolalar düz metin saklanmaz; güvenli özet (hash) ile tutulur. İsteğe bağlı iki adımlı doğrulama (2FA) Ayarlar'dan açılabilir.
+- **İletişim:** Site trafiği HTTPS ile şifrelenir. Oturum çerezleri httpOnly'dir.
+- **AI kullanımı:** Canlı AI açıksa, talep ettiğiniz çıktı için ilgili metin parçaları yapılandırılmış AI sağlayıcılarına (ör. OpenAI, Anthropic) iletilir; veriler reklam veya satış amacıyla kullanılmaz. Kurumsal gizlilik politikalarınıza göre değerlendirin.
+- **Silme hakları:** Ayarlar → Gizlilik ve veri ile hesap veya firma verilerini silebilirsiniz. Ayrıntılar: /privacy (Gizlilik Politikası).
+- **Destek:** privacy@mdrpilot.com · support@mdrpilot.com`,
+    en: `**Data security — summary (customer FAQ)**
+- **Company isolation:** Each customer has a separate workspace. Other companies cannot access your products, QMS, files or documents; every API request is scoped to your company.
+- **Who can see my data?** Only invited users in your company (Owner, Quality manager, Consultant, Viewer, etc.) share the workspace. Role-based permissions apply.
+- **Uploaded files:** Evidence files are not public URLs; only authenticated users in the same company can download them.
+- **Passwords:** Stored as secure hashes, never plain text. Optional 2FA is available in Settings.
+- **In transit:** HTTPS encryption. Session cookies are httpOnly.
+- **AI:** When live AI is enabled, relevant excerpts are sent to configured providers (e.g. OpenAI, Anthropic) only to generate your requested output; data is not sold or used for advertising.
+- **Deletion:** Settings → Privacy & data to delete account or company workspace. Details: /privacy
+- **Contact:** privacy@mdrpilot.com · support@mdrpilot.com`,
+  },
+  {
     keywords:
       /hesab(ı|im)|hesap sil|delete (my )?account|remove (my )?account|kvkk|gdpr|veri sil|firma veri|privacy|gizlilik/i,
     tr: `**Hesabımı silme (KVKK / GDPR)**
@@ -227,6 +249,12 @@ export function buildSiteGuideContext(message: string, locale: SiteGuideLocale):
 export function mockSiteGuideReply(message: string, locale: SiteGuideLocale): string | null {
   const m = message.toLowerCase();
   const isTr = locale === "tr";
+
+  if (/güvenlik|korunuyor|korunur|başkası.*gör|verilerim|gizli|data safe|data protect|who can see/i.test(m)) {
+    return isTr
+      ? "**Kısa cevap:** Evet — verileriniz firma bazında izole edilir; başka müşteriler göremez.\n\n**Detay:**\n- Yalnızca kendi firmanızdaki davetli ekip üyeleri çalışma alanını görür\n- Dosyalar herkese açık değildir; giriş + firma kontrolü vardır\n- Parolalar hash ile saklanır; HTTPS ve oturum güvenliği uygulanır\n- Canlı AI kullanıyorsanız, AI için metin parçaları sağlayıcıya gider (Gizlilik Politikası: /privacy)\n- Hesap/firma silme: Ayarlar → Gizlilik ve veri\n\nSorularınız için: privacy@mdrpilot.com"
+      : "**Short answer:** Yes — your data is isolated per company; other customers cannot see it.\n\n**Details:**\n- Only invited members of your company see the workspace\n- Files are not public; login + company checks required\n- Passwords are hashed; HTTPS and secure sessions\n- With live AI, excerpts are sent to the provider (see /privacy)\n- Delete account/company: Settings → Privacy & data\n\nQuestions: privacy@mdrpilot.com";
+  }
 
   if (/hesap.*sil|hesabımı sil|delete.*account|veri.*sil|kvkk|gdpr|firma veri/i.test(m)) {
     return isTr
