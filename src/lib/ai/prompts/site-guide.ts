@@ -53,7 +53,7 @@ const SECTIONS: SiteGuideSection[] = [
   {
     id: "account-delete",
     keywords:
-      /hesab(ı|im)|hesap sil|delete (my )?account|remove (my )?account|kvkk|gdpr|veri sil|firma veri|privacy|gizlilik/i,
+      /hesab[\wığüşöçİĞÜŞÖÇ]*|hesap\s*sil|delete\s*(my\s*)?account|remove\s*(my\s*)?account|kvkk|gdpr|veri\s*sil|firma\s*veri|privacy|gizlilik|silebilirim|silerim/i,
     tr: `**Hesabımı silme (KVKK / GDPR)**
 1. Sol menü → **Ayarlar** (/settings)
 2. **Gizlilik ve veri (KVKK / GDPR)** kartına inin
@@ -236,6 +236,15 @@ export function buildSiteGuideContext(message: string, locale: SiteGuideLocale):
     }
   }
 
+  // Turkish inflections: "hesabımı nasıl silerim" etc.
+  if (!seen.has("account-delete") && /hesab\w*.*sil|hesap.*sil|delete.*account|remove.*account/i.test(message)) {
+    const section = SECTIONS.find((s) => s.id === "account-delete");
+    if (section) {
+      seen.add(section.id);
+      parts.push(locale === "tr" ? section.tr : section.en);
+    }
+  }
+
   if (seen.size === 0) {
     parts.push(
       locale === "tr"
@@ -257,7 +266,7 @@ export function mockSiteGuideReply(message: string, locale: SiteGuideLocale): st
       : "**Short answer:** Yes — your data is isolated per company; other customers cannot see it.\n\n**Details:**\n- Only invited members of your company see the workspace\n- Files are not public; login + company checks required\n- Passwords are hashed; HTTPS and secure sessions\n- With live AI, excerpts are sent to the provider (see /privacy)\n- Delete account/company: Settings → Privacy & data\n\nQuestions: privacy@mdrpilot.com";
   }
 
-  if (/hesap.*sil|hesabımı sil|delete.*account|veri.*sil|kvkk|gdpr|firma veri/i.test(m)) {
+  if (/hesab\w*.*sil|hesap.*sil|hesabım|hesabimi|delete.*account|remove.*account|veri.*sil|kvkk|gdpr|firma veri|silebilirim|silerim/i.test(m)) {
     return isTr
       ? "**Hesabınızı silmek için:**\n1. Sol menü → **Ayarlar** (/settings)\n2. **Gizlilik ve veri (KVKK / GDPR)** bölümüne inin\n3. Parolanızı girin ve onay alanına `HESABIMI SIL` yazın\n4. **Hesabımı sil** düğmesine basın\n\nFirma verilerini tamamen kaldırmak için (yalnızca firma sahibi) aynı sayfada `FIRMA VERILERINI SIL` kullanın."
       : "**To delete your account:**\n1. Left menu → **Settings** (/settings)\n2. Scroll to **Privacy & data (GDPR / KVKK)**\n3. Enter your password and type `HESABIMI SIL` in the confirmation field\n4. Click **Delete my account**\n\nCompany owners can remove all workspace data with `FIRMA VERILERINI SIL` on the same page.";

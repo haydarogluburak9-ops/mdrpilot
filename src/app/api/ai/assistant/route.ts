@@ -32,6 +32,9 @@ function stripEmbeddedDisclaimer(text: string): string {
 }
 
 function mockReply(message: string, locale: "tr" | "en", productName?: string): string {
+  const siteReply = mockSiteGuideReply(message, locale);
+  if (siteReply) return siteReply;
+
   const m = message.toLowerCase();
   const tr = locale === "tr";
   const ctx = productName ? (tr ? ` (${productName})` : ` for ${productName}`) : "";
@@ -77,9 +80,6 @@ function mockReply(message: string, locale: "tr" | "en", productName?: string): 
       ? "PMS planı (MDR Ek III), PMCF planı (MDCG 2020-7), PMCF değerlendirme raporu (MDCG 2020-8) ve PSUR (MDCG 2022-21) /pms sekmesinde yönetilir. Önce PMCF planı, ardından PMCF raporu ve PSUR döngüsünü öneririm."
       : "PMS plan (MDR Annex III), PMCF plan (MDCG 2020-7), PMCF evaluation report (MDCG 2020-8) and PSUR (MDCG 2022-21) are managed under the PMS tab. I recommend PMCF plan first, then PMCF report and PSUR cycle.";
   }
-
-  const siteReply = mockSiteGuideReply(message, locale);
-  if (siteReply) return siteReply;
 
   return tr
     ? "Regülasyon (sınıflandırma, teknik dosya, GSPR, risk, PMS) veya platform kullanımı (ayarlar, belge oluşturma, KYS işlemleri, hesap silme) konularında yardımcı olabilirim. Ne yapmak istediğinizi yazın."
@@ -148,6 +148,7 @@ export async function POST(req: Request) {
         "2) How to use the MDRpilot platform (navigation, settings, creating documents, QMS operations, account/privacy)",
         "",
         "When the user asks how to do something in the app (e.g. delete account, change password, create a document, QMS records), answer with numbered steps and exact menu paths from the site guide below. Prefer Turkish menu labels when replying in Turkish.",
+        "Never respond to a specific how-to question with only a generic list of topics — always answer the actual question first.",
         langRule,
         "- Use short paragraphs separated by a blank line.",
         "- When listing 3+ items or steps, use markdown bullet or numbered lists.",
