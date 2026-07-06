@@ -4,6 +4,7 @@ import type { DemoAccess } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/lib/auth/errors";
 import { normalizePlanKey } from "@/lib/billing/plans";
+import { ensureSubscriptionPlanDb } from "@/lib/billing/subscription-db";
 
 export type DemoAccessStatus = "active" | "expired" | "revoked";
 
@@ -17,25 +18,8 @@ export function isDemoAccessActive(grant: Pick<DemoAccess, "expiresAt" | "revoke
   return demoAccessStatus(grant, now) === "active";
 }
 
-async function ensureSubscriptionPlan(planKey: string) {
-  const key = normalizePlanKey(planKey);
-  const catalog: Record<string, { name: string; priceMonthly: number; maxProducts: number; maxSeats: number; monthlyAiTokens: number }> = {
-    starter: { name: "Starter", priceMonthly: 0, maxProducts: 1, maxSeats: 1, monthlyAiTokens: 0 },
-    basic: { name: "Basic", priceMonthly: 250, maxProducts: 1, maxSeats: 1, monthlyAiTokens: 500_000 },
-    plus: { name: "Plus", priceMonthly: 450, maxProducts: 3, maxSeats: 3, monthlyAiTokens: 1_500_000 },
-    pro: { name: "Pro", priceMonthly: 750, maxProducts: 5, maxSeats: 5, monthlyAiTokens: 2_500_000 },
-    enterprise: { name: "Enterprise", priceMonthly: 0, maxProducts: 9999, maxSeats: 9999, monthlyAiTokens: 50_000_000 },
-  };
-  const row = catalog[key] ?? catalog.plus;
-  return prisma.subscriptionPlan.upsert({
-    where: { key },
-    update: row,
-    create: { key, ...row },
-  });
-}
-
 async function applyTrialPlan(companyId: string, planKey: string) {
-  const plan = await ensureSubscriptionPlan(planKey);
+  const plan = await ensureSubscriptionPlanDb(planKey);
   await prisma.company.update({
     where: { id: companyId },
     data: { subscriptionId: plan.id },
@@ -50,7 +34,7 @@ async function restorePreviousPlan(grant: Pick<DemoAccess, "companyId" | "previo
     });
     return;
   }
-  const starter = await ensureSubscriptionPlan("starter");
+  const starter = await ensureSubscriptionPlanDb("starter");
   await prisma.company.update({
     where: { id: grant.companyId },
     data: { subscriptionId: starter.id },
