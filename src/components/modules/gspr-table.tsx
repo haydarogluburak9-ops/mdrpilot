@@ -2,7 +2,7 @@
 
 
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Card } from "@/components/ui/card";
 
@@ -30,7 +30,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { GsprEvidenceModal } from "@/components/modules/gspr-evidence-modal";
 import type { EvidenceFile, FileOption } from "@/components/modules/evidence-panel";
-import { AlertCircle, Loader2, Paperclip, Plus } from "lucide-react";
+import { AlertCircle, Loader2, Maximize2, Paperclip, Plus, X } from "lucide-react";
 
 
 
@@ -54,11 +54,72 @@ function applicableBadge(applicable: GsprApplicability): {
 
 
 
+function GsprJustificationExpandModal({
+  gsprNo,
+  text,
+  placeholder,
+  saving,
+  onChange,
+  onSave,
+  onClose,
+}: {
+  gsprNo: string;
+  text: string;
+  placeholder: string;
+  saving: boolean;
+  onChange: (value: string) => void;
+  onSave: () => void;
+  onClose: () => void;
+}) {
+  const { t } = useI18n();
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div
+        className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl border border-border bg-card p-6 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-semibold">
+            {t("gspr.col.justification")} — {t("gspr.col.gspr")} {gsprNo}
+          </h2>
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <Textarea
+          value={text}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="min-h-[240px] flex-1 resize-y text-sm leading-relaxed"
+          disabled={saving}
+        />
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose} disabled={saving}>
+            {t("common.cancel")}
+          </Button>
+          <Button
+            onClick={() => {
+              onSave();
+              onClose();
+            }}
+            disabled={saving}
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : t("common.save")}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function GsprJustificationCell({
 
   itemId,
 
   productId,
+
+  gsprNo,
 
   canEdit,
 
@@ -74,6 +135,8 @@ function GsprJustificationCell({
 
   productId?: string;
 
+  gsprNo: string;
+
   canEdit: boolean;
 
   applicable: GsprItem["applicable"];
@@ -84,37 +147,21 @@ function GsprJustificationCell({
 
 }) {
 
+  const { t } = useI18n();
   const router = useRouter();
   const [text, setText] = useState(value ?? "");
   const [saving, setSaving] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [expanded, setExpanded] = useState(false);
 
-  const resize = useCallback(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "0px";
-    el.style.height = `${el.scrollHeight}px`;
-  }, []);
+  const editable = canEdit && !!productId;
 
   useEffect(() => {
     setText(value ?? "");
   }, [value]);
 
-  useLayoutEffect(() => {
-    resize();
-    const t = window.setTimeout(resize, 0);
-    return () => window.clearTimeout(t);
-  }, [text, value, resize]);
-
-  useEffect(() => {
-    resize();
-  }, [text, value, resize]);
-
-  const editable = canEdit && !!productId;
-
   if (!editable) {
     return (
-      <p className={`whitespace-pre-wrap break-words text-sm leading-relaxed ${value ? "text-foreground" : "text-muted-foreground italic"}`}>
+      <p className={`max-h-20 overflow-y-auto whitespace-pre-wrap break-words text-xs leading-relaxed ${value ? "text-foreground" : "text-muted-foreground italic"}`}>
         {value || "—"}
       </p>
     );
@@ -157,22 +204,40 @@ function GsprJustificationCell({
 
 
   return (
-    <div className="relative min-w-[280px]">
-      <Textarea
-        ref={textareaRef}
-        rows={2}
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value);
-          requestAnimationFrame(resize);
-        }}
-        onBlur={() => save(text)}
-        placeholder={placeholder}
-        className={`min-h-[3.5rem] resize-y py-2 text-xs leading-relaxed ${needsText ? "border-warning/60 bg-warning/5" : ""}`}
-        disabled={saving}
-      />
-      {saving && <Loader2 className="absolute right-2 top-2 h-3.5 w-3.5 animate-spin text-muted-foreground" />}
-    </div>
+    <>
+      <div className="relative w-full min-w-0">
+        <Textarea
+          rows={3}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onBlur={() => save(text)}
+          placeholder={placeholder}
+          className={`min-h-0 h-20 max-h-20 resize-none overflow-y-auto py-1.5 text-xs leading-relaxed ${needsText ? "border-warning/60 bg-warning/5" : ""}`}
+          disabled={saving}
+        />
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="absolute right-1.5 top-1.5 rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+          title={t("gspr.justification.expand")}
+          aria-label={t("gspr.justification.expand")}
+        >
+          <Maximize2 className="h-3.5 w-3.5" />
+        </button>
+        {saving && <Loader2 className="absolute bottom-2 right-8 h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+      </div>
+      {expanded && (
+        <GsprJustificationExpandModal
+          gsprNo={gsprNo}
+          text={text}
+          placeholder={placeholder}
+          saving={saving}
+          onChange={setText}
+          onSave={() => save(text)}
+          onClose={() => setExpanded(false)}
+        />
+      )}
+    </>
   );
 
 }
@@ -233,7 +298,7 @@ function GsprEvidenceCell({
 
   return (
     <>
-      <div className="flex min-w-[160px] items-start gap-1">
+      <div className="flex min-w-0 items-start gap-1">
         <div className="min-w-0 flex-1">
           {displayText ? (
             <div className="space-y-0.5">
@@ -473,27 +538,36 @@ export function GsprTable({
 
   return (
 
-    <Card className="overflow-x-auto">
-      <div>
-        <table className="w-full min-w-[1100px] text-sm table-fixed">
+    <Card className="overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[1180px] table-fixed border-collapse text-sm">
+          <colgroup>
+            <col className="w-12" />
+            <col className="w-[22%]" />
+            <col className="w-[100px]" />
+            <col className="w-[26%]" />
+            <col className="w-[18%]" />
+            <col className="w-[12%]" />
+            <col className="w-[110px]" />
+          </colgroup>
 
           <thead className="border-b border-border bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
 
             <tr>
 
-              <th className="w-[4%] px-3 py-3 font-medium">{t("gspr.col.gspr")}</th>
+              <th className="px-3 py-3 font-medium">{t("gspr.col.gspr")}</th>
 
-              <th className="w-[18%] px-3 py-3 font-medium">{t("gspr.col.requirement")}</th>
+              <th className="px-3 py-3 font-medium">{t("gspr.col.requirement")}</th>
 
-              <th className="w-[8%] px-3 py-3 font-medium">{t("gspr.col.applicable")}</th>
+              <th className="px-3 py-3 font-medium whitespace-normal leading-snug">{t("gspr.col.applicable")}</th>
 
-              <th className="w-[22%] px-3 py-3 font-medium">{t("gspr.col.justification")}</th>
+              <th className="px-3 py-3 font-medium">{t("gspr.col.justification")}</th>
 
-              <th className="w-[16%] px-3 py-3 font-medium">{t("gspr.col.evidence")}</th>
+              <th className="px-3 py-3 font-medium">{t("gspr.col.evidence")}</th>
 
-              <th className="w-[12%] px-3 py-3 font-medium">{t("gspr.col.standard")}</th>
+              <th className="px-3 py-3 font-medium">{t("gspr.col.standard")}</th>
 
-              <th className="w-[10%] px-3 py-3 font-medium">{t("gspr.col.status")}</th>
+              <th className="px-3 py-3 font-medium">{t("gspr.col.status")}</th>
 
             </tr>
 
@@ -540,9 +614,10 @@ export function GsprTable({
                 >
 
                   <td className="align-top px-3 py-3 font-semibold">{g.gsprNo}</td>
-                  <td className="align-top px-3 py-3 text-muted-foreground whitespace-pre-wrap break-words">
-
-                    {localizedReq}
+                  <td className="align-top px-3 py-3 text-muted-foreground">
+                    <div className="max-h-24 overflow-y-auto whitespace-pre-wrap break-words leading-relaxed">
+                      {localizedReq}
+                    </div>
 
                     {g.aiGapComment && (
 
@@ -556,18 +631,20 @@ export function GsprTable({
 
                   </td>
 
-                  <td className="px-4 py-3">
+                  <td className="align-top px-3 py-3">
 
                     <Badge variant={badge.variant}>{t(badge.labelKey)}</Badge>
 
                   </td>
 
-                  <td className="align-top px-3 py-3">
+                  <td className="align-top overflow-hidden px-3 py-3">
                     <GsprJustificationCell
 
                       itemId={g.id}
 
                       productId={productId}
+
+                      gsprNo={g.gsprNo}
 
                       canEdit={canEdit}
 
@@ -598,7 +675,7 @@ export function GsprTable({
                     />
                   </td>
 
-                  <td className="px-4 py-3">
+                  <td className="align-top px-3 py-3">
 
                     {g.standardReference ? (
                       <span className="font-medium text-primary">{formatStandardReference(g.standardReference)}</span>
@@ -611,7 +688,7 @@ export function GsprTable({
 
                   </td>
 
-                  <td className="px-4 py-3">
+                  <td className="align-top px-3 py-3">
                     <GsprStatusCell
                       itemId={g.id}
                       productId={productId}
