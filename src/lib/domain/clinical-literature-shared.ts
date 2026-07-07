@@ -21,6 +21,7 @@ export interface PreparedLiteratureInput {
     hazardousSituation?: string | null;
     harm?: string | null;
   }>;
+  equivalentDeviceNames?: string[];
 }
 
 export function riskThemesSummary(

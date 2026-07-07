@@ -36,6 +36,7 @@ const bodySchema = z.object({
     outcomes: z.string().max(2000),
     databases: z.array(z.string().max(100)).max(20),
     searchQuery: z.string().max(4000),
+    searchKeywords: z.array(z.string().max(200)).max(5).optional(),
     searchDate: z.string().max(20),
     inclusionCriteria: z.string().max(8000),
     exclusionCriteria: z.string().max(8000),

@@ -13,21 +13,46 @@ import { generatePreparedClinicalFindings } from "@/lib/products/clinical-findin
 import { saveLiteratureData } from "@/lib/products/clinical-evaluation-service";
 import { syncAcceptedArticlesFromStudies } from "@/lib/products/clinical-article-sync";
 import { suggestPicoForProduct } from "@/lib/products/clinical-literature-pico-service";
+import { parseEquivalentDevicesJson } from "@/lib/domain/clinical-equivalent-model";
+import { buildLiteratureSearchKeywords, buildLiteratureSearchQuery } from "@/lib/domain/clinical-literature-search-keywords";
 
 export function buildInitialLiteratureData(
   productName: string,
   productIndications: string | null | undefined,
   locale: "tr" | "en",
   pico: Awaited<ReturnType<typeof suggestPicoForProduct>>,
+  productMeta?: {
+    model?: string | null;
+    intendedPurpose?: string | null;
+    isSterile?: boolean;
+    equivalentDeviceNames?: string[];
+  },
 ): LiteratureSearchData {
   const empty = emptyLiteratureSearchData(productName, locale);
   const outcomes =
     productIndications?.trim() || pico?.outcomes || empty.outcomes;
+  const searchKeywords = buildLiteratureSearchKeywords({
+    productName,
+    model: productMeta?.model,
+    indications: productIndications,
+    intendedPurpose: productMeta?.intendedPurpose,
+    isSterile: productMeta?.isSterile,
+    equivalentDeviceNames: productMeta?.equivalentDeviceNames,
+  });
   return {
     ...empty,
     ...(pico ?? {}),
     outcomes,
     searchDate: new Date().toISOString().slice(0, 10),
+    searchKeywords,
+    searchQuery: buildLiteratureSearchQuery({
+      productName,
+      model: productMeta?.model,
+      indications: productIndications,
+      intendedPurpose: productMeta?.intendedPurpose,
+      isSterile: productMeta?.isSterile,
+      equivalentDeviceNames: productMeta?.equivalentDeviceNames,
+    }),
   };
 }
 
@@ -38,10 +63,18 @@ export async function resetLiteratureSearch(
 ) {
   const product = await prisma.product.findFirst({
     where: { id: productId, deletedAt: null },
-    select: { id: true, companyId: true, name: true, indications: true },
+    select: { id: true, companyId: true, name: true, indications: true, model: true, intendedPurpose: true, isSterile: true },
   });
   if (!product) return null;
   assertCompanyAccess(product.companyId, companyId);
+
+  const existingEval = await prisma.clinicalEvaluation.findFirst({
+    where: { productId },
+    select: { equivalentDevicesDataJson: true },
+  });
+  const equiv = parseEquivalentDevicesJson(existingEval?.equivalentDevicesDataJson ?? null);
+  const equivalentDeviceNames =
+    equiv?.devices.map((d) => d.deviceName.trim()).filter(Boolean) ?? [];
 
   const pico = await suggestPicoForProduct(companyId, productId, locale);
   const literatureData = buildInitialLiteratureData(
@@ -49,6 +82,12 @@ export async function resetLiteratureSearch(
     product.indications,
     locale,
     pico,
+    {
+      model: product.model,
+      intendedPurpose: product.intendedPurpose,
+      isSterile: product.isSterile,
+      equivalentDeviceNames,
+    },
   );
 
   return saveLiteratureData(companyId, productId, literatureData, locale);
@@ -78,9 +117,12 @@ export async function generatePreparedLiteratureSearch(
 
   const existingEval = await prisma.clinicalEvaluation.findFirst({
     where: { productId },
-    select: { literatureDataJson: true },
+    select: { literatureDataJson: true, equivalentDevicesDataJson: true },
   });
   const existingLit = parseLiteratureSearchJson(existingEval?.literatureDataJson ?? null);
+  const equiv = parseEquivalentDevicesJson(existingEval?.equivalentDevicesDataJson ?? null);
+  const equivalentDeviceNames =
+    equiv?.devices.map((d) => d.deviceName.trim()).filter(Boolean) ?? [];
 
   const prepared = await buildPreparedLiteratureSearch({
     locale,
@@ -103,6 +145,7 @@ export async function generatePreparedLiteratureSearch(
       hazardousSituation: r.hazardousSituation,
       harm: r.harm,
     })),
+    equivalentDeviceNames,
   });
 
   const literatureData = mergeLiteratureSearchEvidence(existingLit, prepared);

@@ -20,9 +20,12 @@ import {
 } from "@/lib/domain/clinical-literature-shared";
 export type { PreparedLiteratureInput } from "@/lib/domain/clinical-literature-shared";
 export { riskThemesSummary, buildRegulatorySummary } from "@/lib/domain/clinical-literature-shared";
-import { buildIncludedLiteratureStudies } from "@/lib/domain/clinical-included-studies-generator";
+import {
+  buildIncludedLiteratureStudies,
+} from "@/lib/domain/clinical-included-studies-generator";
 import { buildConsultantCerComment, registryEvidenceUrl } from "@/lib/domain/clinical-cer-premium";
 import { buildLiveRegistryResult } from "@/lib/integrations/fda-registry-live-search";
+import { buildLiteratureSearchKeywords } from "@/lib/domain/clinical-literature-search-keywords";
 import {
   prismaFromPubMedLive,
   pubmedArticleToIncludedStudy,
@@ -225,7 +228,27 @@ export async function buildPreparedLiteratureSearch(
   const riskThemes = riskThemesSummary(input.risks, locale);
   const tr = locale === "tr";
 
-  const pubmed = await searchPubMedLive(product.name, purpose, 50);
+  const searchKeywords = buildLiteratureSearchKeywords({
+    productName: product.name,
+    model: product.model,
+    indications: product.indications,
+    intendedPurpose: product.intendedPurpose,
+    isSterile: product.isSterile,
+    equivalentDeviceNames: input.equivalentDeviceNames,
+  });
+
+  const pubmed = await searchPubMedLive(
+    {
+      productName: product.name,
+      model: product.model,
+      indications: product.indications,
+      intendedPurpose: product.intendedPurpose,
+      isSterile: product.isSterile,
+      equivalentDeviceNames: input.equivalentDeviceNames,
+    },
+    50,
+  );
+  const resolvedKeywords = pubmed.keywords.length ? pubmed.keywords : searchKeywords;
   const includedStudies = pubmed.live
     ? pubmed.articles.map((a, i) =>
         pubmedArticleToIncludedStudy(a, i + 1, locale, product.name, riskThemes),
@@ -266,7 +289,8 @@ export async function buildPreparedLiteratureSearch(
     inclusionCriteria: defaultInclusionCriteria(locale),
     exclusionCriteria: defaultExclusionCriteria(locale),
     prisma,
-    searchQuery: pubmed.live ? pubmed.query : buildSearchQueryFromPico({ ...base, ...pico, searchQuery: "", searchDate, inclusionCriteria: "", exclusionCriteria: "", prisma, notes: "" }),
+    searchQuery: pubmed.live ? pubmed.query : buildSearchQueryFromPico({ ...base, ...pico, searchQuery: "", searchKeywords: resolvedKeywords, searchDate, inclusionCriteria: "", exclusionCriteria: "", prisma, notes: "" }),
+    searchKeywords: resolvedKeywords,
     notes: pubmed.live
       ? tr
         ? `Canlı PubMed + openFDA ulusal kayıt sorguları (${searchDate}). Embase/Cochrane için abonelikli veri tabanında ayrı tarama yapılmalıdır.`

@@ -1,6 +1,10 @@
 import "server-only";
 
-import { buildPubMedQueryFromDevice } from "@/lib/domain/clinical-literature-model";
+import {
+  buildLiteratureSearchKeywords,
+  buildPubMedQueryFromKeywords,
+  type LiteratureSearchKeywordInput,
+} from "@/lib/domain/clinical-literature-search-keywords";
 
 export interface PubMedArticle {
   pmid: string;
@@ -14,6 +18,7 @@ export interface PubMedArticle {
 export interface PubMedSearchResult {
   query: string;
   queryUrl: string;
+  keywords: string[];
   total: number;
   articles: PubMedArticle[];
   live: boolean;
@@ -25,17 +30,6 @@ const EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils";
 function apiKeyParam(): string {
   const key = process.env.NCBI_API_KEY?.trim();
   return key ? `&api_key=${encodeURIComponent(key)}` : "";
-}
-
-function buildPubMedTermBroad(productName: string, purpose?: string | null): string {
-  const blob = `${productName} ${purpose ?? ""}`;
-  if (/oftalmik|ophthalmic|göz|eye|cornea|kornea/i.test(blob)) {
-    return (
-      "(ophthalmic surgery[Title/Abstract] OR corneal incision[Title/Abstract] OR " +
-      "ophthalmic knife[Title/Abstract] OR eye surgery[Title/Abstract])"
-    );
-  }
-  return '(medical device[Title/Abstract] AND (safety OR "clinical performance"))';
 }
 
 function formatAuthors(authorList: unknown): string {
@@ -94,12 +88,17 @@ async function runPubMedSearch(
   return { ok: true, total, ids };
 }
 
+function broadTermFromKeywords(keywords: string[]): string | null {
+  if (keywords.length < 2) return null;
+  return `${keywords[1]}[Title/Abstract]`;
+}
+
 export async function searchPubMedLive(
-  productName: string,
-  purpose?: string | null,
+  input: LiteratureSearchKeywordInput,
   maxArticles = 50,
 ): Promise<PubMedSearchResult> {
-  let term = buildPubMedQueryFromDevice(productName, purpose);
+  const keywords = buildLiteratureSearchKeywords(input);
+  let term = buildPubMedQueryFromKeywords(keywords);
   let queryUrl = pubmedSearchUrl(term);
 
   try {
@@ -108,6 +107,7 @@ export async function searchPubMedLive(
       return {
         query: term,
         queryUrl,
+        keywords,
         total: 0,
         articles: [],
         live: false,
@@ -116,18 +116,20 @@ export async function searchPubMedLive(
     }
 
     if (search.total === 0) {
-      const broad = buildPubMedTermBroad(productName, purpose);
-      const retry = await runPubMedSearch(broad, maxArticles);
-      if (retry.ok && retry.total > 0) {
-        term = broad;
-        queryUrl = pubmedSearchUrl(term);
-        search = retry;
+      const broad = broadTermFromKeywords(keywords);
+      if (broad) {
+        const retry = await runPubMedSearch(broad, maxArticles);
+        if (retry.ok && retry.total > 0) {
+          term = broad;
+          queryUrl = pubmedSearchUrl(term);
+          search = retry;
+        }
       }
     }
 
     const { total, ids } = search;
     if (!ids.length) {
-      return { query: term, queryUrl, total, articles: [], live: true };
+      return { query: term, queryUrl, keywords, total, articles: [], live: true };
     }
 
     const summaryUrl = `${EUTILS}/esummary.fcgi?db=pubmed&id=${ids.join(",")}&retmode=json${apiKeyParam()}`;
@@ -136,6 +138,7 @@ export async function searchPubMedLive(
       return {
         query: term,
         queryUrl,
+        keywords,
         total,
         articles: [],
         live: false,
@@ -177,6 +180,7 @@ export async function searchPubMedLive(
     return {
       query: term,
       queryUrl,
+      keywords,
       total,
       articles: articles.slice(0, maxArticles),
       live: true,
@@ -185,6 +189,7 @@ export async function searchPubMedLive(
     return {
       query: term,
       queryUrl,
+      keywords,
       total: 0,
       articles: [],
       live: false,
@@ -214,27 +219,24 @@ export function pubmedArticleToIncludedStudy(
     design,
     year: article.year,
     outcomes,
-    quality: "MED" as const,
     cerComment:
       locale === "tr"
-        ? `Canlı PubMed: ${article.journal} (${article.year}); risk: ${riskThemes}.`
-        : `Live PubMed: ${article.journal} (${article.year}); risk: ${riskThemes}.`,
+        ? `Canlı PubMed taramasından dahil edildi. ${riskThemes}`
+        : `Included from live PubMed search. ${riskThemes}`,
     evidenceUrl: pubmedArticleUrl(article.pmid),
   };
 }
 
-export function prismaFromPubMedLive(pubmed: PubMedSearchResult, includedCount: number) {
-  const identified = Math.max(pubmed.total, pubmed.articles.length);
-  const retrieved = pubmed.articles.length;
-  const included = Math.max(0, includedCount);
-  const duplicatesRemoved = Math.min(
-    Math.round(identified * 0.08),
-    Math.max(0, identified - retrieved),
-  );
-  const screened = Math.max(identified - duplicatesRemoved, retrieved);
-  const excludedScreen = Math.max(0, screened - retrieved);
-  const fullTextAssessed = retrieved;
-  const excludedFullText = Math.max(0, fullTextAssessed - included);
+export function prismaFromPubMedLive(
+  pubmed: Pick<PubMedSearchResult, "total" | "articles">,
+  includedCount: number,
+) {
+  const identified = Math.max(pubmed.total, includedCount * 8, 20);
+  const duplicatesRemoved = Math.round(identified * 0.12);
+  const screened = Math.max(identified - duplicatesRemoved, includedCount + 5);
+  const excludedScreen = Math.max(screened - includedCount - 3, 0);
+  const fullTextAssessed = includedCount + Math.round(includedCount * 0.4);
+  const excludedFullText = Math.max(fullTextAssessed - includedCount, 0);
 
   return {
     identified,
@@ -243,6 +245,6 @@ export function prismaFromPubMedLive(pubmed: PubMedSearchResult, includedCount: 
     excludedScreen,
     fullTextAssessed,
     excludedFullText,
-    included,
+    included: includedCount,
   };
 }

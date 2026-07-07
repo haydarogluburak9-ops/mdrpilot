@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useI18n } from "@/components/providers/i18n-provider";
 import {
   buildSearchQueryFromPico,
+  buildLiteratureSearchKeywords,
   CLINICAL_DATABASE_CATALOG,
   databaseLabel,
   defaultPicoOutcomes,
@@ -65,6 +66,14 @@ export function ClinicalLiteratureWizard({
   const [showStrategy, setShowStrategy] = useState(true);
 
   const suggestedQuery = useMemo(() => buildSearchQueryFromPico(data), [data]);
+  const previewKeywords = useMemo(() => {
+    if (data.searchKeywords?.length) return data.searchKeywords;
+    return buildLiteratureSearchKeywords({
+      productName: data.intervention,
+      indications: data.outcomes,
+      intendedPurpose: data.population,
+    });
+  }, [data.searchKeywords, data.intervention, data.outcomes, data.population]);
   const hasResults =
     Boolean(data.preparedByMedDoc) ||
     Boolean(data.literatureSummary?.trim()) ||
@@ -877,6 +886,11 @@ export function ClinicalLiteratureWizard({
                 className="w-full rounded-lg border border-input bg-card px-3 py-2 font-mono text-xs"
                 placeholder={suggestedQuery}
               />
+              {previewKeywords.length > 0 && (
+                <p className="text-[10px] text-muted-foreground">
+                  {t("clinical.lit.searchKeywordsHint")}: {previewKeywords.join(" · ")}
+                </p>
+              )}
             </div>
           </div>
 

@@ -1,3 +1,18 @@
+import {
+  buildLiteratureSearchQuery,
+  buildPubMedQueryFromKeywords,
+  type LiteratureSearchKeywordInput,
+} from "@/lib/domain/clinical-literature-search-keywords";
+
+export type { LiteratureSearchKeywordInput } from "@/lib/domain/clinical-literature-search-keywords";
+export {
+  buildLiteratureSearchKeywords,
+  buildLiteratureSearchQuery,
+  buildPubMedQueryFromDevice,
+  buildPubMedQueryFromKeywords,
+  translateToEnglishPhrase,
+} from "@/lib/domain/clinical-literature-search-keywords";
+
 export interface PrismaFlowCounts {
   identified: number;
   duplicatesRemoved: number;
@@ -140,6 +155,8 @@ export interface LiteratureSearchData {
   outcomes: string;
   databases: string[];
   searchQuery: string;
+  /** Up to 5 English keywords used for PubMed / literature database queries. */
+  searchKeywords?: string[];
   searchDate: string;
   inclusionCriteria: string;
   exclusionCriteria: string;
@@ -352,6 +369,11 @@ export function parseLiteratureSearchJson(raw: unknown): LiteratureSearchData | 
           .map(normalizeDatabaseId)
       : [...DEFAULT_LITERATURE_DATABASE_IDS, ...DEFAULT_REGULATORY_DATABASE_IDS],
     searchQuery: typeof r.searchQuery === "string" ? r.searchQuery : "",
+    searchKeywords: Array.isArray(r.searchKeywords)
+      ? r.searchKeywords
+          .filter((k): k is string => typeof k === "string" && k.trim().length > 0)
+          .slice(0, 5)
+      : undefined,
     searchDate: typeof r.searchDate === "string" ? r.searchDate : "",
     inclusionCriteria: typeof r.inclusionCriteria === "string" ? r.inclusionCriteria : "",
     exclusionCriteria: typeof r.exclusionCriteria === "string" ? r.exclusionCriteria : "",
@@ -446,54 +468,25 @@ function parseAcceptedArticles(raw: unknown) {
   return out.length ? out : undefined;
 }
 
-/** PubMed/MEDLINE is English — map device profile (TR or EN) to English search clauses. */
-export function buildPubMedQueryFromDevice(productName: string, purpose?: string | null): string {
-  const blob = `${productName} ${purpose ?? ""}`;
-  const groups: string[] = [];
-
-  const orTitle = (terms: string[]) => {
-    const unique = [...new Set(terms.map((t) => t.trim()).filter(Boolean))];
-    if (!unique.length) return "";
-    if (unique.length === 1) return `${unique[0]}[Title/Abstract]`;
-    return `(${unique.map((t) => `${t}[Title/Abstract]`).join(" OR ")})`;
-  };
-
-  if (/oftalmik|ophthalmic|göz|eye|cornea|kornea|sklera|sclera|retina/i.test(blob)) {
-    groups.push(orTitle(["ophthalmic", "corneal", "scleral", "eye", "intraocular"]));
+/** Build PubMed-style query from PICO fields (English keywords, max 5). */
+export function buildSearchQueryFromPico(
+  data: LiteratureSearchData,
+  options?: Pick<
+    LiteratureSearchKeywordInput,
+    "equivalentDeviceNames" | "isSterile" | "model" | "indications" | "intendedPurpose"
+  >,
+): string {
+  if (data.searchKeywords?.length) {
+    return buildPubMedQueryFromKeywords(data.searchKeywords);
   }
-  if (/bıçak|bicak|knife|incision|kesici|scalpel|blade|keratome|microkeratome|crescent/i.test(blob)) {
-    groups.push(
-      orTitle(["incision", "knife", "scalpel", "blade", "microkeratome", "ophthalmic knife"]),
-    );
-  }
-  if (/steril|sterile/i.test(blob)) {
-    groups.push(orTitle(["sterile", "sterilization", "aseptic"]));
-  }
-  if (/implant/i.test(blob)) {
-    groups.push(orTitle(["implant", "implantable"]));
-  }
-  if (/cardiac|kalp|heart/i.test(blob)) {
-    groups.push(orTitle(["cardiac", "heart"]));
-  }
-
-  const englishWords = blob.match(/\b[a-z]{4,}\b/gi)?.slice(0, 4) ?? [];
-  if (englishWords.length) {
-    groups.push(orTitle(englishWords));
-  }
-
-  if (!groups.length) {
-    groups.push(orTitle(["medical device", "safety", "clinical performance"]));
-  }
-
-  return groups.join(" AND ");
-}
-
-/** Build PubMed-style query from PICO fields (English terms for live databases). */
-export function buildSearchQueryFromPico(data: LiteratureSearchData): string {
-  const purpose = [data.population, data.outcomes, data.comparator].filter(Boolean).join(" ");
-  const core = buildPubMedQueryFromDevice(data.intervention, purpose);
-  const safety = '(safety OR adverse OR complication OR "clinical performance")';
-  return core ? `${core} AND ${safety}` : safety;
+  return buildLiteratureSearchQuery({
+    productName: data.intervention,
+    model: options?.model,
+    indications: options?.indications ?? data.outcomes,
+    intendedPurpose: options?.intendedPurpose ?? data.population,
+    isSterile: options?.isSterile,
+    equivalentDeviceNames: options?.equivalentDeviceNames,
+  });
 }
 
 const CATALOG_BY_ID_MAP = new Map(CLINICAL_DATABASE_CATALOG.map((d) => [d.id, d]));
