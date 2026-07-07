@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Loader2, Save, Sparkles, ArrowRight, Wand2, X, ImagePlus, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +69,8 @@ export function ClinicalLiteratureWizard({
   const [uploadingTarget, setUploadingTarget] = useState<string | null>(null);
   const [syncingArticles, setSyncingArticles] = useState(false);
   const [articleSyncFeedback, setArticleSyncFeedback] = useState<string | null>(null);
+  const [fillingPico, setFillingPico] = useState(false);
+  const picoAutoFilled = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [showStrategy, setShowStrategy] = useState(
     () => !initial?.preparedByMedDoc && !initial?.literatureSummary?.trim(),
@@ -118,6 +120,53 @@ export function ClinicalLiteratureWizard({
       </div>
     );
   }
+
+  function applyPicoSuggestion(
+    pico: Pick<LiteratureSearchData, "population" | "intervention" | "comparator" | "outcomes">,
+    onlyEmpty = true,
+  ) {
+    setData((d) => ({
+      ...d,
+      population: onlyEmpty && d.population?.trim() ? d.population : pico.population,
+      intervention: onlyEmpty && d.intervention?.trim() ? d.intervention : pico.intervention,
+      comparator: onlyEmpty && d.comparator?.trim() ? d.comparator : pico.comparator,
+      outcomes:
+        onlyEmpty && d.outcomes?.trim() && d.outcomes !== defaultPicoOutcomes(locale)
+          ? d.outcomes
+          : pico.outcomes,
+    }));
+  }
+
+  async function fillPicoFromProfile(onlyEmpty = true) {
+    setFillingPico(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/products/${productId}/clinical-evaluation/literature/pico`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(typeof body.error === "string" ? body.error : t("clinical.lit.picoFillError"));
+        return;
+      }
+      if (body.pico) applyPicoSuggestion(body.pico, onlyEmpty);
+    } catch {
+      setError(t("clinical.lit.picoFillError"));
+    } finally {
+      setFillingPico(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!canEdit || picoAutoFilled.current) return;
+    const needsPico = !data.population?.trim() || !data.comparator?.trim();
+    if (!needsPico) return;
+    picoAutoFilled.current = true;
+    void fillPicoFromProfile(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount when PICO incomplete
+  }, []);
 
   function applySuggestedQuery() {
     setData((d) => ({ ...d, searchQuery: suggestedQuery }));
@@ -639,7 +688,26 @@ export function ClinicalLiteratureWizard({
       {showStrategy && (
         <>
           <div className="rounded-lg border border-border p-4">
-            <h4 className="mb-3 text-sm font-semibold">{t("clinical.lit.picoTitle")}</h4>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h4 className="text-sm font-semibold">{t("clinical.lit.picoTitle")}</h4>
+              {canEdit && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={fillingPico || generating}
+                  onClick={() => void fillPicoFromProfile(false)}
+                  className="gap-1.5 text-xs h-8"
+                >
+                  {fillingPico ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Wand2 className="h-3.5 w-3.5" />
+                  )}
+                  {t("clinical.lit.fillPicoFromProfile")}
+                </Button>
+              )}
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1 sm:col-span-2">
                 <FieldLabel>{t("clinical.lit.population")}</FieldLabel>

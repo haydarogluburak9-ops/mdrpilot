@@ -63,7 +63,7 @@ function estimateRecordsScreened(dbId: string, prisma: PrismaFlowCounts): number
   return base + jitter;
 }
 
-function buildPico(input: PreparedLiteratureInput): Pick<
+export function buildPico(input: PreparedLiteratureInput): Pick<
   LiteratureSearchData,
   "population" | "intervention" | "comparator" | "outcomes"
 > {
