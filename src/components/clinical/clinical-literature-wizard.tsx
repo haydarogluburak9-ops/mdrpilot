@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Loader2, Save, Sparkles, ArrowRight, Wand2, X, ImagePlus, FileText } from "lucide-react";
+import { Loader2, Save, Sparkles, ArrowRight, Wand2, X, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -11,32 +11,18 @@ import {
   databaseLabel,
   defaultPicoOutcomes,
   emptyLiteratureSearchData,
-  registryStatusExportLabel,
-  registryStatusShortLabel,
   type LiteratureSearchData,
   type RegistrySearchResult,
-  type RegistrySearchStatus,
 } from "@/lib/domain/clinical-literature-model";
 import type { ClinicalEvaluationData } from "@/lib/domain/clinical-evaluation";
+import {
+  IncludedStudiesTable,
+  LiteratureDatabaseTable,
+  RegistryResultsTable,
+} from "@/components/clinical/clinical-literature-search-tables";
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return <label className="text-xs font-medium text-muted-foreground">{children}</label>;
-}
-
-const STATUS_UI_FOOTNOTE: Record<RegistrySearchStatus, string> = {
-  no_signal: "¹",
-  review_required: "²",
-  records_found: "³",
-};
-
-function registryStatusClass(status: RegistrySearchStatus): string {
-  if (status === "records_found") {
-    return "bg-red-100 text-red-900 dark:bg-red-950/50 dark:text-red-100";
-  }
-  if (status === "review_required") {
-    return "bg-amber-100 text-amber-950 dark:bg-amber-950/50 dark:text-amber-100";
-  }
-  return "bg-emerald-100 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100";
 }
 
 export function ClinicalLiteratureWizard({
@@ -68,6 +54,7 @@ export function ClinicalLiteratureWizard({
   const [generating, setGenerating] = useState(false);
   const [uploadingTarget, setUploadingTarget] = useState<string | null>(null);
   const [syncingArticles, setSyncingArticles] = useState(false);
+  const [uploadingStudyIndex, setUploadingStudyIndex] = useState<number | null>(null);
   const [articleSyncFeedback, setArticleSyncFeedback] = useState<string | null>(null);
   const [fillingPico, setFillingPico] = useState(false);
   const picoAutoFilled = useRef(false);
@@ -80,7 +67,8 @@ export function ClinicalLiteratureWizard({
   const hasResults =
     Boolean(data.preparedByMedDoc) ||
     Boolean(data.literatureSummary?.trim()) ||
-    (data.registryResults?.length ?? 0) > 0;
+    (data.registryResults?.length ?? 0) > 0 ||
+    (data.includedStudies?.length ?? 0) > 0;
 
   function setPrisma<K extends keyof LiteratureSearchData["prisma"]>(key: K, value: number) {
     setData((d) => ({ ...d, prisma: { ...d.prisma, [key]: value } }));
@@ -249,13 +237,39 @@ export function ClinicalLiteratureWizard({
     }
   }
 
-  async function uploadArticle(file: File, citation?: string) {
-    setUploadingTarget("article");
+  async function persistLiteratureData(next: LiteratureSearchData) {
+    const res = await fetch(`/api/products/${productId}/clinical-evaluation/literature`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        locale,
+        literatureData: {
+          ...next,
+          searchQuery: next.searchQuery.trim() || suggestedQuery,
+        },
+      }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(typeof body.error === "string" ? body.error : t("clinical.lit.saveError"));
+    }
+    if (body.evaluation?.literatureData) {
+      setData(body.evaluation.literatureData);
+      onSaved(body.evaluation);
+    }
+    return body.evaluation as ClinicalEvaluationData | undefined;
+  }
+
+  async function uploadArticle(file: File, options?: { citation?: string; studyIndex?: number }) {
+    const studyIndex = options?.studyIndex;
+    if (studyIndex != null) setUploadingStudyIndex(studyIndex);
+    else setUploadingTarget("article");
     setError(null);
     try {
       const form = new FormData();
       form.append("file", file);
-      if (citation) form.append("citation", citation);
+      if (options?.citation) form.append("citation", options.citation);
+      if (studyIndex != null) form.append("studyIndex", String(studyIndex));
       const res = await fetch(
         `/api/products/${productId}/clinical-evaluation/literature/articles`,
         { method: "POST", body: form },
@@ -266,22 +280,33 @@ export function ClinicalLiteratureWizard({
         return;
       }
       if (!body.article) return;
-      setData((d) => ({
-        ...d,
-        acceptedArticles: [...(d.acceptedArticles ?? []), body.article],
-      }));
-    } catch {
-      setError(t("clinical.lit.articleUploadError"));
+      const next: LiteratureSearchData = {
+        ...data,
+        acceptedArticles: [...(data.acceptedArticles ?? []).filter(
+          (a) => a.studyIndex !== studyIndex,
+        ), body.article],
+      };
+      setData(next);
+      await persistLiteratureData(next);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("clinical.lit.articleUploadError"));
     } finally {
-      setUploadingTarget(null);
+      if (studyIndex != null) setUploadingStudyIndex(null);
+      else setUploadingTarget(null);
     }
   }
 
-  function removeArticle(id: string) {
-    setData((d) => ({
-      ...d,
-      acceptedArticles: (d.acceptedArticles ?? []).filter((a) => a.id !== id),
-    }));
+  async function removeArticle(id: string) {
+    const next: LiteratureSearchData = {
+      ...data,
+      acceptedArticles: (data.acceptedArticles ?? []).filter((a) => a.id !== id),
+    };
+    setData(next);
+    try {
+      await persistLiteratureData(next);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("clinical.lit.saveError"));
+    }
   }
 
   async function uploadEvidence(target: string, file: File, registryId?: string) {
@@ -410,136 +435,47 @@ export function ClinicalLiteratureWizard({
     );
   }
 
+  function registryEvidenceCell(row: RegistrySearchResult) {
+    return (
+      <>
+        {row.liveQueryUrl ? (
+          <a
+            href={row.liveQueryUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline break-all block"
+          >
+            {t("clinical.lit.openLiveQuery")}
+          </a>
+        ) : row.evidenceUrl ? (
+          <a
+            href={row.evidenceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline break-all block"
+          >
+            {t("clinical.lit.registryCol.openRegistry")}
+          </a>
+        ) : null}
+        <EvidenceScreenshots
+          target={row.registryId}
+          registryId={row.registryId}
+          shots={row.evidenceScreenshots ?? []}
+        />
+      </>
+    );
+  }
+
   async function save() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/products/${productId}/clinical-evaluation/literature`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          locale,
-          literatureData: {
-            ...data,
-            searchQuery: data.searchQuery.trim() || suggestedQuery,
-          },
-        }),
-      });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError(typeof body.error === "string" ? body.error : t("clinical.lit.saveError"));
-        return;
-      }
-      if (body.evaluation) onSaved(body.evaluation);
-    } catch {
-      setError(t("clinical.lit.saveError"));
+      await persistLiteratureData(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("clinical.lit.saveError"));
     } finally {
       setLoading(false);
     }
-  }
-
-  function RegistryResultsTable({ rows }: { rows: RegistrySearchResult[] }) {
-    return (
-      <div className="overflow-x-auto rounded-lg border border-border">
-        <table className="w-full min-w-[720px] text-left text-xs">
-          <thead className="border-b border-border bg-muted/40">
-            <tr>
-              <th className="px-3 py-2 font-medium">{t("clinical.lit.registryCol.source")}</th>
-              <th className="px-3 py-2 font-medium">{t("clinical.lit.registryCol.query")}</th>
-              <th className="px-3 py-2 font-medium">{t("clinical.lit.registryCol.status")}</th>
-              <th className="px-3 py-2 font-medium">{t("clinical.lit.registryCol.evidence")}</th>
-              <th className="px-3 py-2 font-medium">{t("clinical.lit.registryCol.cerComment")}</th>
-              <th className="px-3 py-2 font-medium">{t("clinical.lit.registryCol.summary")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.registryId} className="border-b border-border last:border-0 align-top">
-                <td className="px-3 py-2 font-medium whitespace-nowrap">
-                  <div className="flex flex-col gap-1">
-                    <span>{databaseLabel(row.registryId, locale)}</span>
-                    {row.liveVerified && (
-                      <span className="inline-flex w-fit rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100">
-                        {t("clinical.lit.liveRegistry")}
-                      </span>
-                    )}
-                    {row.liveRecordCount != null && row.liveVerified && (
-                      <span className="text-[10px] text-muted-foreground">
-                        {t("clinical.lit.liveRegistryBadge").replace(
-                          "{n}",
-                          String(row.liveRecordCount),
-                        )}
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-3 py-2 font-mono text-[11px] max-w-[140px] break-all">
-                  {row.query}
-                </td>
-                <td className="px-3 py-2 align-top">
-                  <p
-                    className={`rounded-md px-2 py-1.5 text-[11px] leading-snug ${registryStatusClass(row.status)}`}
-                    title={registryStatusExportLabel(row.status, locale)}
-                  >
-                    {registryStatusShortLabel(row.status, locale)}
-                    <span className="ml-0.5 opacity-70">{STATUS_UI_FOOTNOTE[row.status]}</span>
-                  </p>
-                </td>
-                <td className="px-3 py-2 text-[11px] space-y-1">
-                  {row.liveQueryUrl ? (
-                    <a
-                      href={row.liveQueryUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary underline break-all block"
-                    >
-                      {t("clinical.lit.openLiveQuery")}
-                    </a>
-                  ) : row.evidenceUrl ? (
-                    <a
-                      href={row.evidenceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary underline break-all block"
-                    >
-                      {t("clinical.lit.registryCol.openRegistry")}
-                    </a>
-                  ) : (
-                    "—"
-                  )}
-                  <EvidenceScreenshots
-                    target={row.registryId}
-                    registryId={row.registryId}
-                    shots={row.evidenceScreenshots ?? []}
-                  />
-                </td>
-                <td className="px-3 py-2 text-[11px] text-muted-foreground max-w-[180px]">
-                  {row.cerComment || "—"}
-                </td>
-                <td className="px-3 py-2 text-muted-foreground">
-                  <p>{row.summary}</p>
-                  {(row.sampleHits?.length ?? 0) > 0 && (
-                    <div className="mt-1 text-[10px]">
-                      <p className="font-medium text-foreground">{t("clinical.lit.sampleHits")}:</p>
-                      <ul className="list-disc pl-3 text-muted-foreground">
-                        {row.sampleHits!.slice(0, 3).map((hit, i) => (
-                          <li key={i} className="break-words">
-                            {hit}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <p className="border-t border-border px-3 py-2 text-[10px] text-muted-foreground">
-          {t("clinical.lit.statusFootnotes")}
-        </p>
-      </div>
-    );
   }
 
   if (!canEdit) {
@@ -558,10 +494,22 @@ export function ClinicalLiteratureWizard({
             <p className="text-sm text-muted-foreground">{data.literatureSummary}</p>
           </div>
         )}
+        {(data.includedStudies?.length ?? 0) > 0 || data.databases.some((id) => id === "pubmed") ? (
+          <div className="space-y-2">
+            <h4 className="text-sm font-semibold">{t("clinical.lit.literatureDbResultsTitle")}</h4>
+            <LiteratureDatabaseTable data={data} productId={productId} />
+          </div>
+        ) : null}
+        {(data.includedStudies?.length ?? 0) > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-semibold">{t("clinical.lit.includedStudiesTableTitle")}</h4>
+            <IncludedStudiesTable data={data} productId={productId} canEdit={false} />
+          </div>
+        )}
         {(data.registryResults?.length ?? 0) > 0 && (
           <div className="space-y-2">
             <h4 className="text-sm font-semibold">{t("clinical.lit.registryResultsTitle")}</h4>
-            <RegistryResultsTable rows={data.registryResults ?? []} />
+            <RegistryResultsTable rows={data.registryResults ?? []} locale={locale} />
           </div>
         )}
       </div>
@@ -660,10 +608,58 @@ export function ClinicalLiteratureWizard({
             </p>
           )}
 
+          <div className="space-y-2">
+            <FieldLabel>{t("clinical.lit.literatureDbResultsTitle")}</FieldLabel>
+            <LiteratureDatabaseTable data={data} productId={productId} />
+          </div>
+
+          {(data.includedStudies?.length ?? 0) > 0 && (
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <FieldLabel>{t("clinical.lit.includedStudiesTableTitle")}</FieldLabel>
+                {canEdit && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={syncingArticles || generating}
+                    onClick={() => void syncOpenAccessArticles()}
+                    className="gap-1.5 text-xs h-8"
+                  >
+                    {syncingArticles ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Wand2 className="h-3.5 w-3.5" />
+                    )}
+                    {t("clinical.lit.fetchOpenAccessPdfs")}
+                  </Button>
+                )}
+              </div>
+              {articleSyncFeedback && (
+                <p className="text-xs text-emerald-700 dark:text-emerald-400">{articleSyncFeedback}</p>
+              )}
+              <IncludedStudiesTable
+                data={data}
+                productId={productId}
+                canEdit={canEdit}
+                uploadingStudyIndex={uploadingStudyIndex}
+                onUploadForStudy={(studyIndex, file) => {
+                  const study = data.includedStudies?.find((s) => s.index === studyIndex);
+                  void uploadArticle(file, { studyIndex, citation: study?.citation });
+                }}
+              />
+            </div>
+          )}
+
           {(data.registryResults?.length ?? 0) > 0 && (
             <div className="space-y-2">
               <FieldLabel>{t("clinical.lit.registryResultsTitle")}</FieldLabel>
-              <RegistryResultsTable rows={data.registryResults ?? []} />
+              <RegistryResultsTable
+                rows={data.registryResults ?? []}
+                locale={locale}
+                evidenceSlot={registryEvidenceCell}
+              />
+              <p className="text-[10px] text-muted-foreground">{t("clinical.lit.statusFootnotes")}</p>
             </div>
           )}
 
@@ -838,72 +834,6 @@ export function ClinicalLiteratureWizard({
             </div>
           </div>
         </>
-      )}
-
-      {(canEdit || (data.acceptedArticles?.length ?? 0) > 0) && (
-        <div className="rounded-lg border border-border p-4 space-y-2">
-          <h4 className="text-sm font-semibold">{t("clinical.lit.articlesTitle")}</h4>
-          <p className="text-xs text-muted-foreground">{t("clinical.lit.articlesHint")}</p>
-          {articleSyncFeedback && (
-            <p className="text-xs text-emerald-700 dark:text-emerald-400">{articleSyncFeedback}</p>
-          )}
-          <ul className="space-y-1 text-xs">
-            {(data.acceptedArticles ?? []).map((a) => (
-              <li key={a.id} className="flex items-center justify-between gap-2 rounded border border-border px-2 py-1">
-                <span className="flex items-center gap-1 truncate">
-                  <FileText className="h-3.5 w-3.5 shrink-0" />
-                  {a.fileName}
-                  {a.pmid && (
-                    <span className="text-muted-foreground">(PMID {a.pmid})</span>
-                  )}
-                </span>
-                {canEdit && (
-                  <button type="button" className="text-destructive" onClick={() => removeArticle(a.id)}>
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-          {canEdit && (
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                disabled={syncingArticles || generating || uploadingTarget !== null}
-                onClick={() => void syncOpenAccessArticles()}
-                className="gap-1.5 text-xs h-8"
-              >
-                {syncingArticles ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Wand2 className="h-3.5 w-3.5" />
-                )}
-                {t("clinical.lit.fetchOpenAccessPdfs")}
-              </Button>
-              <label className="inline-flex cursor-pointer items-center gap-1 text-xs text-primary underline">
-                {uploadingTarget === "article" ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <FileText className="h-3 w-3" />
-                )}
-                {t("clinical.lit.addArticlePdf")}
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  className="hidden"
-                  disabled={uploadingTarget !== null || syncingArticles}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) void uploadArticle(file);
-                    e.target.value = "";
-                  }}
-                />
-              </label>
-            </div>
-          )}
-        </div>
       )}
 
       <div className="flex items-center gap-2">
