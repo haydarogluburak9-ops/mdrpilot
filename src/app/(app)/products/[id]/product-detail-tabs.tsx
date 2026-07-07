@@ -54,7 +54,6 @@ import {
   mergeVerificationTests,
 } from "@/lib/domain/verification-tests";
 import { ProductWorkflowMini } from "@/components/workflow/product-workflow-mini";
-import { WorkflowWelcomeBanner } from "@/components/workflow/workflow-welcome-banner";
 import type { DossierWorkflowStep } from "@/lib/workflow/dossier-checklist";
 
 interface ProductEvidence {
@@ -100,8 +99,6 @@ export function ProductDetailTabs({
   canApprove,
   company,
   defaultTab = "overview",
-  showSetup = false,
-  companyId,
   productWorkflowSteps,
 }: {
   product: Product;
@@ -112,8 +109,6 @@ export function ProductDetailTabs({
   canApprove: boolean;
   company: CompanyLabelProfile;
   defaultTab?: string;
-  showSetup?: boolean;
-  companyId: string;
   productWorkflowSteps: DossierWorkflowStep[];
 }) {
   const { t, lang } = useI18n();
@@ -177,12 +172,6 @@ export function ProductDetailTabs({
           </Button>
         </div>
       </div>
-
-      <WorkflowWelcomeBanner
-        companyId={companyId}
-        showSetup={showSetup}
-        steps={productWorkflowSteps}
-      />
 
       <Tabs defaultValue={defaultTab}>
         <TabsList>

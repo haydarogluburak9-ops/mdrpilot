@@ -45,7 +45,7 @@ export default function OnboardingPage() {
         setLoading(false);
         return;
       }
-      router.push(data.redirectTo ?? "/dashboard?setup=1");
+      router.push(data.redirectTo ?? "/demo/tour");
       router.refresh();
     } catch {
       setError(t("auth.networkError"));

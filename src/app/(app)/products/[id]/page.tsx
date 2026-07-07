@@ -8,8 +8,6 @@ import { BackLink } from "@/components/layout/back-link";
 import { ProductDetailTabs } from "./product-detail-tabs";
 
 import { computeProductWorkflowSteps } from "@/lib/workflow/dossier-checklist";
-import { ProductWorkflowMini } from "@/components/workflow/product-workflow-mini";
-import { WorkflowWelcomeBanner } from "@/components/workflow/workflow-welcome-banner";
 
 const PRODUCT_TABS = new Set([
   "overview", "technical", "gspr", "risk", "clinical", "pms", "ifu", "udi",
@@ -80,8 +78,6 @@ export default async function ProductDetailPage({
         canApprove={canApprove}
         company={company}
         defaultTab={defaultTab}
-        showSetup={searchParams?.setup === "1"}
-        companyId={ctx.companyId}
         productWorkflowSteps={productWorkflowSteps}
       />
     </div>

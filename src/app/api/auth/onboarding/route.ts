@@ -84,9 +84,7 @@ export async function POST(req: Request) {
       ok: true,
       companyId: company.id,
       firstProductId: productIds[0] ?? null,
-      redirectTo: productIds[0]
-        ? `/products/${productIds[0]}?setup=1&tab=overview`
-        : "/dashboard?setup=1",
+      redirectTo: "/demo/tour",
     });
   } catch (err) {
     const { status, message } = statusForError(err);

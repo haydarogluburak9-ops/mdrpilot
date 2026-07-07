@@ -15,13 +15,13 @@ export const AUDIT_STANDARDS: { value: AuditStandardScope; label: string }[] = [
 ];
 
 export const ASSESSMENT_TYPES: { value: AssessmentType; label: string; count: number }[] = [
-  { value: "QUICK", label: "Quick (5 questions)", count: 5 },
-  { value: "STANDARD", label: "Standard (10 questions)", count: 10 },
-  { value: "FULL", label: "Full Audit (18 questions)", count: 18 },
+  { value: "QUICK", label: "Quick (6 questions)", count: 6 },
+  { value: "STANDARD", label: "Standard (12 questions)", count: 12 },
+  { value: "FULL", label: "Full Audit (24 questions)", count: 24 },
 ];
 
 export const ASSESSMENT_COUNT: Record<AssessmentType, number> = {
-  QUICK: 5, STANDARD: 10, FULL: 18,
+  QUICK: 6, STANDARD: 12, FULL: 24,
 };
 
 export const FINDING_SEVERITY_LABEL: Record<FindingSeverity, string> = {

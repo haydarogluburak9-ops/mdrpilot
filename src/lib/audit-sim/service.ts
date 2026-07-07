@@ -148,6 +148,15 @@ export async function archiveAuditSession(params: { companyId: string; userId: s
   });
 }
 
+export async function deleteAuditSession(params: { companyId: string; userId: string; sessionId: string; ip?: string | null }) {
+  const session = await loadSessionOr404(params.companyId, params.sessionId);
+  await prisma.auditSession.delete({ where: { id: session.id } });
+  await writeAuditLog({
+    action: "audit.delete", userId: params.userId, companyId: params.companyId,
+    entity: "AuditSession", entityId: session.id, ip: params.ip,
+  });
+}
+
 export async function listAuditSessions(companyId: string) {
   const rows = await prisma.auditSession.findMany({
     where: { companyId }, orderBy: { createdAt: "desc" }, take: 100,

@@ -820,7 +820,7 @@ export const dictionaries: { en: Record<string, string>; tr: Record<string, stri
     "workflow.welcome.productTitle": "Step 1: Register your device",
     "workflow.welcome.productDesc": "Enter the product name, class and intended purpose. A technical file and GSPR checklist will be created automatically.",
     "workflow.product.title": "Product dossier steps",
-    "workflow.product.fullChecklist": "Company-wide checklist on Dashboard →",
+    "workflow.product.fullChecklist": "Company-wide checklist in Guided demo →",
     "workflow.product.profile.title": "Product profile",
     "workflow.product.profile.desc": "Intended purpose, class, materials and variants.",
     "workflow.product.profile.hint": "Complete intended purpose and device characteristics in Edit product.",
@@ -875,6 +875,7 @@ export const dictionaries: { en: Record<string, string>; tr: Record<string, stri
     "auditSim.answerPlaceholder": "Your answer / evidence reference…",
     "auditSim.noAnswer": "No answer",
     "auditSim.completeAudit": "Complete audit & generate findings",
+    "auditSim.deleteConfirm": "Delete this audit simulation permanently? This cannot be undone.",
 
     // executive dashboard
     "executive.title": "Executive Dashboard",
@@ -3789,7 +3790,7 @@ export const dictionaries: { en: Record<string, string>; tr: Record<string, stri
     "workflow.welcome.productTitle": "Adım 1: Cihazınızı kaydedin",
     "workflow.welcome.productDesc": "Ürün adı, sınıf ve kullanım amacını girin. Teknik dosya ve GSPR listesi otomatik oluşturulur.",
     "workflow.product.title": "Ürün dosyası adımları",
-    "workflow.product.fullChecklist": "Şirket geneli liste → Gösterge Paneli",
+    "workflow.product.fullChecklist": "Şirket geneli kontrol listesi → Rehberli demo",
     "workflow.product.profile.title": "Ürün profili",
     "workflow.product.profile.desc": "Kullanım amacı, sınıf, malzeme ve varyantlar.",
     "workflow.product.profile.hint": "Ürünü düzenle’de kullanım amacı ve cihaz özelliklerini tamamlayın.",
@@ -3844,6 +3845,7 @@ export const dictionaries: { en: Record<string, string>; tr: Record<string, stri
     "auditSim.answerPlaceholder": "Yanıtınız / kanıt referansı…",
     "auditSim.noAnswer": "Yanıt yok",
     "auditSim.completeAudit": "Denetimi tamamla ve bulguları üret",
+    "auditSim.deleteConfirm": "Bu denetim simülasyonu kalıcı olarak silinsin mi? Bu işlem geri alınamaz.",
 
     // executive dashboard
     "executive.title": "Yönetici Panosu",

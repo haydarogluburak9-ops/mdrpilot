@@ -10,7 +10,13 @@ export default async function AuditDetailPage({ params }: { params: { id: string
   const ctx = await requireCompany();
   try {
     const session = await getAuditSessionDetail(ctx.companyId, params.id);
-    return <AuditDetailView session={session as unknown as AuditSessionDetail} canEdit={hasRole(ctx.role, "CONSULTANT")} />;
+    return (
+      <AuditDetailView
+        session={session as unknown as AuditSessionDetail}
+        canEdit={hasRole(ctx.role, "CONSULTANT")}
+        canDelete={hasRole(ctx.role, "QUALITY_MANAGER")}
+      />
+    );
   } catch (err) {
     if (err instanceof NotFoundError) notFound();
     throw err;

@@ -59,7 +59,7 @@ export function ProductWorkflowMini({ steps }: { steps: DossierWorkflowStep[] })
             </li>
           ))}
         </ul>
-        <Link href="/dashboard#dossier-checklist" className="block pt-1 text-[11px] text-primary hover:underline">
+        <Link href="/demo/tour#dossier-checklist" className="block pt-1 text-[11px] text-primary hover:underline">
           {t("workflow.product.fullChecklist")}
         </Link>
       </CardContent>

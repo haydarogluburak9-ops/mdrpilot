@@ -30,9 +30,6 @@ import { DEVICE_CLASS_LABEL, riskLevelFromScore } from "@/lib/domain/constants";
 import { formatDate } from "@/lib/utils";
 import type { Product, RiskLevel } from "@/lib/domain/types";
 import { EqmsRemindersCard } from "@/components/eqms/eqms-reminders-card";
-import { DossierChecklistPanel } from "@/components/workflow/dossier-checklist-panel";
-import { WorkflowWelcomeBanner } from "@/components/workflow/workflow-welcome-banner";
-import type { DossierWorkflowStep } from "@/lib/workflow/dossier-checklist";
 
 interface Capa {
   id: string;
@@ -63,18 +60,12 @@ export function DashboardView({
   complaints,
   companyName,
   profile,
-  workflowSteps,
-  companyId,
-  showSetup = false,
 }: {
   products: Product[];
   capas: Capa[];
   complaints: Complaint[];
   companyName?: string;
   profile?: CompanyProfile | null;
-  workflowSteps: DossierWorkflowStep[];
-  companyId: string;
-  showSetup?: boolean;
 }) {
   const { t } = useI18n();
   const goalCta = profile?.goal ? GOAL_CTA[profile.goal] : GOAL_CTA.GAPS;
@@ -133,12 +124,6 @@ export function DashboardView({
           <Link href="/demo/tour"><Button variant="outline">{t("nav.demo")}</Button></Link>
           <Link href={goalCta.href}><Button className="gap-2">{t(goalCta.labelKey)} <ArrowRight className="h-4 w-4" /></Button></Link>
         </div>
-      </div>
-
-      <WorkflowWelcomeBanner companyId={companyId} showSetup={showSetup} steps={workflowSteps} />
-
-      <div id="dossier-checklist" className="mb-6 scroll-mt-4">
-        <DossierChecklistPanel steps={workflowSteps} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

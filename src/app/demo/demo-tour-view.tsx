@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { DossierChecklistPanel } from "@/components/workflow/dossier-checklist-panel";
+import type { DossierWorkflowStep } from "@/lib/workflow/dossier-checklist";
 import type { LucideIcon } from "lucide-react";
 
 interface Step {
@@ -24,7 +26,15 @@ interface Step {
   cta: string;
 }
 
-export function DemoTourView({ productId, productName }: { productId: string | null; productName: string | null }) {
+export function DemoTourView({
+  productId,
+  productName,
+  workflowSteps,
+}: {
+  productId: string | null;
+  productName: string | null;
+  workflowSteps: DossierWorkflowStep[];
+}) {
   const { t } = useI18n();
   const [done, setDone] = useState<Record<number, boolean>>({});
   const productHref = productId ? `/products/${productId}` : "/products";
@@ -149,6 +159,10 @@ export function DemoTourView({ productId, productName }: { productId: string | n
         description={t("demo.desc")}
         actions={<Badge variant={completed === steps.length ? "success" : "muted"}>{completed}/{steps.length} {t("demo.steps")}</Badge>}
       />
+
+      <div id="dossier-checklist" className="mb-6 scroll-mt-4">
+        <DossierChecklistPanel steps={workflowSteps} />
+      </div>
 
       <Card className="mb-6 border-primary/20 bg-primary/5">
         <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">

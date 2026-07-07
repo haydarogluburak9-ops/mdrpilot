@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ClipboardCheck, Plus, Loader2, AlertCircle, ChevronRight } from "lucide-react";
+import { ClipboardCheck, Plus, Loader2, AlertCircle, ChevronRight, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,12 +23,13 @@ const STATUS_BADGE: Record<string, "default" | "success" | "muted"> = {
   IN_PROGRESS: "default", COMPLETED: "success", ARCHIVED: "muted",
 };
 
-export function AuditListView({ products, canStart }: { products: ProductLite[]; canStart: boolean }) {
+export function AuditListView({ products, canStart, canDelete }: { products: ProductLite[]; canStart: boolean; canDelete: boolean }) {
   const { t } = useI18n();
   const router = useRouter();
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -41,6 +42,17 @@ export function AuditListView({ products, canStart }: { products: ProductLite[];
     }
   }
   useEffect(() => { void load(); }, []);
+
+  async function deleteSession(id: string) {
+    if (!window.confirm(t("auditSim.deleteConfirm"))) return;
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/audit-simulator/${id}`, { method: "DELETE" });
+      if (res.ok) setSessions((prev) => prev.filter((s) => s.id !== id));
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
     <div>
@@ -71,6 +83,21 @@ export function AuditListView({ products, canStart }: { products: ProductLite[];
                     </p>
                   </div>
                   {s.score != null && <span className="text-lg font-bold">{s.score}</span>}
+                  {canDelete && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 text-destructive hover:text-destructive"
+                      disabled={deletingId === s.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void deleteSession(s.id);
+                      }}
+                      aria-label={t("common.delete")}
+                    >
+                      {deletingId === s.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                    </Button>
+                  )}
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </CardContent>
               </Card>

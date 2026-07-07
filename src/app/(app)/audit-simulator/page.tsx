@@ -7,5 +7,5 @@ export const dynamic = "force-dynamic";
 export default async function AuditSimulatorPage() {
   const ctx = await requireCompany();
   const products = await listProductsLite(ctx.companyId);
-  return <AuditListView products={products} canStart={hasRole(ctx.role, "CONSULTANT")} />;
+  return <AuditListView products={products} canStart={hasRole(ctx.role, "CONSULTANT")} canDelete={hasRole(ctx.role, "QUALITY_MANAGER")} />;
 }

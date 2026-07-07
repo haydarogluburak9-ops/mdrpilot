@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2, CheckCircle2, FileDown, Save } from "lucide-react";
+import { ArrowLeft, Loader2, CheckCircle2, FileDown, Save, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { ScoreRing } from "@/components/ui/score-ring";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { displayStandardCode } from "@/lib/domain/standards-catalog";
+import { localizeAuditQuestion } from "@/lib/audit-sim/questions";
 import type { AuditSummary, FindingSeverity } from "@/lib/audit-sim/types";
 
 interface QuestionRow {
@@ -31,8 +32,8 @@ const SEV_BADGE: Record<FindingSeverity, "destructive" | "warning" | "muted" | "
   MAJOR: "destructive", MINOR: "warning", OBSERVATION: "muted", POSITIVE: "success",
 };
 
-export function AuditDetailView({ session, canEdit }: { session: AuditSessionDetail; canEdit: boolean }) {
-  const { t } = useI18n();
+export function AuditDetailView({ session, canEdit, canDelete }: { session: AuditSessionDetail; canEdit: boolean; canDelete: boolean }) {
+  const { t, lang } = useI18n();
   const router = useRouter();
   const [answers, setAnswers] = useState<Record<string, string>>(
     Object.fromEntries(session.questions.map((q) => [q.id, q.answer])),
@@ -40,6 +41,7 @@ export function AuditDetailView({ session, canEdit }: { session: AuditSessionDet
   const [saving, setSaving] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
   const [exporting, setExporting] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [language, setLanguage] = useState<"tr" | "en">("tr");
   const inProgress = session.status === "IN_PROGRESS";
 
@@ -85,6 +87,18 @@ export function AuditDetailView({ session, canEdit }: { session: AuditSessionDet
     }
   }
 
+  async function deleteSession() {
+    if (!window.confirm(t("auditSim.deleteConfirm"))) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/audit-simulator/${session.id}`, { method: "DELETE" });
+      if (res.ok) router.push("/audit-simulator");
+      else router.refresh();
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div>
       <Link href="/audit-simulator" className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
@@ -94,8 +108,14 @@ export function AuditDetailView({ session, canEdit }: { session: AuditSessionDet
         title={`${session.standard.replace("_", " ")} ${t("auditSim.auditSuffix")}`}
         description={`${session.productName ?? t("auditSim.companyWide")} · ${session.assessmentType}`}
         actions={
-          session.status === "COMPLETED" ? (
-            <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {canDelete && (
+              <Button variant="outline" size="sm" onClick={deleteSession} disabled={deleting} className="text-destructive hover:text-destructive">
+                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />} {t("common.delete")}
+              </Button>
+            )}
+            {session.status === "COMPLETED" ? (
+              <>
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as "tr" | "en")}
@@ -109,8 +129,9 @@ export function AuditDetailView({ session, canEdit }: { session: AuditSessionDet
               <Button variant="outline" size="sm" onClick={() => exportReport("docx")} disabled={!!exporting}>DOCX</Button>
               <Button variant="outline" size="sm" onClick={() => exportReport("findings")} disabled={!!exporting}>Findings XLSX</Button>
               <Button variant="outline" size="sm" onClick={() => exportReport("capa")} disabled={!!exporting}>CAPA XLSX</Button>
-            </div>
-          ) : undefined
+              </>
+            ) : null}
+          </div>
         }
       />
       <Disclaimer />
@@ -180,14 +201,16 @@ export function AuditDetailView({ session, canEdit }: { session: AuditSessionDet
         <CardContent className="p-4">
           <h3 className="mb-3 text-sm font-semibold">{inProgress ? t("auditSim.auditorQuestions") : t("auditSim.auditInterview")}</h3>
           <div className="space-y-4">
-            {session.questions.map((q) => (
+            {session.questions.map((q) => {
+              const localized = localizeAuditQuestion(q, lang === "tr" ? "tr" : "en");
+              return (
               <div key={q.id} className="rounded-lg border border-border p-4">
                 <div className="flex items-center gap-2">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{q.order}</span>
-                  <p className="text-sm font-medium">{q.question}</p>
+                  <p className="text-sm font-medium">{localized.question}</p>
                   <span className="ml-auto text-xs text-muted-foreground">{displayStandardCode(q.standardCode)} · {q.clauseNo}</span>
                 </div>
-                {q.expectedEvidence && <p className="mt-1 pl-8 text-xs text-muted-foreground">{t("auditSim.expectedEvidence")}: {q.expectedEvidence}</p>}
+                {localized.expectedEvidence && <p className="mt-1 pl-8 text-xs text-muted-foreground">{t("auditSim.expectedEvidence")}: {localized.expectedEvidence}</p>}
                 <div className="mt-2 pl-8">
                   {inProgress && canEdit ? (
                     <div className="flex items-start gap-2">
@@ -207,7 +230,7 @@ export function AuditDetailView({ session, canEdit }: { session: AuditSessionDet
                   )}
                 </div>
               </div>
-            ))}
+            );})}
           </div>
 
           {inProgress && canEdit && (
