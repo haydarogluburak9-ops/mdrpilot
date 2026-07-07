@@ -30,7 +30,7 @@ const fieldLabel = "mb-1.5 block text-sm font-medium";
 const selectClass =
   "flex h-10 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-export function NewProductForm() {
+export function NewProductForm({ welcome = false }: { welcome?: boolean }) {
   const { t, lang } = useI18n();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -131,7 +131,7 @@ export function NewProductForm() {
         setError(data.error ?? t("products.form.error"));
         return;
       }
-      router.push(`/products/${data.id}`);
+      router.push(`/products/${data.id}?setup=1&tab=overview`);
       router.refresh();
     } catch {
       setError(t("products.form.error"));
@@ -143,6 +143,13 @@ export function NewProductForm() {
   return (
     <form onSubmit={submit}>
       <PageHeader title={t("products.form.title")} description={t("products.form.desc")} />
+
+      {welcome && (
+        <div className="mb-6 rounded-xl border border-primary/25 bg-primary/5 p-4 text-sm">
+          <p className="font-semibold">{t("workflow.welcome.productTitle")}</p>
+          <p className="mt-1 text-muted-foreground">{t("workflow.welcome.productDesc")}</p>
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="space-y-4 p-6 lg:col-span-2">

@@ -6,6 +6,7 @@ import { setSessionCompany } from "@/lib/auth/session";
 import { statusForError } from "@/lib/auth/errors";
 import { writeAuditLog, ipFromRequest } from "@/lib/audit";
 import { scaffoldCompanyQms } from "@/lib/qms/scaffold";
+import { scaffoldOnboardingProducts } from "@/lib/products/onboarding-scaffold";
 
 export const runtime = "nodejs";
 
@@ -64,6 +65,11 @@ export async function POST(req: Request) {
     // ISO 9001) so the new company starts with the full regulatory checklist.
     await scaffoldCompanyQms(company.id, standards ?? []).catch(() => undefined);
 
+    const productIds = await scaffoldOnboardingProducts(company.id, company.name, {
+      productCount: productCount ?? 1,
+      industry: industry ?? "MEDICAL",
+    }).catch(() => [] as string[]);
+
     await setSessionCompany(ctx.token, company.id);
     await writeAuditLog({
       action: "company.create",
@@ -74,7 +80,14 @@ export async function POST(req: Request) {
       ip: ipFromRequest(req),
     });
 
-    return NextResponse.json({ ok: true, companyId: company.id });
+    return NextResponse.json({
+      ok: true,
+      companyId: company.id,
+      firstProductId: productIds[0] ?? null,
+      redirectTo: productIds[0]
+        ? `/products/${productIds[0]}?setup=1&tab=overview`
+        : "/dashboard?setup=1",
+    });
   } catch (err) {
     const { status, message } = statusForError(err);
     return NextResponse.json({ error: message }, { status });

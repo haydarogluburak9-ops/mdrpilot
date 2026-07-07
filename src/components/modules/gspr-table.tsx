@@ -605,6 +605,8 @@ export function GsprTable({
 
                   key={g.id}
 
+                  id={`gspr-row-${g.id}`}
+
                   className={cn(
                     "group border-b border-border last:border-0 hover:bg-muted/30",
                     noEvidence && "bg-destructive/5",

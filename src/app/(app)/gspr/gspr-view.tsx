@@ -33,6 +33,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 
 import { productAiInput } from "@/lib/domain/ai-input";
 
+import { GsprNextActionBanner } from "@/components/modules/gspr-next-action-banner";
+import { findNextGsprAction } from "@/lib/domain/gspr-next-action";
 import { countEffectiveGsprStatuses, countNotApplicableGsprRows } from "@/lib/domain/gspr-row-status";
 import type { Product } from "@/lib/domain/types";
 
@@ -98,6 +100,15 @@ export function GsprView({
 
 
   const evidenceForTable = evidence;
+
+  const nextGsprAction = useMemo(() => {
+    if (!product) return null;
+    const linkedFileCountById: Record<string, number> = {};
+    for (const [itemId, files] of Object.entries(evidence)) {
+      linkedFileCountById[itemId] = files.length;
+    }
+    return findNextGsprAction(product.gsprItems, linkedFileCountById);
+  }, [product, evidence]);
 
   return (
 
@@ -187,6 +198,8 @@ export function GsprView({
           </p>
 
           <div className="space-y-4">
+
+            {nextGsprAction && <GsprNextActionBanner action={nextGsprAction} />}
 
             <GsprTable
               items={product.gsprItems}

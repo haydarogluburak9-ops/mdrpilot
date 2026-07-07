@@ -7,7 +7,22 @@ import { NotFoundError } from "@/lib/auth/errors";
 import { BackLink } from "@/components/layout/back-link";
 import { ProductDetailTabs } from "./product-detail-tabs";
 
-export default async function ProductDetailPage({ params }: { params: { id: string } }) {
+import { computeProductWorkflowSteps } from "@/lib/workflow/dossier-checklist";
+import { ProductWorkflowMini } from "@/components/workflow/product-workflow-mini";
+import { WorkflowWelcomeBanner } from "@/components/workflow/workflow-welcome-banner";
+
+const PRODUCT_TABS = new Set([
+  "overview", "technical", "gspr", "risk", "clinical", "pms", "ifu", "udi",
+  "tests", "design", "software", "cyber", "quality", "audit", "ai",
+]);
+
+export default async function ProductDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams?: { tab?: string; setup?: string };
+}) {
   const ctx = await requireCompany();
 
   let product = null;
@@ -49,6 +64,10 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
     }
   }
 
+  const tab = searchParams?.tab;
+  const defaultTab = tab && PRODUCT_TABS.has(tab) ? tab : "overview";
+  const productWorkflowSteps = computeProductWorkflowSteps(product);
+
   return (
     <div>
       <BackLink href="/products" labelKey="common.backToProducts" />
@@ -60,6 +79,10 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
         canEdit={canEdit}
         canApprove={canApprove}
         company={company}
+        defaultTab={defaultTab}
+        showSetup={searchParams?.setup === "1"}
+        companyId={ctx.companyId}
+        productWorkflowSteps={productWorkflowSteps}
       />
     </div>
   );

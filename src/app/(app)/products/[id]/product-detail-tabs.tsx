@@ -53,6 +53,9 @@ import {
   DEFAULT_VERIFICATION_TESTS,
   mergeVerificationTests,
 } from "@/lib/domain/verification-tests";
+import { ProductWorkflowMini } from "@/components/workflow/product-workflow-mini";
+import { WorkflowWelcomeBanner } from "@/components/workflow/workflow-welcome-banner";
+import type { DossierWorkflowStep } from "@/lib/workflow/dossier-checklist";
 
 interface ProductEvidence {
   gspr: Record<string, EvidenceFile[]>;
@@ -96,6 +99,10 @@ export function ProductDetailTabs({
   canEdit,
   canApprove,
   company,
+  defaultTab = "overview",
+  showSetup = false,
+  companyId,
+  productWorkflowSteps,
 }: {
   product: Product;
   evidence: ProductEvidence;
@@ -104,6 +111,10 @@ export function ProductDetailTabs({
   canEdit: boolean;
   canApprove: boolean;
   company: CompanyLabelProfile;
+  defaultTab?: string;
+  showSetup?: boolean;
+  companyId: string;
+  productWorkflowSteps: DossierWorkflowStep[];
 }) {
   const { t, lang } = useI18n();
   const [assistantOpen, setAssistantOpen] = useState(false);
@@ -167,7 +178,13 @@ export function ProductDetailTabs({
         </div>
       </div>
 
-      <Tabs defaultValue="overview">
+      <WorkflowWelcomeBanner
+        companyId={companyId}
+        showSetup={showSetup}
+        steps={productWorkflowSteps}
+      />
+
+      <Tabs defaultValue={defaultTab}>
         <TabsList>
           <TabsTrigger value="overview">{t("pd.tab.overview")}</TabsTrigger>
           <TabsTrigger value="technical">{t("pd.tab.technical")}</TabsTrigger>
@@ -220,6 +237,7 @@ export function ProductDetailTabs({
               </CardContent>
             </Card>
             <div className="space-y-4">
+              <ProductWorkflowMini steps={productWorkflowSteps} />
               <Card>
                 <CardHeader><CardTitle>{t("pd.auditReadiness")}</CardTitle></CardHeader>
                 <CardContent className="flex flex-col items-center">
