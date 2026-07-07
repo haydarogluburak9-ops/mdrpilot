@@ -6,12 +6,6 @@ import {
 
 const CATALOG_BY_ID_MAP = new Map(CLINICAL_DATABASE_CATALOG.map((d) => [d.id, d]));
 
-function splitPrismaCount(total: number, count: number, index: number): number {
-  if (count <= 0) return 0;
-  const base = Math.floor(total / count);
-  return index === count - 1 ? total - base * (count - 1) : base;
-}
-
 export type LiteratureDbSearchStatus = "live_done" | "manual_required" | "pending";
 
 export interface LiteratureDatabaseSearchRow {
@@ -42,6 +36,17 @@ export interface IncludedStudySearchRow {
   hasPdf: boolean;
 }
 
+function includedCountForDatabase(data: LiteratureSearchData, databaseId: string): number {
+  const studies = data.includedStudies ?? [];
+  if (studies.length > 0) {
+    return studies.filter((s) => s.databaseId === databaseId).length;
+  }
+  if (databaseId === "pubmed" && data.liveLiteratureSearch) {
+    return data.prisma.included;
+  }
+  return 0;
+}
+
 export function buildLiteratureDatabaseRows(
   data: LiteratureSearchData,
   locale: "tr" | "en",
@@ -51,13 +56,11 @@ export function buildLiteratureDatabaseRows(
   const query = data.searchQuery.trim() || "—";
   const pubmedPdfCount = data.acceptedArticles?.length ?? 0;
 
-  return litIds.map((id, idx) => {
+  return litIds.map((id) => {
     const label = databaseLabel(id, locale);
     const isPubmed = id === "pubmed";
     const live = isPubmed && data.liveLiteratureSearch === true;
-    const includedCount = isPubmed
-      ? (data.includedStudies?.length ?? data.prisma.included)
-      : splitPrismaCount(data.prisma.included, litIds.length, idx);
+    const includedCount = includedCountForDatabase(data, id);
 
     if (live) {
       return {
@@ -81,14 +84,20 @@ export function buildLiteratureDatabaseRows(
     return {
       databaseId: id,
       label,
-      query,
+      query: isPubmed ? query : "—",
       status: data.preparedByMedDoc ? ("manual_required" as const) : ("pending" as const),
+      recordsFound: undefined,
       includedCount,
       pdfCount: 0,
       live: false,
-      summary: tr
-        ? `${label}: abonelikli veri tabanı — MDRpilot ile tarama yapıldıktan sonra ayrı sorgu ve kanıt (ekran görüntüsü/PDF) eklenmelidir.`
-        : `${label}: subscription database — run separate query after MDRpilot search and attach evidence (screenshot/PDF).`,
+      summary:
+        includedCount > 0
+          ? tr
+            ? `${label}: ${includedCount} çalışma bu kaynak için kayıtlı (manuel tarama).`
+            : `${label}: ${includedCount} study/studies recorded for this source (manual search).`
+          : tr
+            ? `${label}: canlı tarama yapılmadı — abonelikli veri tabanında ayrı sorgu ve kanıt eklenmelidir.`
+            : `${label}: not searched live — run a separate query via subscription database and attach evidence.`,
     };
   });
 }

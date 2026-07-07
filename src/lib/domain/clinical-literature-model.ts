@@ -468,10 +468,20 @@ export function buildSearchQueryFromPico(data: LiteratureSearchData): string {
   return core ? `${core} AND ${safety}` : safety;
 }
 
-function splitPrismaCount(total: number, count: number, index: number): number {
-  if (count <= 0) return total;
-  const base = Math.floor(total / count);
-  return index === count - 1 ? total - base * (count - 1) : base;
+const CATALOG_BY_ID_MAP = new Map(CLINICAL_DATABASE_CATALOG.map((d) => [d.id, d]));
+
+function includedCountForDatabaseExport(
+  data: LiteratureSearchData,
+  databaseId: string,
+): number {
+  const studies = data.includedStudies ?? [];
+  if (studies.length > 0) {
+    return studies.filter((s) => s.databaseId === databaseId).length;
+  }
+  if (databaseId === "pubmed" && data.liveLiteratureSearch) {
+    return data.prisma.included;
+  }
+  return 0;
 }
 
 /** One Word table row per scientific database (PubMed, Embase, Cochrane…). */
@@ -484,22 +494,32 @@ export function serializeLiteratureDatabaseTableMarkdown(
   if (litIds.length === 0) return "";
 
   const headers = tr
-    ? ["Veri tabanı", "Arama sorgusu", "Dahil edilen (n)", "Değerlendirme özeti"]
-    : ["Database", "Search query", "Included (n)", "Assessment summary"];
+    ? ["Veri tabanı", "Arama sorgusu", "Bulunan kayıt", "Dahil edilen (n)", "Değerlendirme özeti"]
+    : ["Database", "Search query", "Records found", "Included (n)", "Assessment summary"];
 
   const cell = (v: string) => v.replace(/\|/g, "/").replace(/\n/g, " ").trim();
   const query = data.searchQuery.trim() || "—";
 
-  const rows = litIds.map((id, idx) => {
+  const rows = litIds.map((id) => {
     const label = databaseLabel(id, locale);
-    const n = splitPrismaCount(data.prisma.included, litIds.length, idx);
+    const n = includedCountForDatabaseExport(data, id);
+    const isPubmed = id === "pubmed";
+    const records =
+      isPubmed && data.liveLiteratureSearch && data.pubmedTotal != null
+        ? String(data.pubmedTotal)
+        : "—";
+    const rowQuery = isPubmed && data.liveLiteratureSearch ? query : "—";
     const summary =
-      idx === 0 && data.literatureSummary?.trim()
+      isPubmed && data.literatureSummary?.trim()
         ? data.literatureSummary.trim()
-        : tr
-          ? `${label} veri tabanında ${data.searchDate || "—"} tarihli tarama; PRISMA'ya göre ${n} çalışma dahil edildi. Güvenlik ve klinik performans değerlendirildi.`
-          : `${label} searched on ${data.searchDate || "—"}; ${n} studies included per PRISMA. Safety and clinical performance assessed.`;
-    return `| ${cell(label)} | \`${cell(query)}\` | ${n} | ${cell(summary)} |`;
+        : n > 0
+          ? tr
+            ? `${label}: ${n} çalışma kayıtlı.`
+            : `${label}: ${n} study/studies recorded.`
+          : tr
+            ? `${label}: canlı tarama yapılmadı — ayrı sorgu gerekir.`
+            : `${label}: not searched live — separate query required.`;
+    return `| ${cell(label)} | \`${cell(rowQuery)}\` | ${records} | ${n} | ${cell(summary)} |`;
   });
 
   return [
