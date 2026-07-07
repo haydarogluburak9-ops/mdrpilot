@@ -194,7 +194,7 @@ function DraftModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div
-        className="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-xl border border-border bg-card shadow-xl"
+        className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-visible rounded-xl border border-border bg-card shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3 border-b border-border p-5">
@@ -228,8 +228,9 @@ function DraftModal({
           </pre>
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-border p-4">
+        <div className="flex justify-end gap-2 overflow-visible border-t border-border p-4">
           <DownloadSelectButton
+            menuPlacement="top"
             formatOptions={[{ value: "docx", label: t("qms.download.formatDocx") }]}
             onDownload={({ lang: exportLang }) => {
               const a = document.createElement("a");

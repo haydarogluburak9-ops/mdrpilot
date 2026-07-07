@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,6 +28,8 @@ export interface DownloadSelectButtonProps {
   showEnDocNoHint?: boolean;
   hint?: string;
   menuAlign?: "left" | "right";
+  /** Prefer opening above the button (e.g. modal footers). `auto` flips when viewport space is tight. */
+  menuPlacement?: "auto" | "top" | "bottom";
   /** Hide language when selected format matches (e.g. ZIP = both languages). */
   hideLangWhenFormat?: string | string[];
   onDownload: (params: { lang: string; format: string }) => void | Promise<void>;
@@ -48,6 +50,7 @@ export function DownloadSelectButton({
   showEnDocNoHint = true,
   hint,
   menuAlign = "right",
+  menuPlacement = "auto",
   hideLangWhenFormat,
   onDownload,
   onBeforeDownload,
@@ -55,7 +58,9 @@ export function DownloadSelectButton({
   const { t, lang } = useI18n();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [opensUp, setOpensUp] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const resolvedLangOptions = useMemo((): DownloadSelectOption[] | false => {
     if (langOptions === false) return false;
@@ -104,6 +109,25 @@ export function DownloadSelectButton({
     return () => document.removeEventListener("mousedown", onDocClick);
   }, [open]);
 
+  useLayoutEffect(() => {
+    if (!open || !wrapRef.current) return;
+
+    if (menuPlacement === "top") {
+      setOpensUp(true);
+      return;
+    }
+    if (menuPlacement === "bottom") {
+      setOpensUp(false);
+      return;
+    }
+
+    const trigger = wrapRef.current.getBoundingClientRect();
+    const menuHeight = menuRef.current?.offsetHeight ?? 280;
+    const spaceBelow = window.innerHeight - trigger.bottom;
+    const spaceAbove = trigger.top;
+    setOpensUp(spaceBelow < menuHeight + 8 && spaceAbove >= spaceBelow);
+  }, [open, menuPlacement, showLangSelect, showFormatSelect, format, exportLang]);
+
   useEffect(() => {
     if (defaultLang) return;
     setExportLang(isExportLanguage(lang) ? lang : "tr");
@@ -129,6 +153,7 @@ export function DownloadSelectButton({
   }
 
   const menuPos = menuAlign === "left" ? "left-0" : "right-0";
+  const menuVertical = opensUp ? "bottom-full mb-1" : "top-full mt-1";
 
   return (
     <div ref={wrapRef} className={`relative inline-flex ${className ?? ""}`}>
@@ -146,7 +171,8 @@ export function DownloadSelectButton({
 
       {open && (
         <Card
-          className={`absolute ${menuPos} top-full z-50 mt-1 w-72 border border-border p-3 shadow-lg space-y-3`}
+          ref={menuRef}
+          className={`absolute ${menuPos} ${menuVertical} z-[60] max-h-[min(70vh,24rem)] w-72 overflow-y-auto border border-border p-3 shadow-lg space-y-3`}
         >
           <p className="text-sm font-medium">{dialogTitle ?? t("qms.download.dialogTitle")}</p>
 
