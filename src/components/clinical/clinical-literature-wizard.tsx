@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Loader2, Save, Sparkles, ArrowRight, Wand2, X, ImagePlus } from "lucide-react";
+import { Loader2, Save, Sparkles, ArrowRight, Wand2, X, ImagePlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -57,11 +57,11 @@ export function ClinicalLiteratureWizard({
   const [uploadingStudyIndex, setUploadingStudyIndex] = useState<number | null>(null);
   const [articleSyncFeedback, setArticleSyncFeedback] = useState<string | null>(null);
   const [fillingPico, setFillingPico] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [resetFeedback, setResetFeedback] = useState<string | null>(null);
   const picoAutoFilled = useRef(false);
   const [error, setError] = useState<string | null>(null);
-  const [showStrategy, setShowStrategy] = useState(
-    () => !initial?.preparedByMedDoc && !initial?.literatureSummary?.trim(),
-  );
+  const [showStrategy, setShowStrategy] = useState(true);
 
   const suggestedQuery = useMemo(() => buildSearchQueryFromPico(data), [data]);
   const hasResults =
@@ -197,13 +197,46 @@ export function ClinicalLiteratureWizard({
       if (body.evaluation?.literatureData) {
         setData(body.evaluation.literatureData);
         onSaved(body.evaluation);
-        setShowStrategy(false);
         setArticleSyncFeedback(formatArticleSyncFeedback(body.articleSync));
       }
     } catch {
       setError(t("clinical.lit.generateError"));
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function resetLiteratureSearch() {
+    if (!window.confirm(t("clinical.lit.resetSearchConfirm"))) return;
+    setResetting(true);
+    setError(null);
+    setResetFeedback(null);
+    setArticleSyncFeedback(null);
+    try {
+      const res = await fetch(
+        `/api/products/${productId}/clinical-evaluation/literature/reset`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ locale }),
+        },
+      );
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(typeof body.error === "string" ? body.error : t("clinical.lit.resetSearchError"));
+        return;
+      }
+      if (body.evaluation?.literatureData) {
+        setData(body.evaluation.literatureData);
+        onSaved(body.evaluation);
+        setShowStrategy(true);
+        picoAutoFilled.current = true;
+        setResetFeedback(t("clinical.lit.resetSearchDone"));
+      }
+    } catch {
+      setError(t("clinical.lit.resetSearchError"));
+    } finally {
+      setResetting(false);
     }
   }
 
@@ -525,7 +558,7 @@ export function ClinicalLiteratureWizard({
           <Button
             type="button"
             size="sm"
-            disabled={generating}
+            disabled={generating || resetting}
             onClick={runMedDocSearch}
             className="gap-1.5"
           >
@@ -536,6 +569,23 @@ export function ClinicalLiteratureWizard({
             )}
             {generating ? t("clinical.lit.generating") : t("clinical.lit.runMedDoc")}
           </Button>
+          {hasResults && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={generating || resetting}
+              onClick={() => void resetLiteratureSearch()}
+              className="gap-1.5 text-destructive hover:text-destructive"
+            >
+              {resetting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              {t("clinical.lit.resetSearch")}
+            </Button>
+          )}
           {onGoToFindings && hasResults && (
             <Button type="button" size="sm" variant="secondary" className="gap-1.5" onClick={onGoToFindings}>
               {t("clinical.lit.goToFindings")}
@@ -543,6 +593,9 @@ export function ClinicalLiteratureWizard({
             </Button>
           )}
         </div>
+        {resetFeedback && (
+          <p className="mt-2 text-xs text-muted-foreground">{resetFeedback}</p>
+        )}
       </div>
 
       <p className="rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs text-cyan-950 dark:border-cyan-900 dark:bg-cyan-950/40 dark:text-cyan-100">

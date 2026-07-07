@@ -3,11 +3,56 @@ import { prisma } from "@/lib/db";
 import { assertCompanyAccess } from "@/lib/auth/guards";
 import { DEVICE_CLASS_LABEL } from "@/lib/domain/constants";
 import { buildPreparedLiteratureSearch, mergeLiteratureSearchEvidence } from "@/lib/domain/clinical-literature-generator";
-import { parseLiteratureSearchJson } from "@/lib/domain/clinical-literature-model";
+import {
+  emptyLiteratureSearchData,
+  parseLiteratureSearchJson,
+  type LiteratureSearchData,
+} from "@/lib/domain/clinical-literature-model";
 import { displayRiskNo } from "@/lib/domain/risk-category-codes";
 import { generatePreparedClinicalFindings } from "@/lib/products/clinical-findings-service";
 import { saveLiteratureData } from "@/lib/products/clinical-evaluation-service";
 import { syncAcceptedArticlesFromStudies } from "@/lib/products/clinical-article-sync";
+import { suggestPicoForProduct } from "@/lib/products/clinical-literature-pico-service";
+
+export function buildInitialLiteratureData(
+  productName: string,
+  productIndications: string | null | undefined,
+  locale: "tr" | "en",
+  pico: Awaited<ReturnType<typeof suggestPicoForProduct>>,
+): LiteratureSearchData {
+  const empty = emptyLiteratureSearchData(productName, locale);
+  const outcomes =
+    productIndications?.trim() || pico?.outcomes || empty.outcomes;
+  return {
+    ...empty,
+    ...(pico ?? {}),
+    outcomes,
+    searchDate: new Date().toISOString().slice(0, 10),
+  };
+}
+
+export async function resetLiteratureSearch(
+  companyId: string,
+  productId: string,
+  locale: "tr" | "en" = "tr",
+) {
+  const product = await prisma.product.findFirst({
+    where: { id: productId, deletedAt: null },
+    select: { id: true, companyId: true, name: true, indications: true },
+  });
+  if (!product) return null;
+  assertCompanyAccess(product.companyId, companyId);
+
+  const pico = await suggestPicoForProduct(companyId, productId, locale);
+  const literatureData = buildInitialLiteratureData(
+    product.name,
+    product.indications,
+    locale,
+    pico,
+  );
+
+  return saveLiteratureData(companyId, productId, literatureData, locale);
+}
 
 export async function generatePreparedLiteratureSearch(
   companyId: string,
