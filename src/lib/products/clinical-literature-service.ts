@@ -7,12 +7,13 @@ import { parseLiteratureSearchJson } from "@/lib/domain/clinical-literature-mode
 import { displayRiskNo } from "@/lib/domain/risk-category-codes";
 import { generatePreparedClinicalFindings } from "@/lib/products/clinical-findings-service";
 import { saveLiteratureData } from "@/lib/products/clinical-evaluation-service";
+import { syncAcceptedArticlesFromStudies } from "@/lib/products/clinical-article-sync";
 
 export async function generatePreparedLiteratureSearch(
   companyId: string,
   productId: string,
   locale: "tr" | "en" = "tr",
-  options: { syncFindings?: boolean } = {},
+  options: { syncFindings?: boolean; syncArticles?: boolean } = {},
 ) {
   const product = await prisma.product.findFirst({
     where: { id: productId, deletedAt: null },
@@ -60,12 +61,27 @@ export async function generatePreparedLiteratureSearch(
   });
 
   const literatureData = mergeLiteratureSearchEvidence(existingLit, prepared);
+
+  let articleSync = null;
+  if (options.syncArticles !== false) {
+    articleSync = await syncAcceptedArticlesFromStudies({
+      companyId,
+      productId,
+      includedStudies: literatureData.includedStudies ?? [],
+      existingArticles: existingLit?.acceptedArticles,
+    });
+    if (articleSync.articles.length) {
+      literatureData.acceptedArticles = articleSync.articles;
+    }
+  }
+
   const evaluation = await saveLiteratureData(companyId, productId, literatureData, locale);
   if (!evaluation) return null;
 
   if (options.syncFindings !== false) {
-    return generatePreparedClinicalFindings(companyId, productId, locale, { merge: true });
+    const withFindings = await generatePreparedClinicalFindings(companyId, productId, locale, { merge: true });
+    return { evaluation: withFindings ?? evaluation, articleSync };
   }
 
-  return evaluation;
+  return { evaluation, articleSync };
 }

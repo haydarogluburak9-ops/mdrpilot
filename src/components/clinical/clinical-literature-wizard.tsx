@@ -67,6 +67,8 @@ export function ClinicalLiteratureWizard({
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [uploadingTarget, setUploadingTarget] = useState<string | null>(null);
+  const [syncingArticles, setSyncingArticles] = useState(false);
+  const [articleSyncFeedback, setArticleSyncFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showStrategy, setShowStrategy] = useState(
     () => !initial?.preparedByMedDoc && !initial?.literatureSummary?.trim(),
@@ -121,9 +123,26 @@ export function ClinicalLiteratureWizard({
     setData((d) => ({ ...d, searchQuery: suggestedQuery }));
   }
 
+  function formatArticleSyncFeedback(sync: {
+    fetched?: number;
+    alreadyPresent?: number;
+    unavailable?: number;
+  } | null | undefined): string | null {
+    if (!sync) return null;
+    const fetched = sync.fetched ?? 0;
+    const already = sync.alreadyPresent ?? 0;
+    const unavailable = sync.unavailable ?? 0;
+    if (fetched === 0 && unavailable === 0 && already === 0) return null;
+    return t("clinical.lit.articleSyncDone")
+      .replace("{fetched}", String(fetched))
+      .replace("{unavailable}", String(unavailable))
+      .replace("{already}", String(already));
+  }
+
   async function runMedDocSearch() {
     setGenerating(true);
     setError(null);
+    setArticleSyncFeedback(null);
     try {
       const res = await fetch(
         `/api/products/${productId}/clinical-evaluation/literature/generate`,
@@ -142,11 +161,42 @@ export function ClinicalLiteratureWizard({
         setData(body.evaluation.literatureData);
         onSaved(body.evaluation);
         setShowStrategy(false);
+        setArticleSyncFeedback(formatArticleSyncFeedback(body.articleSync));
       }
     } catch {
       setError(t("clinical.lit.generateError"));
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function syncOpenAccessArticles() {
+    setSyncingArticles(true);
+    setError(null);
+    setArticleSyncFeedback(null);
+    try {
+      const res = await fetch(
+        `/api/products/${productId}/clinical-evaluation/literature/articles/sync`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ locale }),
+        },
+      );
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(typeof body.error === "string" ? body.error : t("clinical.lit.articleSyncError"));
+        return;
+      }
+      if (body.evaluation?.literatureData) {
+        setData(body.evaluation.literatureData);
+        onSaved(body.evaluation);
+      }
+      setArticleSyncFeedback(formatArticleSyncFeedback(body.articleSync));
+    } catch {
+      setError(t("clinical.lit.articleSyncError"));
+    } finally {
+      setSyncingArticles(false);
     }
   }
 
@@ -726,12 +776,18 @@ export function ClinicalLiteratureWizard({
         <div className="rounded-lg border border-border p-4 space-y-2">
           <h4 className="text-sm font-semibold">{t("clinical.lit.articlesTitle")}</h4>
           <p className="text-xs text-muted-foreground">{t("clinical.lit.articlesHint")}</p>
+          {articleSyncFeedback && (
+            <p className="text-xs text-emerald-700 dark:text-emerald-400">{articleSyncFeedback}</p>
+          )}
           <ul className="space-y-1 text-xs">
             {(data.acceptedArticles ?? []).map((a) => (
               <li key={a.id} className="flex items-center justify-between gap-2 rounded border border-border px-2 py-1">
                 <span className="flex items-center gap-1 truncate">
                   <FileText className="h-3.5 w-3.5 shrink-0" />
                   {a.fileName}
+                  {a.pmid && (
+                    <span className="text-muted-foreground">(PMID {a.pmid})</span>
+                  )}
                 </span>
                 {canEdit && (
                   <button type="button" className="text-destructive" onClick={() => removeArticle(a.id)}>
@@ -742,25 +798,42 @@ export function ClinicalLiteratureWizard({
             ))}
           </ul>
           {canEdit && (
-            <label className="inline-flex cursor-pointer items-center gap-1 text-xs text-primary underline">
-              {uploadingTarget === "article" ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <FileText className="h-3 w-3" />
-              )}
-              {t("clinical.lit.addArticlePdf")}
-              <input
-                type="file"
-                accept="application/pdf"
-                className="hidden"
-                disabled={uploadingTarget !== null}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) void uploadArticle(file);
-                  e.target.value = "";
-                }}
-              />
-            </label>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={syncingArticles || generating || uploadingTarget !== null}
+                onClick={() => void syncOpenAccessArticles()}
+                className="gap-1.5 text-xs h-8"
+              >
+                {syncingArticles ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Wand2 className="h-3.5 w-3.5" />
+                )}
+                {t("clinical.lit.fetchOpenAccessPdfs")}
+              </Button>
+              <label className="inline-flex cursor-pointer items-center gap-1 text-xs text-primary underline">
+                {uploadingTarget === "article" ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <FileText className="h-3 w-3" />
+                )}
+                {t("clinical.lit.addArticlePdf")}
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  disabled={uploadingTarget !== null || syncingArticles}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void uploadArticle(file);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
           )}
         </div>
       )}

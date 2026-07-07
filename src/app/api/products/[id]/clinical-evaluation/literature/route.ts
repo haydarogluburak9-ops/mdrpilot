@@ -73,6 +73,7 @@ const bodySchema = z.object({
           quality: z.enum(["HIGH", "MED", "LOW"]).optional(),
           cerComment: z.string().max(2000).optional(),
           evidenceUrl: z.string().max(500).optional(),
+          pmid: z.string().max(20).optional(),
         }),
       )
       .max(100)
@@ -94,6 +95,7 @@ const bodySchema = z.object({
           uploadedAt: z.string().max(40),
           citation: z.string().max(2000).optional(),
           studyIndex: z.number().int().min(1).optional(),
+          pmid: z.string().max(20).optional(),
         }),
       )
       .max(50)

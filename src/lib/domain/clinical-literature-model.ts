@@ -147,6 +147,7 @@ export interface LiteratureSearchData {
     uploadedAt: string;
     citation?: string;
     studyIndex?: number;
+    pmid?: string;
   }>;
 }
 
@@ -160,6 +161,7 @@ export interface IncludedLiteratureStudy {
   quality?: "HIGH" | "MED" | "LOW";
   cerComment?: string;
   evidenceUrl?: string;
+  pmid?: string;
 }
 
 export type RegistrySearchStatus = "no_signal" | "review_required" | "records_found";
@@ -377,6 +379,7 @@ export function parseLiteratureSearchJson(raw: unknown): LiteratureSearchData | 
                 : "MED",
             cerComment: typeof x.cerComment === "string" ? x.cerComment : undefined,
             evidenceUrl: typeof x.evidenceUrl === "string" ? x.evidenceUrl : undefined,
+            pmid: typeof x.pmid === "string" ? x.pmid.replace(/\D/g, "") || undefined : undefined,
           }))
           .filter((x) => x.index > 0 && x.citation)
           .sort((a, b) => a.index - b.index)
@@ -408,6 +411,7 @@ function parseAcceptedArticles(raw: unknown) {
           typeof x.studyIndex === "number" && x.studyIndex > 0
             ? Math.round(x.studyIndex)
             : undefined,
+        pmid: typeof x.pmid === "string" ? x.pmid.replace(/\D/g, "") || undefined : undefined,
       };
     })
     .filter((x): x is NonNullable<typeof x> => Boolean(x?.storageKey));

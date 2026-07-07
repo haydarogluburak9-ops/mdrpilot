@@ -3,15 +3,15 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth/guards";
 import { statusForError } from "@/lib/auth/errors";
 import { writeAuditLog, ipFromRequest } from "@/lib/audit";
-import { generatePreparedLiteratureSearch } from "@/lib/products/clinical-literature-service";
+import { syncLiteratureAcceptedArticles } from "@/lib/products/clinical-literature-article-sync-service";
 
 export const runtime = "nodejs";
 
 const bodySchema = z.object({
   locale: z.enum(["tr", "en"]).optional(),
-  syncFindings: z.boolean().optional(),
 });
 
+// POST — fetch open-access PDFs for PubMed included studies (EK-4)
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
     const ctx = await requireRole("CONSULTANT");
@@ -24,30 +24,32 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     const locale = parsed.data.locale ?? "tr";
-    const result = await generatePreparedLiteratureSearch(
-      ctx.companyId,
-      params.id,
-      locale,
-      { syncFindings: parsed.data.syncFindings ?? true },
-    );
-    if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-    const { evaluation, articleSync } = result;
+    const result = await syncLiteratureAcceptedArticles(ctx.companyId, params.id, locale);
+    if (!result) {
+      return NextResponse.json({ error: "Literature data not found — run search first" }, { status: 400 });
+    }
 
     await writeAuditLog({
-      action: "clinical_evaluation.literature.generate",
+      action: "clinical_evaluation.literature.articles.sync",
       companyId: ctx.companyId,
       userId: ctx.user.id,
       entity: "ClinicalEvaluation",
-      entityId: evaluation.id,
-      metadata: { productId: params.id, articlesFetched: articleSync?.fetched ?? 0 },
+      entityId: result.evaluation.id,
+      metadata: {
+        productId: params.id,
+        fetched: result.articleSync.fetched,
+        unavailable: result.articleSync.unavailable,
+      },
       ip: ipFromRequest(req),
     });
 
-    return NextResponse.json({ evaluation, articleSync });
+    return NextResponse.json({
+      evaluation: result.evaluation,
+      articleSync: result.articleSync,
+    });
   } catch (err) {
     const { status, message } = statusForError(err);
-    if (status === 500) console.error("[api/clinical-evaluation/literature/generate POST]", err);
+    if (status === 500) console.error("[api/clinical-evaluation/literature/articles/sync POST]", err);
     return NextResponse.json({ error: message }, { status });
   }
 }

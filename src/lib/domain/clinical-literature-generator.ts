@@ -316,6 +316,11 @@ export function mergeLiteratureSearchEvidence(
       return { ...row, evidenceScreenshots: prev.evidenceScreenshots };
     });
   }
+  if (existing.acceptedArticles?.length && !prepared.acceptedArticles?.length) {
+    merged.acceptedArticles = existing.acceptedArticles;
+  } else if (prepared.acceptedArticles?.length) {
+    merged.acceptedArticles = prepared.acceptedArticles;
+  }
   return merged;
 }
 

@@ -14,6 +14,7 @@ export interface AcceptedArticleFile {
   uploadedAt: string;
   citation?: string;
   studyIndex?: number;
+  pmid?: string;
 }
 
 function articleKey(companyId: string, productId: string, fileId: string) {
@@ -28,6 +29,7 @@ export async function uploadAcceptedArticlePdf(params: {
   fileName: string;
   citation?: string;
   studyIndex?: number;
+  pmid?: string;
 }): Promise<AcceptedArticleFile> {
   const mime = params.mimeType === "application/x-pdf" ? "application/pdf" : params.mimeType;
   if (!ALLOWED_MIME.includes(mime as (typeof ALLOWED_MIME)[number])) {
@@ -52,6 +54,7 @@ export async function uploadAcceptedArticlePdf(params: {
     uploadedAt: new Date().toISOString(),
     citation: params.citation?.trim() || undefined,
     studyIndex: params.studyIndex,
+    pmid: params.pmid?.replace(/\D/g, "") || undefined,
   };
 }
 

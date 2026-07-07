@@ -209,6 +209,7 @@ export function pubmedArticleToIncludedStudy(
   return {
     index,
     databaseId: "pubmed",
+    pmid: article.pmid,
     citation: citation(article),
     design,
     year: article.year,
