@@ -12,8 +12,8 @@ export interface AcceptedArticleSyncResult {
   attempted: number;
 }
 
-const MAX_AUTO_FETCH = 15;
-const DELAY_MS = 250;
+const MAX_AUTO_FETCH = 50;
+const DELAY_MS = 200;
 
 export function pmidFromStudy(study: IncludedLiteratureStudy): string | null {
   if (study.pmid?.trim()) return study.pmid.replace(/\D/g, "") || null;
@@ -48,7 +48,7 @@ export async function syncAcceptedArticlesFromStudies(params: {
   let attempted = 0;
 
   for (const study of pubmedStudies) {
-    if (fetched + unavailable >= MAX_AUTO_FETCH) break;
+    if (attempted >= MAX_AUTO_FETCH) break;
 
     const pmid = pmidFromStudy(study);
     if (!pmid) continue;
@@ -83,10 +83,52 @@ export async function syncAcceptedArticlesFromStudies(params: {
   }
 
   return {
-    articles: existing.length ? existing : [],
+    articles: existing,
     fetched,
     alreadyPresent,
     unavailable,
     attempted,
   };
+}
+
+export async function syncAcceptedArticleForStudy(params: {
+  companyId: string;
+  productId: string;
+  study: IncludedLiteratureStudy;
+  existingArticles?: AcceptedArticleFile[];
+}): Promise<{
+  article: AcceptedArticleFile | null;
+  unavailable: boolean;
+  alreadyPresent: boolean;
+}> {
+  const pmid = pmidFromStudy(params.study);
+  if (!pmid) {
+    return { article: null, unavailable: true, alreadyPresent: false };
+  }
+
+  const existing = [...(params.existingArticles ?? [])];
+  if (hasArticleForStudy(existing, params.study, pmid)) {
+    const found =
+      existing.find((a) => a.studyIndex === params.study.index) ||
+      existing.find((a) => a.pmid === pmid);
+    return { article: found ?? null, unavailable: false, alreadyPresent: true };
+  }
+
+  const buffer = await fetchOpenAccessPdfForPmid(pmid);
+  if (!buffer) {
+    return { article: null, unavailable: true, alreadyPresent: false };
+  }
+
+  const uploaded = await uploadAcceptedArticlePdf({
+    companyId: params.companyId,
+    productId: params.productId,
+    buffer,
+    mimeType: "application/pdf",
+    fileName: `PMID-${pmid}.pdf`,
+    citation: params.study.citation,
+    studyIndex: params.study.index,
+    pmid,
+  });
+
+  return { article: uploaded, unavailable: false, alreadyPresent: false };
 }

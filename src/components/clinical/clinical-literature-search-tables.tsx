@@ -1,6 +1,7 @@
 "use client";
 
-import { FileText, Loader2 } from "lucide-react";
+import { Download, ExternalLink, FileText, Loader2, Wand2 } from "lucide-react";
+import { externalLinksForPmid } from "@/lib/domain/literature-article-external-links";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/components/providers/i18n-provider";
 import {
@@ -138,13 +139,17 @@ export function IncludedStudiesTable({
   productId,
   canEdit,
   onUploadForStudy,
+  onFetchPdfForStudy,
   uploadingStudyIndex,
+  fetchingPdfStudyIndex,
 }: {
   data: LiteratureSearchData;
   productId: string;
   canEdit: boolean;
   onUploadForStudy?: (studyIndex: number, file: File) => void;
+  onFetchPdfForStudy?: (studyIndex: number) => void;
   uploadingStudyIndex?: number | null;
+  fetchingPdfStudyIndex?: number | null;
 }) {
   const { t, lang } = useI18n();
   const locale = lang === "tr" ? "tr" : "en";
@@ -172,7 +177,9 @@ export function IncludedStudiesTable({
               productId={productId}
               canEdit={canEdit}
               onUpload={onUploadForStudy}
+              onFetchPdf={onFetchPdfForStudy}
               uploading={uploadingStudyIndex === row.index}
+              fetchingPdf={fetchingPdfStudyIndex === row.index}
             />
           ))}
         </tbody>
@@ -186,15 +193,20 @@ function IncludedStudyRow({
   productId,
   canEdit,
   onUpload,
+  onFetchPdf,
   uploading,
+  fetchingPdf,
 }: {
   row: IncludedStudySearchRow;
   productId: string;
   canEdit: boolean;
   onUpload?: (studyIndex: number, file: File) => void;
+  onFetchPdf?: (studyIndex: number) => void;
   uploading: boolean;
+  fetchingPdf: boolean;
 }) {
   const { t } = useI18n();
+  const externalLinks = row.pmid ? externalLinksForPmid(row.pmid) : null;
 
   return (
     <tr className="border-b border-border last:border-0 align-top">
@@ -229,8 +241,23 @@ function IncludedStudyRow({
             {row.pdfFileName ?? "PDF"}
           </a>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <span className="text-muted-foreground">{t("clinical.lit.noPdfYet")}</span>
+            {canEdit && row.pmid && onFetchPdf && (
+              <button
+                type="button"
+                disabled={fetchingPdf || uploading}
+                onClick={() => onFetchPdf(row.index)}
+                className="flex items-center gap-1 text-primary underline disabled:opacity-50"
+              >
+                {fetchingPdf ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Wand2 className="h-3 w-3" />
+                )}
+                {t("clinical.lit.tryAutoFetchPdf")}
+              </button>
+            )}
             {canEdit && onUpload && (
               <label className="flex cursor-pointer items-center gap-1 text-primary underline">
                 {uploading ? (
@@ -243,7 +270,7 @@ function IncludedStudyRow({
                   type="file"
                   accept="application/pdf"
                   className="hidden"
-                  disabled={uploading}
+                  disabled={uploading || fetchingPdf}
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) onUpload(row.index, file);
@@ -251,6 +278,38 @@ function IncludedStudyRow({
                   }}
                 />
               </label>
+            )}
+            {externalLinks && (
+              <div className="space-y-0.5 pt-0.5">
+                <p className="text-[10px] text-muted-foreground">{t("clinical.lit.findPdfLinks")}</p>
+                <a
+                  href={externalLinks.europePmcPdf}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-primary underline"
+                >
+                  <Download className="h-3 w-3 shrink-0" />
+                  {t("clinical.lit.downloadEuropePmcPdf")}
+                </a>
+                <a
+                  href={externalLinks.europePmcArticle}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-primary underline"
+                >
+                  <ExternalLink className="h-3 w-3 shrink-0" />
+                  {t("clinical.lit.openEuropePmc")}
+                </a>
+                <a
+                  href={externalLinks.pubmed}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-primary underline"
+                >
+                  <ExternalLink className="h-3 w-3 shrink-0" />
+                  {t("clinical.lit.openPubMed")}
+                </a>
+              </div>
             )}
           </div>
         )}

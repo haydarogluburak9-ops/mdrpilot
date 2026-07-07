@@ -55,6 +55,7 @@ export function ClinicalLiteratureWizard({
   const [uploadingTarget, setUploadingTarget] = useState<string | null>(null);
   const [syncingArticles, setSyncingArticles] = useState(false);
   const [uploadingStudyIndex, setUploadingStudyIndex] = useState<number | null>(null);
+  const [fetchingPdfStudyIndex, setFetchingPdfStudyIndex] = useState<number | null>(null);
   const [articleSyncFeedback, setArticleSyncFeedback] = useState<string | null>(null);
   const [fillingPico, setFillingPico] = useState(false);
   const [resetting, setResetting] = useState(false);
@@ -164,12 +165,17 @@ export function ClinicalLiteratureWizard({
     fetched?: number;
     alreadyPresent?: number;
     unavailable?: number;
+    attempted?: number;
   } | null | undefined): string | null {
     if (!sync) return null;
     const fetched = sync.fetched ?? 0;
     const already = sync.alreadyPresent ?? 0;
     const unavailable = sync.unavailable ?? 0;
+    const attempted = sync.attempted ?? fetched + unavailable;
     if (fetched === 0 && unavailable === 0 && already === 0) return null;
+    if (fetched === 0 && unavailable > 0 && attempted > 0) {
+      return t("clinical.lit.articleSyncNoneOpenAccess").replace("{unavailable}", String(unavailable));
+    }
     return t("clinical.lit.articleSyncDone")
       .replace("{fetched}", String(fetched))
       .replace("{unavailable}", String(unavailable))
@@ -267,6 +273,39 @@ export function ClinicalLiteratureWizard({
       setError(t("clinical.lit.articleSyncError"));
     } finally {
       setSyncingArticles(false);
+    }
+  }
+
+  async function fetchPdfForStudy(studyIndex: number) {
+    setFetchingPdfStudyIndex(studyIndex);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/products/${productId}/clinical-evaluation/literature/articles/fetch`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ studyIndex, locale }),
+        },
+      );
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(typeof body.error === "string" ? body.error : t("clinical.lit.articleSyncError"));
+        return;
+      }
+      if (body.evaluation?.literatureData) {
+        setData(body.evaluation.literatureData);
+        onSaved(body.evaluation);
+      }
+      if (body.fetched) {
+        setArticleSyncFeedback(t("clinical.lit.articleFetchDone"));
+      } else if (body.unavailable) {
+        setArticleSyncFeedback(t("clinical.lit.articleFetchUnavailable"));
+      }
+    } catch {
+      setError(t("clinical.lit.articleSyncError"));
+    } finally {
+      setFetchingPdfStudyIndex(null);
     }
   }
 
@@ -696,10 +735,12 @@ export function ClinicalLiteratureWizard({
                 productId={productId}
                 canEdit={canEdit}
                 uploadingStudyIndex={uploadingStudyIndex}
+                fetchingPdfStudyIndex={fetchingPdfStudyIndex}
                 onUploadForStudy={(studyIndex, file) => {
                   const study = data.includedStudies?.find((s) => s.index === studyIndex);
                   void uploadArticle(file, { studyIndex, citation: study?.citation });
                 }}
+                onFetchPdfForStudy={(studyIndex) => void fetchPdfForStudy(studyIndex)}
               />
             </div>
           )}
