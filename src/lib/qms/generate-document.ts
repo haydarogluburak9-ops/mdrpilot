@@ -1,8 +1,9 @@
 import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { NotFoundError } from "@/lib/auth/errors";
+import { NotFoundError, AiTokenLimitError } from "@/lib/auth/errors";
 import { runPrompt } from "@/lib/ai/orchestrator";
+import { getMeteredAiProvider } from "@/lib/ai/provider-factory";
 import { getAiTokenBalance } from "@/lib/billing/ai-tokens";
 import { canonicalQmsClauseRefs } from "@/lib/domain/constants";
 import { qmsDocTitle } from "@/lib/i18n/qms-doc-titles";
@@ -32,6 +33,43 @@ function sectionsToMarkdown(data: unknown): string {
     })
     .filter(Boolean)
     .join("\n\n");
+}
+
+function templateHintForAi(template: string, locale: "tr" | "en"): string {
+  const label =
+    locale === "tr"
+      ? "Yapısal referans şablonu (bölüm sırası ve numaralandırmayı koru; metni şirket bağlamına göre özelleştir — aynen kopyalama)"
+      : "Structural reference template (keep section order and numbering; customize text for company context — do not copy verbatim)";
+  return `${label}:\n${template.trim()}`;
+}
+
+async function liveQmsAiAvailable(companyId: string): Promise<boolean> {
+  try {
+    const provider = await getMeteredAiProvider({ companyId, feature: "qms-generate" });
+    return provider !== null;
+  } catch (err) {
+    if (err instanceof AiTokenLimitError) return false;
+    throw err;
+  }
+}
+
+function ruleTemplateSummary(
+  rulesLocale: "tr" | "en",
+  procedureTemplate: string | null,
+  docLayer: ReturnType<typeof inferQmsLayerFromCode>,
+): string {
+  if (rulesLocale === "tr") {
+    if (procedureTemplate) return "Kontrollü prosedür şablonu";
+    if (docLayer === "FORM") return "Kontrollü form şablonu";
+    if (docLayer === "DIAGRAM") return "Kontrollü şema şablonu";
+    if (docLayer === "INSTRUCTION") return "Kontrollü iş talimatı şablonu";
+    return "Kontrollü alt doküman şablonu";
+  }
+  if (procedureTemplate) return "Controlled procedure template";
+  if (docLayer === "FORM") return "Controlled form template";
+  if (docLayer === "DIAGRAM") return "Controlled diagram template";
+  if (docLayer === "INSTRUCTION") return "Controlled work instruction template";
+  return "Controlled child document template";
 }
 
 export interface QmsGenerateResult {
@@ -96,42 +134,15 @@ export async function generateQmsDocument(
   }
 
   const docLayer = inferQmsLayerFromCode(doc.code);
-  const { result, source, meta } = ruleBasedContent
-    ? {
-        result: {
-          summary:
-            rulesLocale === "tr"
-              ? procedureTemplate
-                ? "Kontrollü prosedür şablonu"
-                : docLayer === "FORM"
-                ? "Kontrollü form şablonu"
-                : docLayer === "DIAGRAM"
-                  ? "Kontrollü şema şablonu"
-                  : docLayer === "INSTRUCTION"
-                    ? "Kontrollü iş talimatı şablonu"
-                    : "Kontrollü alt doküman şablonu"
-              : procedureTemplate
-                ? "Controlled procedure template"
-                : docLayer === "FORM"
-                ? "Controlled form template"
-                : docLayer === "DIAGRAM"
-                  ? "Controlled diagram template"
-                  : docLayer === "INSTRUCTION"
-                    ? "Controlled work instruction template"
-                    : "Controlled child document template",
-          missingItems: [] as string[],
-          risks: [] as string[],
-          recommendedDocuments: [] as string[],
-          regulatoryReferences: [doc.standard],
-          complianceStatus: "partial" as const,
-          confidence: 0.95,
-          disclaimer: "",
-          data: {},
-        },
-        source: "rules" as const,
-        meta: { source: "mock" as const, provider: "mock" as const, model: "rule-template", latencyMs: 0 },
-      }
-    : await runPrompt(
+  const useLiveAi = await liveQmsAiAvailable(companyId);
+
+  let promptContext = aiContext || "";
+  if (useLiveAi && ruleBasedContent?.trim()) {
+    promptContext = [promptContext, templateHintForAi(ruleBasedContent, rulesLocale)].filter(Boolean).join("\n\n");
+  }
+
+  const { result, source, meta } = useLiveAi
+    ? await runPrompt(
         "qms",
         {
           documentTitle: localizedTitle,
@@ -140,19 +151,52 @@ export async function generateQmsDocument(
           documentCode: doc.code ?? undefined,
           documentLayer: doc.layer ?? undefined,
           companyName: doc.company.name,
-          context: aiContext || undefined,
+          context: promptContext || undefined,
           _locale: locale,
         },
         { companyId, feature: "qms-generate" },
-      );
+      )
+    : ruleBasedContent
+      ? {
+          result: {
+            summary: ruleTemplateSummary(rulesLocale, procedureTemplate, docLayer),
+            missingItems: [] as string[],
+            risks: [] as string[],
+            recommendedDocuments: [] as string[],
+            regulatoryReferences: [doc.standard],
+            complianceStatus: "partial" as const,
+            confidence: 0.95,
+            disclaimer: "",
+            data: {},
+          },
+          source: "rules" as const,
+          meta: { source: "mock" as const, provider: "mock" as const, model: "rule-template", latencyMs: 0 },
+        }
+      : await runPrompt(
+          "qms",
+          {
+            documentTitle: localizedTitle,
+            standard: doc.standard,
+            clauseRefs: canonicalQmsClauseRefs(doc.code, doc.clauseRefs),
+            documentCode: doc.code ?? undefined,
+            documentLayer: doc.layer ?? undefined,
+            companyName: doc.company.name,
+            context: promptContext || undefined,
+            _locale: locale,
+          },
+          { companyId, feature: "qms-generate" },
+        );
 
   const fromSections = sectionsToMarkdown(result.data);
-  const content =
-    ruleBasedContent?.trim() ||
+  let content =
     fromSections.trim() ||
-    (result.summary.trim() ? `## ${localizedTitle}\n\n${result.summary}` : "");
+    (useLiveAi && result.summary.trim() ? `## ${localizedTitle}\n\n${result.summary}` : "");
 
-  const liveAiUsed = !ruleBasedContent && source !== "mock";
+  if (!content.trim() && ruleBasedContent?.trim()) {
+    content = ruleBasedContent.trim();
+  }
+
+  const liveAiUsed = useLiveAi && source !== "mock";
   let aiFallbackReason: string | undefined;
   if (!liveAiUsed && !ruleBasedContent) {
     const balance = await getAiTokenBalance(companyId);
@@ -163,6 +207,8 @@ export async function generateQmsDocument(
     } else {
       aiFallbackReason = "mock_or_no_provider";
     }
+  } else if (useLiveAi && source === "mock" && ruleBasedContent) {
+    aiFallbackReason = "provider_error_or_invalid_json";
   }
 
   let updatedStatus = doc.status as DocStatus;
@@ -228,7 +274,7 @@ export async function generateQmsDocument(
 
   return {
     content,
-    source: ruleBasedContent ? "rules" : source,
+    source: liveAiUsed ? source : ruleBasedContent && !useLiveAi ? "rules" : source,
     model: meta.model,
     summary: result.summary,
     missingItems: result.missingItems,
