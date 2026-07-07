@@ -1,6 +1,10 @@
 import type { ClinicalSectionKey } from "@/lib/domain/clinical-evaluation";
 import type { AiResult } from "@/lib/ai/types";
 import { buildCepCore, type CepBuildInput } from "@/lib/domain/clinical-cep-builder";
+import {
+  defaultExclusionCriteria,
+  defaultInclusionCriteria,
+} from "@/lib/domain/clinical-literature-model";
 import { riskScore } from "@/lib/domain/risk-template";
 
 export type CerDraftSections = Record<ClinicalSectionKey, string>;
@@ -220,15 +224,10 @@ function buildLiterature(input: CerBuildInput): string {
       `("${terms}") AND (safety OR performance OR clinical OR adverse OR complication)`,
       "",
       "### Dahil etme kriterleri",
-      "- İnsan verisi içeren yayınlar (vaka serisi, kohort, RCT, sistematik derleme)",
-      "- Son 10 yıl (eski pivotal çalışmalar gerekçe ile dahil edilebilir)",
-      "- İngilizce / Türkçe (diğer diller özet ile)",
-      "- Ulusal kayıtlar: FDA MAUDE, FDA geri çağırma, BfArM, MHRA, EUDAMED, TİTCK vb. (cihazla ilişkili vigilans)",
+      defaultInclusionCriteria(locale),
       "",
       "### Hariç tutma",
-      "- Sadece bench / hayvan çalışması (SOTA için ayrı değerlendirme)",
-      "- İlgisiz endikasyon veya farklı teknoloji",
-      "- Cihazla ilişkilendirilemeyen genel olay kayıtları",
+      defaultExclusionCriteria(locale),
       "",
       "### Kalite değerlendirmesi",
       "- Yayın tipi, örneklem, takip süresi, bias, cihaza özgü veri varlığı",
@@ -258,15 +257,10 @@ function buildLiterature(input: CerBuildInput): string {
     `("${terms}") AND (safety OR performance OR clinical OR adverse OR complication)`,
     "",
     "### Inclusion criteria",
-    "- Human data (case series, cohort, RCT, systematic reviews)",
-    "- Last 10 years (older pivotal studies with justification)",
-    "- English (others with abstract translation if needed)",
-    "- National registries: FDA MAUDE, FDA recalls, BfArM, MHRA, EUDAMED, TİTCK etc. (device-related vigilance)",
+    defaultInclusionCriteria(locale),
     "",
     "### Exclusion criteria",
-    "- Bench / animal only (assessed separately for SOTA)",
-    "- Irrelevant indication or technology",
-    "- General incident records not linkable to the device",
+    defaultExclusionCriteria(locale),
     "",
     "### Quality appraisal",
     "- Study type, sample size, follow-up, bias, device-specific data",

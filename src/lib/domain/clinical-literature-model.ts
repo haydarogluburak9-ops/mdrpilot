@@ -76,32 +76,60 @@ export function normalizeDatabaseId(idOrLegacy: string): string {
 export function defaultInclusionCriteria(locale: "tr" | "en"): string {
   if (locale === "tr") {
     return [
-      "- İnsan verisi içeren yayınlar (vaka serisi, kohort, RCT, sistematik derleme)",
-      "- Son 10 yıl (eski pivotal çalışmalar gerekçe ile)",
-      "- İngilizce / Türkçe (diğer diller özet ile)",
-      "- Ulusal kayıtlar: FDA MAUDE, FDA geri çağırma, BfArM, MHRA, EUDAMED, TİTCK vb. vigilans kayıtları (cihaz / eşdeğer cihaz ile ilişkili)",
+      "- Yalnızca tam metinler değerlendirilir.",
+      "- Yalnızca insan çalışmaları dikkate alınır.",
+      "- Yazı dili İngilizce olmalıdır.",
+      "- Son 5 yılda yayınlanan çalışmalar (2020 ve sonrası).",
+      "- Çalışma türleri: klinik çalışma, klinik deneme, karşılaştırmalı çalışma, meta-analiz, çok merkezli çalışma, randomize kontrollü çalışma (RCT), derleme ve sistematik derlemeler.",
+      "- Öncül cihaz ve eşdeğerlerinin komplikasyonları ve advers olayları.",
+      "- Eşdeğer cihaz ve diğer potansiyel eşdeğer cihazlar hakkında hastalarda yapılan klinik çalışmalar.",
+      "- Laboratuvar ortamında yapılan biyomekanik veya in-vitro çalışmalar.",
+      "- Klinik değerlendirme için önemli içerik: amaçlanan kullanıma ilişkin klinik veriler; aynı endikasyonlarda cihaz teknolojisinin terapötik veya diğer etkilerini (olumlu/olumsuz) değerlendiren yayınlar; belirli ürün iddialarına odaklanan yayınlar.",
     ].join("\n");
   }
   return [
-    "- Human data (case series, cohort, RCT, systematic reviews)",
-    "- Last 10 years (older pivotal studies with justification)",
-    "- English (others with abstract translation if needed)",
-    "- National registries: FDA MAUDE, FDA recalls, BfArM, MHRA, EUDAMED, TİTCK etc. for device-related vigilance signals",
+    "- Only full texts are assessed.",
+    "- Only human studies are considered.",
+    "- Language: English.",
+    "- Studies published within the last 5 years (from 2020 onward).",
+    "- Study types: clinical studies, clinical trials, comparative studies, meta-analyses, multicentre studies, randomized controlled trials (RCTs), narrative reviews, and systematic reviews.",
+    "- Complications and adverse events of the predicate device and its equivalents.",
+    "- Clinical studies in patients on the equivalent device and other potential equivalent devices.",
+    "- Biomechanical or in-vitro studies conducted in a laboratory setting.",
+    "- Content important for clinical evaluation: publications on clinical data related to intended use; same-indication publications evaluating therapeutic or other effects of the device technology (positive and negative); publications addressing specific product claims.",
   ].join("\n");
 }
 
 export function defaultExclusionCriteria(locale: "tr" | "en"): string {
   if (locale === "tr") {
     return [
-      "- Sadece bench / hayvan çalışması (SOTA için ayrı)",
-      "- İlgisiz endikasyon veya farklı teknoloji",
-      "- Cihazla ilişkilendirilemeyen genel olay kayıtları",
+      "- İngilizce dışındaki dillerde yayınlanan yayınlar.",
+      "- 2020'den eski literatür.",
+      "- Yalnızca atıf yapılan literatür (kaynak tam metin değil).",
+      "- Yalnızca özetlenmiş literatür (yalnızca özetler).",
+      "- Farklı arama motorlarında tekrarlanan (yinelenen) literatür.",
+      "- Eşdeğer cihazlara ait olmayan çalışmalar.",
+      "- Başka tıbbi cihaz türleri ve tedavi yöntemleriyle yapılan tedavi çalışmaları.",
+      "- Başka ilaç veya cihazların değerlendirilmesine yönelik çalışmalar.",
+      "- Diğer, ilgisiz tıbbi semptomların tedavisi.",
+      "- Vaka raporları (anekdot kabul edildiği için) ve özeti olmayan makaleler.",
+      "- Hayvan deneyleriyle ilgili klinik öncesi ve deneysel veriler.",
+      "- Yayınlanmamış klinik veriler.",
     ].join("\n");
   }
   return [
-    "- Bench / animal only (assessed separately for SOTA)",
-    "- Irrelevant indication or technology",
-    "- General incident records not linkable to the device",
+    "- Publications in languages other than English.",
+    "- Literature published before 2020.",
+    "- Cited literature only (not the full source text).",
+    "- Summarized literature only (abstracts without full text).",
+    "- Duplicate literature across different search engines.",
+    "- Studies not pertaining to equivalent devices.",
+    "- Treatment studies involving other types of medical devices or treatment methods.",
+    "- Studies evaluating other drugs or devices.",
+    "- Treatment of other, irrelevant medical symptoms.",
+    "- Case reports (considered anecdotal) and articles without abstracts.",
+    "- Preclinical and experimental data from animal studies.",
+    "- Unpublished clinical data.",
   ].join("\n");
 }
 
