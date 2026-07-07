@@ -64,6 +64,7 @@ export const NAV_GROUPS: NavGroup[] = [
     titleKey: "nav.group.intelligence",
     items: [
       { labelKey: "nav.consultant", href: "/consultant", icon: Sparkles },
+      { labelKey: "nav.composer", href: "/composer", icon: PenLine },
       { labelKey: "nav.auditSimulator", href: "/audit-simulator", icon: ClipboardCheck },
       { labelKey: "nav.executive", href: "/executive", icon: LineChart },
       { labelKey: "nav.documentTranslator", href: "/document-translator", icon: Languages },
@@ -72,7 +73,6 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     titleKey: "nav.group.quality",
     items: [
-      { labelKey: "nav.composer", href: "/composer", icon: PenLine },
       { labelKey: "nav.qmWizard", href: "/wizards/quality-manual", icon: Wand2 },
       { labelKey: "nav.standards", href: "/standards", icon: Library },
       { labelKey: "nav.qms", href: "/qms", icon: BookMarked },
