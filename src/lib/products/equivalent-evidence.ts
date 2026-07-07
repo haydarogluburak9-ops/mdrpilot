@@ -59,6 +59,38 @@ export async function readEquivalentEvidenceBuffer(
   }
 }
 
+const DATASHEET_MIME = ["application/pdf"] as const;
+const DATASHEET_MAX = 25 * 1024 * 1024;
+
+function datasheetKey(companyId: string, productId: string, deviceId: string, fileId: string) {
+  return `clinical-equiv/${companyId}/${productId}/${deviceId}/datasheet-${fileId}.pdf`;
+}
+
+export async function uploadEquivalentDatasheetPdf(params: {
+  companyId: string;
+  productId: string;
+  deviceId: string;
+  buffer: Buffer;
+  mimeType: string;
+  fileName: string;
+}): Promise<{ storageKey: string; fileName: string; mimeType: string }> {
+  const mime = params.mimeType === "application/x-pdf" ? "application/pdf" : params.mimeType;
+  if (!DATASHEET_MIME.includes(mime as (typeof DATASHEET_MIME)[number])) {
+    throw new BadRequestError("Datasheet must be a PDF file");
+  }
+  if (params.buffer.length > DATASHEET_MAX) {
+    throw new BadRequestError("PDF exceeds 25 MB");
+  }
+  if (params.buffer.slice(0, 5).toString() !== "%PDF-") {
+    throw new BadRequestError("Invalid PDF file");
+  }
+
+  const id = randomUUID();
+  const storageKey = datasheetKey(params.companyId, params.productId, params.deviceId, id);
+  await getUploadsStorage().save(storageKey, params.buffer);
+  return { storageKey, fileName: params.fileName, mimeType: mime };
+}
+
 export function assertEvidenceKeyOwned(
   storageKey: string,
   companyId: string,

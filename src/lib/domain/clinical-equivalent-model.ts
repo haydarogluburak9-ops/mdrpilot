@@ -29,6 +29,12 @@ export interface EquivalentDeviceRecord {
   liveVerified?: boolean;
   liveQueryUrl?: string;
   evidenceScreenshots?: EquivalentEvidenceScreenshot[];
+  /** Competitor IFU / datasheet PDF (EK-5). */
+  datasheetFile?: {
+    storageKey: string;
+    fileName: string;
+    mimeType: string;
+  };
   cerComment?: string;
   notes: string;
   preparedByMedDoc?: boolean;
@@ -161,6 +167,22 @@ export function parseEquivalentDevicesJson(raw: unknown): EquivalentDevicesData 
         liveVerified: d.liveVerified === true,
         liveQueryUrl: typeof d.liveQueryUrl === "string" ? d.liveQueryUrl : undefined,
         evidenceScreenshots: parseEvidenceScreenshots(d.evidenceScreenshots),
+        datasheetFile:
+          d.datasheetFile &&
+          typeof d.datasheetFile === "object" &&
+          typeof (d.datasheetFile as { storageKey?: string }).storageKey === "string"
+            ? {
+                storageKey: (d.datasheetFile as { storageKey: string }).storageKey,
+                fileName:
+                  typeof (d.datasheetFile as { fileName?: string }).fileName === "string"
+                    ? (d.datasheetFile as { fileName: string }).fileName
+                    : "datasheet.pdf",
+                mimeType:
+                  typeof (d.datasheetFile as { mimeType?: string }).mimeType === "string"
+                    ? (d.datasheetFile as { mimeType: string }).mimeType
+                    : "application/pdf",
+              }
+            : undefined,
         cerComment: typeof d.cerComment === "string" ? d.cerComment : undefined,
         notes: typeof d.notes === "string" ? d.notes : "",
         preparedByMedDoc: d.preparedByMedDoc === true,

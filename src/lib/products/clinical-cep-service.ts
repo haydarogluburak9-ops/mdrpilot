@@ -138,6 +138,7 @@ export async function buildCepInput(
     equivalentDevicesData,
     pmsPmcfInputs: cer?.pmsPmcfInputs ?? null,
     planNotes: existingPlan ?? cer?.plan ?? null,
+    variantsJson: product.variantsJson,
   };
 }
 

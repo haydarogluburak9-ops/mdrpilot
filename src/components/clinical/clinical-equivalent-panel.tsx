@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ImagePlus, Loader2, Plus, Save, Sparkles, Trash2 } from "lucide-react";
+import { ImagePlus, Loader2, Plus, Save, Sparkles, Trash2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -58,6 +58,7 @@ export function ClinicalEquivalentPanel({
   const [error, setError] = useState<string | null>(null);
 
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [uploadingDatasheetId, setUploadingDatasheetId] = useState<string | null>(null);
 
   function updateDevice(id: string, patch: Partial<EquivalentDeviceRecord>) {
     setData((d) => ({
@@ -145,6 +146,46 @@ export function ClinicalEquivalentPanel({
               evidenceScreenshots: (row.evidenceScreenshots ?? []).filter((s) => s.id !== screenshotId),
             }
           : row,
+      ),
+    }));
+  }
+
+  async function uploadDatasheet(deviceId: string, file: File) {
+    setUploadingDatasheetId(deviceId);
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append("deviceId", deviceId);
+      form.append("file", file);
+      const res = await fetch(
+        `/api/products/${productId}/clinical-evaluation/equivalents/datasheet`,
+        { method: "POST", body: form },
+      );
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(typeof body.error === "string" ? body.error : t("clinical.equiv.datasheetUploadError"));
+        return;
+      }
+      if (body.datasheet) {
+        setData((d) => ({
+          ...d,
+          devices: d.devices.map((row) =>
+            row.id === deviceId ? { ...row, datasheetFile: body.datasheet } : row,
+          ),
+        }));
+      }
+    } catch {
+      setError(t("clinical.equiv.datasheetUploadError"));
+    } finally {
+      setUploadingDatasheetId(null);
+    }
+  }
+
+  function removeDatasheet(deviceId: string) {
+    setData((d) => ({
+      ...d,
+      devices: d.devices.map((row) =>
+        row.id === deviceId ? { ...row, datasheetFile: undefined } : row,
       ),
     }));
   }
@@ -387,6 +428,48 @@ export function ClinicalEquivalentPanel({
                 </a>
               </div>
             )}
+            <div className="space-y-2 sm:col-span-2 rounded-md border border-dashed border-border p-3">
+              <FieldLabel>{t("clinical.equiv.datasheet")}</FieldLabel>
+              <p className="text-[11px] text-muted-foreground">{t("clinical.equiv.datasheetHint")}</p>
+              {d.datasheetFile && (
+                <div className="flex items-center gap-2 rounded border border-border px-2 py-1 text-xs">
+                  <FileText className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{d.datasheetFile.fileName}</span>
+                  {canEdit && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="ml-auto h-6 w-6 p-0"
+                      onClick={() => removeDatasheet(d.id)}
+                    >
+                      <Trash2 className="h-3 w-3 text-destructive" />
+                    </Button>
+                  )}
+                </div>
+              )}
+              {canEdit && (
+                <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs text-primary">
+                  {uploadingDatasheetId === d.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileText className="h-4 w-4" />
+                  )}
+                  {t("clinical.equiv.addDatasheet")}
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    className="hidden"
+                    disabled={uploadingDatasheetId === d.id}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void uploadDatasheet(d.id, file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              )}
+            </div>
             <div className="space-y-2 sm:col-span-2 rounded-md border border-dashed border-border p-3">
               <FieldLabel>{t("clinical.equiv.evidenceScreenshots")}</FieldLabel>
               <p className="text-[11px] text-muted-foreground">{t("clinical.equiv.evidenceScreenshotsHint")}</p>

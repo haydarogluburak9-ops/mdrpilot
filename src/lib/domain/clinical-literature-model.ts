@@ -24,6 +24,7 @@ export const CLINICAL_DATABASE_CATALOG: ClinicalDatabaseOption[] = [
   { id: "embase", labelEn: "Embase", labelTr: "Embase", group: "literature", region: "INT" },
   { id: "cochrane", labelEn: "Cochrane Library", labelTr: "Cochrane Library", group: "literature", region: "INT" },
   { id: "scopus", labelEn: "Scopus", labelTr: "Scopus", group: "literature", region: "INT" },
+  { id: "sciencedirect", labelEn: "ScienceDirect", labelTr: "ScienceDirect", group: "literature", region: "INT" },
   { id: "trdizin", labelEn: "TR Dizin / ULAKBİM", labelTr: "TR Dizin / ULAKBİM", group: "literature", region: "TR" },
   { id: "fda-maude", labelEn: "FDA MAUDE (adverse events)", labelTr: "FDA MAUDE (advers olaylar)", group: "regulatory", region: "US" },
   { id: "fda-recalls", labelEn: "FDA Medical Device Recalls", labelTr: "FDA Tıbbi Cihaz Geri Çağırmaları", group: "regulatory", region: "US" },
@@ -136,6 +137,16 @@ export interface LiteratureSearchData {
     mimeType: string;
     uploadedAt: string;
     caption?: string;
+  }>;
+  /** Full-text PDFs of PRISMA-included articles (EK-4). */
+  acceptedArticles?: Array<{
+    id: string;
+    storageKey: string;
+    fileName: string;
+    mimeType: string;
+    uploadedAt: string;
+    citation?: string;
+    studyIndex?: number;
   }>;
 }
 
@@ -375,7 +386,32 @@ export function parseLiteratureSearchJson(raw: unknown): LiteratureSearchData | 
     pubmedQueryUrl: typeof r.pubmedQueryUrl === "string" ? r.pubmedQueryUrl : undefined,
     pubmedTotal: typeof r.pubmedTotal === "number" ? r.pubmedTotal : undefined,
     evidenceScreenshots: parseLitEvidenceScreenshots(r.evidenceScreenshots),
+    acceptedArticles: parseAcceptedArticles(r.acceptedArticles),
   };
+}
+
+function parseAcceptedArticles(raw: unknown) {
+  if (!Array.isArray(raw)) return undefined;
+  const out = raw
+    .filter((x) => x && typeof x === "object")
+    .map((row) => {
+      const x = row as Record<string, unknown>;
+      if (typeof x.storageKey !== "string") return null;
+      return {
+        id: typeof x.id === "string" ? x.id : "",
+        storageKey: x.storageKey,
+        fileName: typeof x.fileName === "string" ? x.fileName : "article.pdf",
+        mimeType: typeof x.mimeType === "string" ? x.mimeType : "application/pdf",
+        uploadedAt: typeof x.uploadedAt === "string" ? x.uploadedAt : "",
+        citation: typeof x.citation === "string" ? x.citation : undefined,
+        studyIndex:
+          typeof x.studyIndex === "number" && x.studyIndex > 0
+            ? Math.round(x.studyIndex)
+            : undefined,
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => Boolean(x?.storageKey));
+  return out.length ? out : undefined;
 }
 
 /** PubMed/MEDLINE is English — map device profile (TR or EN) to English search clauses. */

@@ -84,6 +84,20 @@ const bodySchema = z.object({
     pubmedQueryUrl: z.string().max(800).optional(),
     pubmedTotal: z.number().int().min(0).optional(),
     evidenceScreenshots: z.array(evidenceScreenshotSchema).max(10).optional(),
+    acceptedArticles: z
+      .array(
+        z.object({
+          id: z.string().max(64),
+          storageKey: z.string().max(300),
+          fileName: z.string().max(200),
+          mimeType: z.string().max(100),
+          uploadedAt: z.string().max(40),
+          citation: z.string().max(2000).optional(),
+          studyIndex: z.number().int().min(1).optional(),
+        }),
+      )
+      .max(50)
+      .optional(),
   }),
 });
 

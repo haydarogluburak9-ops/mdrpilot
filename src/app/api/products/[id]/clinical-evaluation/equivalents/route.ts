@@ -41,6 +41,13 @@ const deviceSchema = z.object({
     )
     .max(10)
     .optional(),
+  datasheetFile: z
+    .object({
+      storageKey: z.string().max(300),
+      fileName: z.string().max(200),
+      mimeType: z.string().max(100),
+    })
+    .optional(),
   cerComment: z.string().max(2000).optional(),
   dimensions: z.string().max(500).optional(),
   rawMaterial: z.string().max(500).optional(),

@@ -46,6 +46,8 @@ export interface CepBuildInput {
   pmsPmcfInputs?: string | null;
   /** User-edited team / schedule notes from plan field (optional). */
   planNotes?: string | null;
+  /** Device family matrix for variant justification (optional). */
+  variantsJson?: unknown;
 }
 
 function higherClass(deviceClass: string): boolean {
@@ -228,6 +230,62 @@ function pmcfAnnex(input: CepBuildInput): string {
   ].join("");
 }
 
+function variantFamilyBlock(input: CepBuildInput): string {
+  const { locale, product: p, variantsJson } = input;
+  const tr = locale === "tr";
+  const v = variantsJson as
+    | { brands?: Array<{ name?: string; models?: Array<{ code?: string }> }> }
+    | null
+    | undefined;
+  const brands = v?.brands ?? [];
+  if (brands.length <= 1 && (brands[0]?.models?.length ?? 0) <= 1) {
+    return tr
+      ? "_Tek varyantlı ürün — ayrı CER gerekçesi uygulanmaz._"
+      : "_Single-variant product — separate CER justification not required._";
+  }
+  const modelCount = brands.reduce((n, b) => n + (b.models?.length ?? 0), 0);
+  return [
+    tr
+      ? `Bu CEP/CER, **${p.name}** cihaz ailesindeki ${brands.length} marka ve ${modelCount} model/referansı kapsar.`
+      : `This CEP/CER covers ${brands.length} brand(s) and ${modelCount} model/reference(s) in the **${p.name}** device family.`,
+    "",
+    tr
+      ? "**Gerekçe:** Varyantlar aynı amaçlanan kullanım, aynı risk profili, aynı temel tasarım ve üretim sürecini paylaşır; farklılıklar yalnızca boyut/renk/model kodu düzeyindedir ve klinik güvenlik veya performansı olumsuz etkilemez."
+      : "**Rationale:** Variants share intended purpose, risk profile, core design and manufacturing; differences are size/colour/model code only and do not adversely affect clinical safety or performance.",
+    "",
+    "| Marka | Modeller |",
+    "| --- | --- |",
+    ...brands.map((b) => `| ${cell(b.name ?? "—")} | ${cell((b.models ?? []).map((m) => m.code).filter(Boolean).join(", ") || "—")} |`),
+  ].join("\n");
+}
+
+function clinicalOutcomesBlock(input: CepBuildInput): string {
+  const { locale, literatureData: lit, product: p } = input;
+  const tr = locale === "tr";
+  const outcomes = lit?.outcomes?.trim() || p.intendedPurpose?.trim() || "—";
+  return [
+    tr ? "## 5. Beklenen klinik sonuç parametreleri" : "## 5. Expected clinical outcome parameters",
+    "",
+    tr
+      ? "Fayda-risk değerlendirmesi ve literatür taraması aşağıdaki sonuç parametrelerine göre yapılır:"
+      : "Benefit-risk and literature appraisal use the following outcome parameters:",
+    "",
+    outcomes,
+    "",
+    "| Parametre | Kabul kriteri (SOTA) | Veri kaynağı |",
+    "| --- | --- | --- |",
+    tr
+      ? `| Güvenlik (advers olay, komplikasyon) | Kabul edilebilir risk seviyesi (ISO 14971) | Literatür, PMS, risk dosyası |`
+      : `| Safety (adverse events, complications) | Acceptable risk level (ISO 14971) | Literature, PMS, risk file |`,
+    tr
+      ? `| Klinik performans | Amaçlanan kullanım için yeterli etkinlik | Literatür, eşdeğerlik, PMCF |`
+      : `| Clinical performance | Adequate efficacy for intended purpose | Literature, equivalence, PMCF |`,
+    tr
+      ? `| Kullanılabilirlik | Hedef kullanıcı için güvenli kullanım | Risk dosyası, PMS |`
+      : `| Usability | Safe use for intended user | Risk file, PMS |`,
+  ].join("\n");
+}
+
 /** MDCG 2020-1 core sections (stored in `plan` field). */
 export function buildCepCore(input: CepBuildInput): string {
   const { locale, product: p, risks, planNotes } = input;
@@ -304,6 +362,9 @@ export function buildCepCore(input: CepBuildInput): string {
         : `- **Contact duration:** ${p.bodyContactDuration}`
       : "",
     "",
+    tr ? "## 2.1 Cihaz ailesi / varyant gerekçesi" : "## 2.1 Device family / variant rationale",
+    variantFamilyBlock(input),
+    "",
     tr ? "## 3. Klinik veri gerektiren GSPR'ler" : "## 3. GSPRs requiring clinical data",
     tr
       ? "_MDR Ek I GSPR maddeleri — klinik değerlendirme ile adreslenecekler:_"
@@ -315,6 +376,11 @@ export function buildCepCore(input: CepBuildInput): string {
     "",
     tr ? "## 4. Klinik değerlendirme türü" : "## 4. Type of clinical evaluation",
     evaluationRoute(input),
+    "",
+    clinicalOutcomesBlock(input).replace(
+      tr ? "## 5. Beklenen klinik sonuç parametreleri" : "## 5. Expected clinical outcome parameters",
+      tr ? "## 4.1 Beklenen klinik sonuç parametreleri" : "## 4.1 Expected clinical outcome parameters",
+    ),
     "",
     tr ? "## 5. Literatür inceleme planı" : "## 5. Literature review plan",
     input.literatureData?.preparedByMedDoc

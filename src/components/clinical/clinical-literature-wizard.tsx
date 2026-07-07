@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2, Save, Sparkles, ArrowRight, Wand2, X, ImagePlus } from "lucide-react";
+import { Loader2, Save, Sparkles, ArrowRight, Wand2, X, ImagePlus, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -148,6 +148,41 @@ export function ClinicalLiteratureWizard({
     } finally {
       setGenerating(false);
     }
+  }
+
+  async function uploadArticle(file: File, citation?: string) {
+    setUploadingTarget("article");
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      if (citation) form.append("citation", citation);
+      const res = await fetch(
+        `/api/products/${productId}/clinical-evaluation/literature/articles`,
+        { method: "POST", body: form },
+      );
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(typeof body.error === "string" ? body.error : t("clinical.lit.articleUploadError"));
+        return;
+      }
+      if (!body.article) return;
+      setData((d) => ({
+        ...d,
+        acceptedArticles: [...(d.acceptedArticles ?? []), body.article],
+      }));
+    } catch {
+      setError(t("clinical.lit.articleUploadError"));
+    } finally {
+      setUploadingTarget(null);
+    }
+  }
+
+  function removeArticle(id: string) {
+    setData((d) => ({
+      ...d,
+      acceptedArticles: (d.acceptedArticles ?? []).filter((a) => a.id !== id),
+    }));
   }
 
   async function uploadEvidence(target: string, file: File, registryId?: string) {
@@ -685,6 +720,49 @@ export function ClinicalLiteratureWizard({
             </div>
           </div>
         </>
+      )}
+
+      {(canEdit || (data.acceptedArticles?.length ?? 0) > 0) && (
+        <div className="rounded-lg border border-border p-4 space-y-2">
+          <h4 className="text-sm font-semibold">{t("clinical.lit.articlesTitle")}</h4>
+          <p className="text-xs text-muted-foreground">{t("clinical.lit.articlesHint")}</p>
+          <ul className="space-y-1 text-xs">
+            {(data.acceptedArticles ?? []).map((a) => (
+              <li key={a.id} className="flex items-center justify-between gap-2 rounded border border-border px-2 py-1">
+                <span className="flex items-center gap-1 truncate">
+                  <FileText className="h-3.5 w-3.5 shrink-0" />
+                  {a.fileName}
+                </span>
+                {canEdit && (
+                  <button type="button" className="text-destructive" onClick={() => removeArticle(a.id)}>
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+          {canEdit && (
+            <label className="inline-flex cursor-pointer items-center gap-1 text-xs text-primary underline">
+              {uploadingTarget === "article" ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <FileText className="h-3 w-3" />
+              )}
+              {t("clinical.lit.addArticlePdf")}
+              <input
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                disabled={uploadingTarget !== null}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void uploadArticle(file);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          )}
+        </div>
       )}
 
       <div className="flex items-center gap-2">
