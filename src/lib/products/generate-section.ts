@@ -18,6 +18,7 @@ import { describeSymbols } from "@/lib/domain/iso15223-symbols";
 import { sterilizationText } from "@/lib/domain/sterilization";
 import { getMeteredAiProvider, aiProviderInfo, extractJson } from "@/lib/ai/provider-factory";
 import { AiTokenLimitError } from "@/lib/auth/errors";
+import { syncTechnicalFileSections } from "@/lib/products/technical-file-sync";
 import {
   buildPmsOperationalSnapshot,
   snapshotToPsurContext,
@@ -216,6 +217,8 @@ export async function generateTechnicalSection(
   locale: string,
   generatedBy = "—",
 ): Promise<GeneratedSection | null> {
+  await syncTechnicalFileSections(productId);
+
   const product = await prisma.product.findFirst({
     where: { id: productId, companyId, deletedAt: null },
     include: {

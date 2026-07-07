@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sparkles, Loader2, X, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,12 +31,23 @@ export function TechnicalFileTable({
   canEdit?: boolean;
 }) {
   const { t, lang } = useI18n();
+  const sectionFingerprint = useMemo(
+    () => initialSections.map((s) => s.id).join(","),
+    [initialSections],
+  );
   const [sections, setSections] = useState<TechnicalSection[]>(
     initialSections.filter((s) => isTechnicalFileSectionKey(s.key)),
   );
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState<DraftState | null>(null);
+
+  useEffect(() => {
+    setSections(initialSections.filter((s) => isTechnicalFileSectionKey(s.key)));
+    setError(null);
+    setDraft(null);
+    setLoadingId(null);
+  }, [productId, sectionFingerprint, initialSections]);
 
   function localizedTitle(s: TechnicalSection): string {
     const k = `tf.section.${s.key}`;
@@ -56,7 +67,7 @@ export function TechnicalFileTable({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? t("tf.generateError"));
+        setError(data.error === "Not found" ? t("tf.generateNotFound") : (data.error ?? t("tf.generateError")));
         return;
       }
       setSections((prev) =>

@@ -37,7 +37,12 @@ export function TechnicalFileView({ products, canEdit = false }: { products: Pro
         <>
           <ProductSwitcher products={products} value={productId} onChange={setProductId} />
           <div className="space-y-4">
-            <TechnicalFileTable sections={product.technicalSections} productId={product.id} canEdit={canEdit} />
+            <TechnicalFileTable
+              key={product.id}
+              sections={product.technicalSections}
+              productId={product.id}
+              canEdit={canEdit}
+            />
             <AiPanel
               promptId="technical-file"
               input={{ ...productAiInput(product), productId: product.id }}
