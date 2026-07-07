@@ -75,7 +75,7 @@ export function RiskDocGenerate({
       setDraftContent(data.content ?? "");
       setDraftSource(data.source ?? "rules");
       setMissing(data.missingInformation ?? []);
-      if (!data.liveAiUsed) {
+      if (!data.liveAiUsed && data.aiFallbackReason) {
         setError(data.aiFallbackReason ? `${t("risk.mgmt.generate.aiFallback")} (${data.aiFallbackReason})` : t("risk.mgmt.generate.aiFallback"));
       }
       setDraftOpen(true);

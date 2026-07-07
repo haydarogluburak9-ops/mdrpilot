@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { NotFoundError } from "@/lib/auth/errors";
 import { runPrompt } from "@/lib/ai/orchestrator";
+import { getAiTokenBalance } from "@/lib/billing/ai-tokens";
 import { canonicalQmsClauseRefs } from "@/lib/domain/constants";
 import { qmsDocTitle } from "@/lib/i18n/qms-doc-titles";
 import {
@@ -152,11 +153,17 @@ export async function generateQmsDocument(
     (result.summary.trim() ? `## ${localizedTitle}\n\n${result.summary}` : "");
 
   const liveAiUsed = !ruleBasedContent && source !== "mock";
-  const aiFallbackReason = liveAiUsed || ruleBasedContent
-    ? undefined
-    : meta.provider === "mock" && process.env.AI_PROVIDER && process.env.AI_PROVIDER !== "mock"
-      ? "provider_error_or_invalid_json"
-      : "mock_or_no_provider";
+  let aiFallbackReason: string | undefined;
+  if (!liveAiUsed && !ruleBasedContent) {
+    const balance = await getAiTokenBalance(companyId);
+    if (!balance.allowsLiveAi) {
+      aiFallbackReason = "starter_plan";
+    } else if (meta.provider === "mock" && process.env.AI_PROVIDER && process.env.AI_PROVIDER !== "mock") {
+      aiFallbackReason = "provider_error_or_invalid_json";
+    } else {
+      aiFallbackReason = "mock_or_no_provider";
+    }
+  }
 
   let updatedStatus = doc.status as DocStatus;
   let updatedVersion = revisionNoToLabel(doc.revisionNo ?? 0);

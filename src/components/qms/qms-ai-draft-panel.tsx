@@ -268,7 +268,7 @@ export function QmsAiDraftPanel({
       setSource(data.source ?? "");
       setMissing(data.missingItems ?? []);
       setSummary(data.summary ?? "");
-      if (!data.liveAiUsed) {
+      if (!data.liveAiUsed && data.aiFallbackReason) {
         setError(fallbackLabel(data.aiFallbackReason));
       }
       applySync(data);
