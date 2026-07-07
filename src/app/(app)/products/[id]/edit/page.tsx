@@ -18,10 +18,12 @@ export default async function EditProductPage({ params }: { params: { id: string
   }
   if (!product) notFound();
 
+  const canDelete = hasRole(ctx.role, "QUALITY_MANAGER");
+
   return (
     <div>
       <BackLink href={`/products/${product.id}`} labelKey="products.edit.back" />
-      <EditProductForm product={product} />
+      <EditProductForm product={product} canDelete={canDelete} />
     </div>
   );
 }

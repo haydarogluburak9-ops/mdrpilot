@@ -258,3 +258,19 @@ export async function updateProduct(
 
   return updated;
 }
+
+/** Soft-delete a product (company-scoped). Dossier data remains in DB but is hidden from lists. */
+export async function deleteProduct(companyId: string, productId: string): Promise<boolean> {
+  const existing = await prisma.product.findFirst({
+    where: { id: productId, deletedAt: null },
+    select: { companyId: true },
+  });
+  if (!existing) return false;
+  assertCompanyAccess(existing.companyId, companyId);
+
+  await prisma.product.update({
+    where: { id: productId },
+    data: { deletedAt: new Date() },
+  });
+  return true;
+}

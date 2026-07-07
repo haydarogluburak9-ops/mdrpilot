@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   FileStack,
   ListChecks,
@@ -13,6 +14,8 @@ import {
   Plus,
   PenLine,
   Pencil,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -97,6 +100,7 @@ export function ProductDetailTabs({
   recommendations,
   canEdit,
   canApprove,
+  canDelete,
   company,
   defaultTab = "overview",
   productWorkflowSteps,
@@ -107,12 +111,15 @@ export function ProductDetailTabs({
   recommendations: Record<string, string[]>;
   canEdit: boolean;
   canApprove: boolean;
+  canDelete: boolean;
   company: CompanyLabelProfile;
   defaultTab?: string;
   productWorkflowSteps: DossierWorkflowStep[];
 }) {
   const { t, lang } = useI18n();
+  const router = useRouter();
   const [assistantOpen, setAssistantOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [selectedModelIds, setSelectedModelIds] = useState<string[]>([]);
   const readiness = computeAuditReadiness(p);
   const input = aiInput(p);
@@ -132,6 +139,25 @@ export function ProductDetailTabs({
     : p.isSterile
       ? t(`sterilization.${p.sterilization}`)
       : t("pd.nonSterile");
+
+  async function deleteProduct() {
+    if (!window.confirm(t("products.deleteConfirm").replace("{name}", p.name))) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/products/${p.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        window.alert(data.error ?? t("products.deleteError"));
+        return;
+      }
+      router.push("/products");
+      router.refresh();
+    } catch {
+      window.alert(t("products.deleteError"));
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <div>
@@ -163,6 +189,18 @@ export function ProductDetailTabs({
             <Link href={`/products/${p.id}/edit`} className={buttonVariants({ variant: "outline", className: "gap-2" })}>
               <Pencil className="h-4 w-4" /> {t("pd.editProduct")}
             </Link>
+          )}
+          {canDelete && (
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2 text-destructive hover:text-destructive"
+              onClick={deleteProduct}
+              disabled={deleting}
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              {t("common.delete")}
+            </Button>
           )}
           <Link href={`/composer?productId=${p.id}`} className={buttonVariants({ variant: "outline", className: "gap-2" })}>
             <PenLine className="h-4 w-4" /> {t("pd.generateDocument")}

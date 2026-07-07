@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth/guards";
 import { statusForError } from "@/lib/auth/errors";
 import { writeAuditLog, ipFromRequest } from "@/lib/audit";
-import { updateProduct } from "@/lib/products/service";
+import { updateProduct, deleteProduct } from "@/lib/products/service";
 import { productVariantsSchema } from "@/lib/products/variant-schema";
 
 export const runtime = "nodejs";
@@ -85,6 +85,32 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   } catch (err) {
     const { status, message } = statusForError(err);
     if (status === 500) console.error("[api/products/[id] PUT]", err);
+    return NextResponse.json({ error: message }, { status });
+  }
+}
+
+// DELETE /api/products/[id] — soft-delete product (QUALITY_MANAGER+).
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  try {
+    const ctx = await requireRole("QUALITY_MANAGER");
+    const ok = await deleteProduct(ctx.companyId, params.id);
+    if (!ok) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    await writeAuditLog({
+      action: "product.delete",
+      companyId: ctx.companyId,
+      userId: ctx.user.id,
+      entity: "Product",
+      entityId: params.id,
+      ip: ipFromRequest(req),
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    const { status, message } = statusForError(err);
+    if (status === 500) console.error("[api/products/[id] DELETE]", err);
     return NextResponse.json({ error: message }, { status });
   }
 }

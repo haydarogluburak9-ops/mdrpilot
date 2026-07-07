@@ -27,10 +27,11 @@ const fieldLabel = "mb-1.5 block text-sm font-medium";
 const selectClass =
   "flex h-10 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-export function EditProductForm({ product: p }: { product: Product }) {
+export function EditProductForm({ product: p, canDelete }: { product: Product; canDelete?: boolean }) {
   const { t, lang } = useI18n();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [suggesting, setSuggesting] = useState(false);
   const [suggestNote, setSuggestNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -162,6 +163,26 @@ export function EditProductForm({ product: p }: { product: Product }) {
       setError(t("products.edit.error"));
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function deleteProduct() {
+    if (!window.confirm(t("products.deleteConfirm").replace("{name}", p.name))) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/products/${p.id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError((data as { error?: string }).error ?? t("products.deleteError"));
+        return;
+      }
+      router.push("/products");
+      router.refresh();
+    } catch {
+      setError(t("products.deleteError"));
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -456,14 +477,26 @@ export function EditProductForm({ product: p }: { product: Product }) {
         </p>
       )}
 
-      <div className="mt-6 flex items-center gap-3">
-        <Button type="submit" className="gap-2" disabled={saving}>
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <Button type="submit" className="gap-2" disabled={saving || deleting}>
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {t("products.edit.save")}
         </Button>
-        <Button type="button" variant="outline" onClick={() => router.push(`/products/${p.id}`)} disabled={saving}>
+        <Button type="button" variant="outline" onClick={() => router.push(`/products/${p.id}`)} disabled={saving || deleting}>
           {t("common.cancel")}
         </Button>
+        {canDelete && (
+          <Button
+            type="button"
+            variant="outline"
+            className="ml-auto gap-2 text-destructive hover:text-destructive"
+            onClick={deleteProduct}
+            disabled={saving || deleting}
+          >
+            {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            {t("common.delete")}
+          </Button>
+        )}
       </div>
     </form>
   );

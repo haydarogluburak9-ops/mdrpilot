@@ -52,6 +52,7 @@ export default async function ProductDetailPage({
   const fileOptions = files.map((f) => ({ id: f.id, fileName: f.fileName, documentKind: f.documentKind }));
   const canEdit = hasRole(ctx.role, "CONSULTANT");
   const canApprove = hasRole(ctx.role, "QUALITY_MANAGER");
+  const canDelete = canApprove;
 
   // Map AI recommended links (targetIdOrHint -> file ids) for "AI suggested evidence" badges.
   const recommendations: Record<string, string[]> = {};
@@ -76,6 +77,7 @@ export default async function ProductDetailPage({
         recommendations={recommendations}
         canEdit={canEdit}
         canApprove={canApprove}
+        canDelete={canDelete}
         company={company}
         defaultTab={defaultTab}
         productWorkflowSteps={productWorkflowSteps}
