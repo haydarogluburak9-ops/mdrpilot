@@ -11,15 +11,29 @@ export const runtime = "nodejs";
 
 const ifuContentSchema = z
   .object({
+    productDescription: z.string().optional(),
+    technicalSpecifications: z.string().optional(),
     intendedPurpose: z.string().optional(),
+    intendedUsers: z.string().optional(),
+    patientPopulation: z.string().optional(),
+    clinicalBenefits: z.string().optional(),
     indications: z.string().optional(),
     contraindications: z.string().optional(),
     warnings: z.array(z.string()).optional(),
     precautions: z.array(z.string()).optional(),
     instructions: z.string().optional(),
+    biocompatibility: z.string().optional(),
     storage: z.string().optional(),
+    shelfLifeDetail: z.string().optional(),
     sterilityInfo: z.string().optional(),
     disposal: z.string().optional(),
+    wasteSeparation: z.string().optional(),
+    mdrAnnexIDeclaration: z.string().optional(),
+    incidentReporting: z.string().optional(),
+    troubleshooting: z.array(z.string()).optional(),
+    symbolsGlossary: z.array(z.string()).optional(),
+    regulatoryInfo: z.string().optional(),
+    revisionHistory: z.string().optional(),
   })
   .optional();
 

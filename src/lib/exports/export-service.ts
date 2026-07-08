@@ -89,6 +89,10 @@ async function loadProductWithEvidence(companyId: string, productId: string): Pr
     materials: p.materials,
     packagingType: p.packagingType,
     shelfLife: p.shelfLife,
+    userProfile: p.userProfile,
+    patientPopulation: p.patientPopulation,
+    bodyContactDuration: p.bodyContactDuration,
+    appliedStandards: p.appliedStandards,
     complianceScore: p.complianceScore,
     technicalSections: p.technicalSections.map((s) => {
       for (const l of s.evidenceLinks) {

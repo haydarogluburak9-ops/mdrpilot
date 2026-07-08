@@ -53,12 +53,23 @@ function sectionHeading(num: number, title: string): Paragraph {
   });
 }
 
+function subHeading(title: string): Paragraph {
+  return new Paragraph({
+    spacing: { before: 160, after: 80 },
+    children: [run(title, { bold: true, size: SZ.BODY, color: BRAND })],
+  });
+}
+
 function bullet(text: string): Paragraph {
   return new Paragraph({
     spacing: { after: 60 },
     indent: { left: 360, hanging: 360 },
     children: [run(`• ${text}`, { size: SZ.BODY })],
   });
+}
+
+function textBlock(text: string): Paragraph[] {
+  return text.split(/\n+/).filter(Boolean).map((line) => para([run(line)]));
 }
 
 function metaRow(label: string, value: string): TableRow {
@@ -76,7 +87,7 @@ function metaRow(label: string, value: string): TableRow {
   });
 }
 
-function buildDocHeader(ctx: ExportContext, docNo: string): Header {
+function buildDocHeader(ctx: ExportContext, docNo: string, revision: string): Header {
   const logo = ctx.company.logo;
   const logoPara = logo
     ? new Paragraph({
@@ -90,7 +101,7 @@ function buildDocHeader(ctx: ExportContext, docNo: string): Header {
     rows: [
       metaRow(tx(ctx.language, "sec.docNo"), docNo),
       metaRow(tx(ctx.language, "ch.product"), ctx.product?.name ?? "—"),
-      metaRow(tx(ctx.language, "ch.revision"), "00"),
+      metaRow(tx(ctx.language, "ch.revision"), revision),
       metaRow(
         tx(ctx.language, "generated"),
         generatedLine(ctx.language, ctx.generatedAt.toISOString().slice(0, 10), ctx.generatedBy),
@@ -153,12 +164,45 @@ function modelsTable(ctx: ExportContext): Table {
   return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [header, ...body] });
 }
 
+function revisionTable(content: string): (Paragraph | Table)[] {
+  const lines = content.split("\n").filter(Boolean);
+  if (lines.length < 2 || !lines[0].startsWith("|")) {
+    return textBlock(content);
+  }
+  const headerCells = lines[0].split("|").map((c) => c.trim()).filter(Boolean);
+  const rows = lines.slice(2).map((line) => line.split("|").map((c) => c.trim()).filter(Boolean));
+  return [
+    new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      rows: [
+        new TableRow({
+          tableHeader: true,
+          children: headerCells.map(
+            (h) =>
+              new TableCell({
+                shading: { fill: BRAND },
+                children: [para([run(h, { bold: true, color: "FFFFFF", size: SZ.SMALL })])],
+              }),
+          ),
+        }),
+        ...rows.map(
+          (cells) =>
+            new TableRow({
+              children: cells.map((c) => new TableCell({ children: [para([run(c, { size: SZ.SMALL })])] })),
+            }),
+        ),
+      ],
+    }),
+  ];
+}
+
 export async function buildIfuDocx(ctx: ExportContext, override?: IfuContentOverride): Promise<Buffer> {
   const p = ctx.product;
   if (!p) throw new Error("IFU export requires a product");
   const lang = ctx.language;
   const content = buildIfuContent(ctx, override ?? ctx.exportOptions?.ifuContent);
-  const docNo = "TF-IFU-01";
+  const docNo = `IFU-${p.name.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12).toUpperCase() || "01"}`;
+  const revision = "01";
   const mfr = ctx.company.legalName?.trim() || ctx.company.name;
   const mfrAddr = [ctx.company.address, ctx.company.country].filter(Boolean).join(", ");
   const cls = (DEVICE_CLASS_LABEL as Record<string, string>)[p.deviceClass] ?? p.deviceClass;
@@ -177,20 +221,30 @@ export async function buildIfuDocx(ctx: ExportContext, override?: IfuContentOver
     new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
       rows: [
+        metaRow(tx(lang, "sec.docNo"), docNo),
         metaRow(tx(lang, "ch.company"), mfr),
         metaRow(tx(lang, "ifu.manufacturer"), mfrAddr || "—"),
         metaRow(tx(lang, "ch.classification"), cls),
         metaRow(tx(lang, "ch.basicUdi"), p.basicUdiDi ?? "—"),
         metaRow(tx(lang, "ch.udi"), p.udiDi ?? "—"),
+        metaRow(tx(lang, "ifu.ceNb"), content.regulatoryInfo.split("\n")[0] ?? "—"),
       ],
     }),
     new Paragraph({ text: "", spacing: { after: 160 } }),
 
-    sectionHeading(1, tx(lang, "ifu.deviceDescription")),
-    para([run(content.deviceDescription)]),
+    sectionHeading(1, tx(lang, "ifu.productDescription")),
+    ...textBlock(content.productDescription),
+    subHeading(tx(lang, "ifu.technicalSpecs")),
+    ...textBlock(content.technicalSpecifications),
 
     sectionHeading(2, tx(lang, "ifu.intended")),
     para([run(content.intendedPurpose)]),
+    subHeading(tx(lang, "ifu.intendedUsers")),
+    para([run(content.intendedUsers)]),
+    subHeading(tx(lang, "ifu.patientPopulation")),
+    para([run(content.patientPopulation)]),
+    subHeading(tx(lang, "ifu.clinicalBenefits")),
+    para([run(content.clinicalBenefits)]),
 
     sectionHeading(3, tx(lang, "ifu.indications")),
     para([run(content.indications)]),
@@ -205,27 +259,52 @@ export async function buildIfuDocx(ctx: ExportContext, override?: IfuContentOver
     ...content.precautions.map(bullet),
 
     sectionHeading(7, tx(lang, "ifu.instructions")),
-    para([run(content.instructions)]),
+    ...textBlock(content.instructions),
 
-    sectionHeading(8, tx(lang, "ifu.storage")),
-    para([run(content.storage)]),
+    sectionHeading(8, tx(lang, "ifu.biocompatibility")),
+    ...textBlock(content.biocompatibility),
 
-    sectionHeading(9, tx(lang, "ifu.sterility")),
+    sectionHeading(9, tx(lang, "ifu.storage")),
+    ...textBlock(content.storage),
+    subHeading(tx(lang, "ifu.shelfLife")),
+    ...textBlock(content.shelfLifeDetail),
+
+    sectionHeading(10, tx(lang, "ifu.sterility")),
     para([run(content.sterilityInfo)]),
 
-    sectionHeading(10, tx(lang, "ifu.disposal")),
-    para([run(content.disposal)]),
+    sectionHeading(11, tx(lang, "ifu.disposal")),
+    ...textBlock(content.disposal),
+    subHeading(tx(lang, "ifu.wasteSeparation")),
+    ...textBlock(content.wasteSeparation),
 
-    sectionHeading(11, tx(lang, "ifu.modelCatalogue")),
+    sectionHeading(12, tx(lang, "ifu.mdrAnnexI")),
+    ...textBlock(content.mdrAnnexIDeclaration),
+
+    sectionHeading(13, tx(lang, "ifu.incidentReporting")),
+    ...textBlock(content.incidentReporting),
+
+    sectionHeading(14, tx(lang, "ifu.troubleshooting")),
+    ...content.troubleshooting.map(bullet),
+
+    sectionHeading(15, tx(lang, "ifu.symbolsGlossary")),
+    ...content.symbolsGlossary.map(bullet),
+
+    sectionHeading(16, tx(lang, "ifu.regulatory")),
+    ...textBlock(content.regulatoryInfo),
+
+    sectionHeading(17, tx(lang, "ifu.modelCatalogue")),
     modelsTable(ctx),
 
-    sectionHeading(12, tx(lang, "ifu.manufacturer")),
+    sectionHeading(18, tx(lang, "ifu.manufacturer")),
     para([run(mfr)]),
     ...(mfrAddr ? [para([run(mfrAddr, { size: SZ.SMALL, color: SUBTLE })])] : []),
     para([run(`${tx(lang, "ifu.srn")}: ${ctx.company.srnNumber?.trim() || "—"}`, { size: SZ.SMALL })]),
     para([run(`${tx(lang, "ifu.email")}: ${ctx.company.contactEmail?.trim() || "—"}`, { size: SZ.SMALL })]),
     para([run(`${tx(lang, "ifu.phone")}: ${ctx.company.contactPhone?.trim() || "—"}`, { size: SZ.SMALL })]),
     para([run(`${tx(lang, "ch.udi")}: ${p.udiDi ?? "—"} · ${tx(lang, "ch.basicUdi")}: ${p.basicUdiDi ?? "—"}`, { size: SZ.SMALL })]),
+
+    sectionHeading(19, tx(lang, "ifu.revisionHistory")),
+    ...revisionTable(content.revisionHistory),
 
     new Paragraph({
       border: { top: { style: BorderStyle.SINGLE, size: 6, color: "f59e0b", space: 8 } },
@@ -240,7 +319,7 @@ export async function buildIfuDocx(ctx: ExportContext, override?: IfuContentOver
         properties: {
           page: { margin: { top: 1200, right: 1000, bottom: 1000, left: 1000 } },
         },
-        headers: { default: buildDocHeader(ctx, docNo) },
+        headers: { default: buildDocHeader(ctx, docNo, revision) },
         footers: { default: buildDocFooter(lang) },
         children: body,
       },

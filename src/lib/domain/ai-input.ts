@@ -34,6 +34,31 @@ export function riskAiInput(p: Product) {
   return { ...base, productId: p.id, extra };
 }
 
+/** Product + risk context for IFU prompts (MDR Annex I 23.4). */
+export function ifuAiInput(p: Product) {
+  const base = productAiInput(p);
+  const riskLines = p.riskItems.map((r) => {
+    const harm = r.harm ? ` → ${r.harm}` : "";
+    const control = r.riskControlMeasure?.trim();
+    return `${r.hazard}${harm}${control ? ` | control: ${control.slice(0, 100)}` : ""}`;
+  });
+  const extra = [
+    p.userProfile?.trim() ? `Intended users: ${p.userProfile}` : "",
+    p.patientPopulation?.trim() ? `Patient population: ${p.patientPopulation}` : "",
+    p.shelfLife?.trim() ? `Shelf life: ${p.shelfLife}` : "",
+    p.emdnCode?.trim() ? `EMDN: ${p.emdnCode}` : "",
+    p.appliedStandards?.trim() ? `Applied standards: ${p.appliedStandards}` : "",
+    p.isReusable !== undefined ? `Reusable: ${p.isReusable}` : "",
+    p.packagingType?.trim() ? `Packaging: ${p.packagingType}` : "",
+    riskLines.length > 0
+      ? `Risk file — reflect HIGH/CRITICAL items in warnings:\n${riskLines.join("\n")}`
+      : "Risk file: empty — use product-specific warnings.",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+  return { ...base, extra };
+}
+
 /** Product + risk file context for clinical evaluation (CER) prompts. */
 export function cerAiInput(p: Product) {
   const base = productAiInput(p);

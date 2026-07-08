@@ -229,52 +229,68 @@ const generators: Record<PromptId, (input: any) => AiResult> = {
     const tr = p._locale === "tr";
     const purpose = p.intendedPurpose?.trim() || (tr ? `${p.name} için tanımlanan kullanım amacına uygun kullanım.` : `Use per the defined intended purpose for ${p.name}.`);
     const warnings = [
+      tr ? "Kullanmadan önce bu kullanma kılavuzunu tamamen okuyunuz." : "Read this IFU in full before use.",
       p.isSterile
-        ? tr
-          ? "Ambalaj hasarlı veya açılmışsa kullanmayın."
-          : "Do not use if package is damaged or open."
-        : tr
-          ? "Kullanmadan önce cihazı görsel olarak kontrol edin."
-          : "Inspect the device before use.",
-      tr ? "Tek kullanımlıktır; yeniden kullanmayın veya yeniden sterilize etmeyin." : "Single use — do not reuse or re-sterilize.",
-      ...(p.isInvasive
-        ? [tr ? "Yalnızca eğitimli sağlık personeli tarafından kullanılmalıdır." : "For trained healthcare professionals only."]
-        : []),
+        ? tr ? "Ambalaj hasarlı veya açılmışsa kullanmayın." : "Do not use if package is damaged or open."
+        : tr ? "Kullanmadan önce ürünü görsel olarak kontrol edin." : "Inspect the product before use.",
+      tr ? "Tek kullanımlıktır; yeniden kullanmayın." : "Single use — do not reuse.",
+      ...(p.isInvasive ? [tr ? "Yalnızca eğitimli sağlık personeli tarafından kullanılmalıdır." : "For trained healthcare professionals only."] : []),
     ];
     const precautions = [
-      tr ? "Son kullanma tarihini kontrol edin." : "Check the expiry date.",
-      tr ? "Steril bariyer hasarlıysa kullanmayın." : "Do not use if sterile barrier is compromised.",
+      tr ? "Son kullanma tarihini ve ambalaj bütünlüğünü kontrol edin." : "Check expiry date and package integrity.",
+      tr ? "Kişisel koruyucu ekipman (eldiven, gözlük) kullanın." : "Use PPE (gloves, goggles).",
       tr ? "Kuru ve temiz ortamda saklayın." : "Store in a dry, clean place.",
     ];
+    const troubleshooting = [
+      tr ? "Ambalaj hasarlıysa kullanmayın." : "Do not use if packaging is damaged.",
+      tr ? "Beklenmeyen klinik sonuçta kullanımı durdurun ve olay bildirin." : "Stop use and report incidents on unexpected clinical outcomes.",
+    ];
     return base({
-      summary: tr
-        ? `${p.name} için IFU taslağı ve risk/IFU uyum kontrolü.`
-        : `IFU draft and risk/IFU alignment check for ${p.name}.`,
-      missingItems: tr
-        ? ["ISO 15223-1 sembolleri", "Bertaraf talimatları", "Üretici / UDI bloğu"]
-        : ["Symbols per ISO 15223-1", "Disposal instructions", "Manufacturer / UDI block"],
-      regulatoryReferences: ["MDR Annex I 23.4", "ISO 15223-1"],
+      summary: tr ? `${p.name} için kapsamlı IFU taslağı.` : `Comprehensive IFU draft for ${p.name}.`,
+      missingItems: tr ? ["Üretici onayı", "Canlı NB numarası teyidi"] : ["Manufacturer approval", "Live NB number confirmation"],
+      regulatoryReferences: ["MDR Annex I 23.4", "ISO 15223-1", "ISO 10993"],
       data: {
         ifu: {
+          productDescription: [
+            tr ? `Ticari ad: ${p.name}` : `Trade name: ${p.name}`,
+            p.materials ? (tr ? `Malzeme: ${p.materials}` : `Material: ${p.materials}`) : "",
+            tr ? `Sınıf: ${p.deviceClass}` : `Class: ${p.deviceClass}`,
+          ].filter(Boolean).join("\n"),
+          technicalSpecifications: p.materials
+            ? (tr ? `Malzeme/bileşim: ${p.materials}` : `Material/composition: ${p.materials}`)
+            : tr ? "Teknik özellikler teknik dosyada [TEYİT EDİLECEK]." : "Technical specs in technical file [TO BE CONFIRMED].",
           intendedPurpose: purpose,
+          intendedUsers: tr ? "Yetkili sağlık profesyonelleri." : "Authorised healthcare professionals.",
+          patientPopulation: tr ? "Amaçlanan kullanıma uygun hasta popülasyonu." : "Patient population per intended use.",
+          clinicalBenefits: tr ? `Amaçlanan kullanımda güvenlik ve performans: ${purpose}` : `Safety and performance for intended use: ${purpose}`,
           indications: p.indications?.trim() || (tr ? "Ürün dosyasındaki endikasyonlara uygun kullanın." : "Use per indications in the product dossier."),
           contraindications: p.contraindications?.trim() || (tr ? "Ürün dosyasındaki kontrendikasyonlara dikkat edin." : "Observe contraindications in the product dossier."),
           warnings,
           precautions,
-          instructions: tr
-            ? `${p.name} yalnızca tanımlanan amaç için kullanılmalıdır. Aseptik tekniğe uyun.`
-            : `Use ${p.name} only for the stated purpose. Follow aseptic technique.`,
-          storage: tr ? "15–25 °C arasında, kuru ortamda saklayın." : "Store at 15–25 °C in a dry place.",
+          instructions: tr ? `${p.name} yalnızca tanımlanan amaç için kullanılmalıdır.` : `Use ${p.name} only for the stated purpose.`,
+          biocompatibility: tr
+            ? "Biyouyumluluk ISO 10993 serisine göre değerlendirilmiştir; raporlar teknik dosyada."
+            : "Biocompatibility assessed per ISO 10993; reports in technical file.",
+          storage: tr ? "Orijinal ambalajında, kuru ortamda, 15–25 °C saklayın." : "Store in original packaging, dry place, 15–25 °C.",
+          shelfLifeDetail: tr ? "Raf ömrü ambalaj üzerinde belirtilir." : "Shelf life stated on packaging.",
           sterilityInfo: p.isSterile
-            ? tr
-              ? `${p.sterilization ?? "EO"} ile sterilize edilmiştir. Tek kullanımlıktır.`
-              : `Sterilized by ${p.sterilization ?? "EO"}. Single use.`
-            : tr
-              ? "Steril değildir."
-              : "Non-sterile.",
-          disposal: tr
-            ? "Yerel tıbbi atık mevzuatına uygun bertaraf edin."
-            : "Dispose per local medical waste regulations.",
+            ? tr ? `${p.sterilization ?? "EO"} ile sterilize. Tek kullanımlık.` : `Sterilized by ${p.sterilization ?? "EO"}. Single use.`
+            : tr ? "Steril değildir." : "Non-sterile.",
+          disposal: tr ? "Yerel tıbbi atık mevzuatına uygun bertaraf edin." : "Dispose per local medical waste regulations.",
+          wasteSeparation: tr ? "Kontamine atık tıbbi atık; ambalaj geri dönüşüme ayrılır." : "Contaminated waste as medical waste; packaging recycled separately.",
+          mdrAnnexIDeclaration: tr
+            ? "MDR Ek I: İlaç/kan/doku içermez. Ftalat/CMR içermediği beyan edilir."
+            : "MDR Annex I: No drugs/blood/tissue. Declared free of phthalates/CMR.",
+          incidentReporting: tr
+            ? "Ciddi olayları üreticiye ve yetkili otoriteye bildirin (MDR Madde 87)."
+            : "Report serious incidents to manufacturer and competent authority (MDR Art. 87).",
+          troubleshooting,
+          symbolsGlossary: [
+            tr ? "Üretici (ISO 15223-1, 5.1.1): etikette yer alır" : "Manufacturer (ISO 15223-1, 5.1.1): on label",
+            tr ? "Kullanma talimatlarına bakınız (5.4.3): etikette" : "Consult IFU (5.4.3): on label",
+          ],
+          regulatoryInfo: tr ? `CE işareti — ${p.deviceClass} tıbbi cihaz.` : `CE marking — ${p.deviceClass} medical device.`,
+          revisionHistory: tr ? "| Rev | Tarih | Değişiklik | Hazırlayan |\n| 01 | — | İlk taslak | MDRpilot |" : "| Rev | Date | Change | Author |\n| 01 | — | Initial draft | MDRpilot |",
         },
         labelCaution: tr
           ? "Kullanmadan önce kullanım talimatını okuyunuz. Hasarlı ambalajı kullanmayınız."

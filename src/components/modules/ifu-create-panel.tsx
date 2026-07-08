@@ -5,7 +5,7 @@ import { Download, Loader2, AlertCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AiAnalyzingHint } from "@/components/ai/ai-analyzing-hint";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { productAiInput } from "@/lib/domain/ai-input";
+import { ifuAiInput } from "@/lib/domain/ai-input";
 import { flattenLabelModels } from "@/lib/domain/label-models";
 import { downloadExportJob } from "@/lib/exports/download-client";
 import type { Product } from "@/lib/domain/types";
@@ -19,16 +19,32 @@ interface ExportJobResult {
 }
 
 function parseIfuBlock(block: Record<string, unknown>): IfuPreviewContent {
+  const str = (k: string) => (typeof block[k] === "string" ? block[k] : undefined) as string | undefined;
+  const arr = (k: string) => (Array.isArray(block[k]) ? (block[k] as unknown[]).filter((w): w is string => typeof w === "string") : undefined);
   return {
-    intendedPurpose: typeof block.intendedPurpose === "string" ? block.intendedPurpose : undefined,
-    indications: typeof block.indications === "string" ? block.indications : undefined,
-    contraindications: typeof block.contraindications === "string" ? block.contraindications : undefined,
-    warnings: Array.isArray(block.warnings) ? block.warnings.filter((w): w is string => typeof w === "string") : undefined,
-    precautions: Array.isArray(block.precautions) ? block.precautions.filter((w): w is string => typeof w === "string") : undefined,
-    instructions: typeof block.instructions === "string" ? block.instructions : undefined,
-    storage: typeof block.storage === "string" ? block.storage : undefined,
-    sterilityInfo: typeof block.sterilityInfo === "string" ? block.sterilityInfo : undefined,
-    disposal: typeof block.disposal === "string" ? block.disposal : undefined,
+    productDescription: str("productDescription"),
+    technicalSpecifications: str("technicalSpecifications"),
+    intendedPurpose: str("intendedPurpose"),
+    intendedUsers: str("intendedUsers"),
+    patientPopulation: str("patientPopulation"),
+    clinicalBenefits: str("clinicalBenefits"),
+    indications: str("indications"),
+    contraindications: str("contraindications"),
+    warnings: arr("warnings"),
+    precautions: arr("precautions"),
+    instructions: str("instructions"),
+    biocompatibility: str("biocompatibility"),
+    storage: str("storage"),
+    shelfLifeDetail: str("shelfLifeDetail"),
+    sterilityInfo: str("sterilityInfo"),
+    disposal: str("disposal"),
+    wasteSeparation: str("wasteSeparation"),
+    mdrAnnexIDeclaration: str("mdrAnnexIDeclaration"),
+    incidentReporting: str("incidentReporting"),
+    troubleshooting: arr("troubleshooting"),
+    symbolsGlossary: arr("symbolsGlossary"),
+    regulatoryInfo: str("regulatoryInfo"),
+    revisionHistory: str("revisionHistory"),
   };
 }
 
@@ -96,7 +112,7 @@ export function IfuCreatePanel({
     const res = await fetch("/api/ai/ifu", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...productAiInput(product), productId: product.id, _locale: lang }),
+      body: JSON.stringify({ ...ifuAiInput(product), productId: product.id, _locale: lang }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? t("exports.failed"));

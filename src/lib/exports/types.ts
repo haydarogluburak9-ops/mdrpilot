@@ -123,6 +123,10 @@ export interface ProductExportData {
   materials: string | null;
   packagingType: string | null;
   shelfLife: string | null;
+  userProfile: string | null;
+  patientPopulation: string | null;
+  bodyContactDuration: string | null;
+  appliedStandards: string | null;
   complianceScore: number;
   technicalSections: { key: string; title: string; annexRef: string | null; status: string; ownerName: string | null; evidenceFiles: EvidenceRef[] }[];
   gsprItems: {

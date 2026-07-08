@@ -3,15 +3,29 @@
 import { useI18n } from "@/components/providers/i18n-provider";
 
 export interface IfuPreviewContent {
+  productDescription?: string;
+  technicalSpecifications?: string;
   intendedPurpose?: string;
+  intendedUsers?: string;
+  patientPopulation?: string;
+  clinicalBenefits?: string;
   indications?: string;
   contraindications?: string;
   warnings?: string[];
   precautions?: string[];
   instructions?: string;
+  biocompatibility?: string;
   storage?: string;
+  shelfLifeDetail?: string;
   sterilityInfo?: string;
   disposal?: string;
+  wasteSeparation?: string;
+  mdrAnnexIDeclaration?: string;
+  incidentReporting?: string;
+  troubleshooting?: string[];
+  symbolsGlossary?: string[];
+  regulatoryInfo?: string;
+  revisionHistory?: string;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -26,68 +40,72 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function BulletList({ items }: { items: string[] }) {
   return (
     <ul className="list-disc space-y-1 pl-4">
-      {items.map((item) => (
-        <li key={item}>{item}</li>
+      {items.map((item, i) => (
+        <li key={`${item.slice(0, 40)}-${i}`}>{item}</li>
       ))}
     </ul>
   );
 }
 
+const PREVIEW_SECTIONS: { key: keyof IfuPreviewContent; labelKey: string; list?: boolean }[] = [
+  { key: "productDescription", labelKey: "ifu.section.productDescription" },
+  { key: "technicalSpecifications", labelKey: "ifu.section.technicalSpecs" },
+  { key: "intendedPurpose", labelKey: "ifu.section.intendedPurpose" },
+  { key: "intendedUsers", labelKey: "ifu.section.intendedUsers" },
+  { key: "patientPopulation", labelKey: "ifu.section.patientPopulation" },
+  { key: "clinicalBenefits", labelKey: "ifu.section.clinicalBenefits" },
+  { key: "indications", labelKey: "ifu.section.indications" },
+  { key: "contraindications", labelKey: "ifu.section.contraindications" },
+  { key: "warnings", labelKey: "ifu.section.warnings", list: true },
+  { key: "precautions", labelKey: "ifu.section.precautions", list: true },
+  { key: "instructions", labelKey: "ifu.section.instructions" },
+  { key: "biocompatibility", labelKey: "ifu.section.biocompatibility" },
+  { key: "storage", labelKey: "ifu.section.storage" },
+  { key: "shelfLifeDetail", labelKey: "ifu.section.shelfLife" },
+  { key: "sterilityInfo", labelKey: "ifu.section.sterility" },
+  { key: "disposal", labelKey: "ifu.section.disposal" },
+  { key: "wasteSeparation", labelKey: "ifu.section.wasteSeparation" },
+  { key: "mdrAnnexIDeclaration", labelKey: "ifu.section.mdrAnnexI" },
+  { key: "incidentReporting", labelKey: "ifu.section.incidentReporting" },
+  { key: "troubleshooting", labelKey: "ifu.section.troubleshooting", list: true },
+  { key: "symbolsGlossary", labelKey: "ifu.section.symbolsGlossary", list: true },
+  { key: "regulatoryInfo", labelKey: "ifu.section.regulatory" },
+  { key: "revisionHistory", labelKey: "ifu.section.revisionHistory" },
+];
+
 export function IfuContentPreview({ content }: { content: IfuPreviewContent }) {
   const { t } = useI18n();
-  const warnings = content.warnings?.filter(Boolean) ?? [];
-  const precautions = content.precautions?.filter(Boolean) ?? [];
 
-  const hasContent =
-    content.intendedPurpose ||
-    content.indications ||
-    content.contraindications ||
-    warnings.length ||
-    precautions.length ||
-    content.instructions ||
-    content.storage ||
-    content.sterilityInfo ||
-    content.disposal;
+  const hasContent = PREVIEW_SECTIONS.some(({ key, list }) => {
+    const val = content[key];
+    if (list) return Array.isArray(val) && val.filter(Boolean).length > 0;
+    return typeof val === "string" && val.trim().length > 0;
+  });
 
   if (!hasContent) {
-    return (
-      <p className="text-sm text-muted-foreground">{t("ifu.previewEmpty")}</p>
-    );
+    return <p className="text-sm text-muted-foreground">{t("ifu.previewEmpty")}</p>;
   }
 
   return (
     <div className="space-y-4">
-      {content.intendedPurpose && (
-        <Section title={t("ifu.section.intendedPurpose")}>{content.intendedPurpose}</Section>
-      )}
-      {content.indications && (
-        <Section title={t("ifu.section.indications")}>{content.indications}</Section>
-      )}
-      {content.contraindications && (
-        <Section title={t("ifu.section.contraindications")}>{content.contraindications}</Section>
-      )}
-      {warnings.length > 0 && (
-        <Section title={t("ifu.section.warnings")}>
-          <BulletList items={warnings} />
-        </Section>
-      )}
-      {precautions.length > 0 && (
-        <Section title={t("ifu.section.precautions")}>
-          <BulletList items={precautions} />
-        </Section>
-      )}
-      {content.instructions && (
-        <Section title={t("ifu.section.instructions")}>{content.instructions}</Section>
-      )}
-      {content.storage && (
-        <Section title={t("ifu.section.storage")}>{content.storage}</Section>
-      )}
-      {content.sterilityInfo && (
-        <Section title={t("ifu.section.sterility")}>{content.sterilityInfo}</Section>
-      )}
-      {content.disposal && (
-        <Section title={t("ifu.section.disposal")}>{content.disposal}</Section>
-      )}
+      {PREVIEW_SECTIONS.map(({ key, labelKey, list }) => {
+        const val = content[key];
+        if (list) {
+          const items = Array.isArray(val) ? val.filter(Boolean) : [];
+          if (!items.length) return null;
+          return (
+            <Section key={key} title={t(labelKey)}>
+              <BulletList items={items} />
+            </Section>
+          );
+        }
+        if (typeof val !== "string" || !val.trim()) return null;
+        return (
+          <Section key={key} title={t(labelKey)}>
+            {val}
+          </Section>
+        );
+      })}
     </div>
   );
 }
