@@ -2,10 +2,17 @@ import { riskScore } from "@/lib/domain/risk-template";
 import {
   buildSearchQueryFromPico,
   databaseLabel,
+  defaultExclusionCriteria,
+  defaultInclusionCriteria,
   serializePrismaFlowMarkdown,
   type LiteratureSearchData,
 } from "@/lib/domain/clinical-literature-model";
 import type { EquivalentDevicesData } from "@/lib/domain/clinical-equivalent-model";
+import {
+  CEP_IMPORTANT_CONTENT_EN,
+  CEP_IMPORTANT_CONTENT_TR,
+  cepSectionTitles,
+} from "@/lib/domain/clinical-cep-template";
 
 export interface CepBuildInput {
   locale: "tr" | "en";
@@ -114,81 +121,6 @@ function gsprClinicalRows(input: CepBuildInput): string[] {
   return rows.map(([ref, req, evidence]) => `| ${ref} | ${cell(req)} | ${cell(evidence)} |`);
 }
 
-function evaluationRoute(input: CepBuildInput): string {
-  const { locale, literatureData: lit, equivalentDevicesData: equiv } = input;
-  const tr = locale === "tr";
-  const routes: string[] = [];
-  if (lit?.preparedByMedDoc || lit?.searchQuery?.trim()) {
-    routes.push(tr ? "- Yayınlanmış bilimsel literatür taraması" : "- Published scientific literature review");
-  }
-  if ((equiv?.devices.length ?? 0) > 0) {
-    routes.push(
-      tr
-        ? "- Eşdeğer cihaz yolu (MDCG 2020-5 üçlü sütun analizi)"
-        : "- Equivalence route (MDCG 2020-5 three-pillar analysis)",
-    );
-  }
-  routes.push(tr ? "- Üretici PMS / vigilans verileri" : "- Manufacturer PMS / vigilance data");
-  routes.push(tr ? "- Risk yönetimi dosyası (ISO 14971)" : "- Risk management file (ISO 14971)");
-  if (higherClass(input.product.deviceClass)) {
-    routes.push(tr ? "- PMCF planı (MDCG 2020-7)" : "- PMCF plan (MDCG 2020-7)");
-  }
-  return routes.join("\n");
-}
-
-function literatureAnnex(input: CepBuildInput): string {
-  const { locale, literatureData: lit } = input;
-  if (!lit) return "";
-  const tr = locale === "tr";
-  const query = lit.searchQuery?.trim() || buildSearchQueryFromPico(lit);
-  const litDbs = lit.databases
-    .filter((id) => !/fda|bfarm|mhra|eudamed|titck|ansm|aemps|swiss|health-canada|tga|pmda/i.test(id))
-    .map((id) => databaseLabel(id, locale));
-  const regDbs = lit.databases
-    .filter((id) => /fda|bfarm|mhra|eudamed|titck|ansm|aemps|swiss|health-canada|tga|pmda/i.test(id))
-    .map((id) => databaseLabel(id, locale));
-
-  return [
-    tr ? "## Ek A — Literatür tarama protokolü" : "## Annex A — Literature search protocol",
-    "",
-    tr ? "### PICO" : "### PICO",
-    tr ? `- **Popülasyon:** ${lit.population.trim() || "—"}` : `- **Population:** ${lit.population.trim() || "—"}`,
-    tr
-      ? `- **Müdahale / cihaz:** ${lit.intervention.trim() || "—"}`
-      : `- **Intervention / device:** ${lit.intervention.trim() || "—"}`,
-    tr ? `- **Karşılaştırma:** ${lit.comparator.trim() || "—"}` : `- **Comparator:** ${lit.comparator.trim() || "—"}`,
-    tr ? `- **Sonuçlar:** ${lit.outcomes.trim() || "—"}` : `- **Outcomes:** ${lit.outcomes.trim() || "—"}`,
-    "",
-    tr ? `- **Tarama tarihi:** ${lit.searchDate || "—"}` : `- **Search date:** ${lit.searchDate || "—"}`,
-    tr ? `- **Sorgu:** \`${query}\`` : `- **Query:** \`${query}\``,
-    lit.liveLiteratureSearch && lit.pubmedTotal != null
-      ? tr
-        ? `- **Canlı PubMed:** ${lit.pubmedTotal.toLocaleString("tr-TR")} kayıt`
-        : `- **Live PubMed:** ${lit.pubmedTotal.toLocaleString()} records`
-      : "",
-    "",
-    tr ? "### Veri tabanları" : "### Databases",
-    litDbs.length ? litDbs.map((d) => `- ${d}`).join("\n") : "—",
-    "",
-    tr ? "### Ulusal kayıtlar ve vigilans" : "### National registries and vigilance",
-    regDbs.length ? regDbs.map((d) => `- ${d}`).join("\n") : "—",
-    "",
-    tr ? "### Dahil etme kriterleri" : "### Inclusion criteria",
-    lit.inclusionCriteria.trim() || (tr ? "_Tanımlanacak_" : "_To be defined_"),
-    "",
-    tr ? "### Hariç tutma kriterleri" : "### Exclusion criteria",
-    lit.exclusionCriteria.trim() || (tr ? "_Tanımlanacak_" : "_To be defined_"),
-    "",
-    serializePrismaFlowMarkdown(lit.prisma, locale),
-    "",
-    tr
-      ? "_Tam ulusal kayıt sonuçları ve kanıt ekran görüntüleri Literatür sekmesinde ve CER export'ta yer alır._"
-      : "_Full national registry results and evidence screenshots are in the Literature tab and CER export._",
-  ]
-    .filter(Boolean)
-    .join("\n");
-}
-
 function equivalenceAnnex(input: CepBuildInput): string {
   const { locale, equivalentDevicesData: equiv } = input;
   if (!equiv?.devices.length) return "";
@@ -259,37 +191,90 @@ function variantFamilyBlock(input: CepBuildInput): string {
   ].join("\n");
 }
 
-function clinicalOutcomesBlock(input: CepBuildInput): string {
-  const { locale, literatureData: lit, product: p } = input;
+function literatureSection(input: CepBuildInput, t: ReturnType<typeof cepSectionTitles>): string[] {
+  const { locale, literatureData: lit } = input;
   const tr = locale === "tr";
-  const outcomes = lit?.outcomes?.trim() || p.intendedPurpose?.trim() || "—";
+  if (!lit) {
+    return [
+      `## ${t.stage1}`,
+      "",
+      `### ${t.s21}`,
+      tr
+        ? "Literatür protokolü Literatür sekmesinde tanımlanacaktır."
+        : "Literature protocol to be defined in the Literature tab.",
+    ];
+  }
+
+  const query = lit.searchQuery?.trim() || buildSearchQueryFromPico(lit);
+  const keywords = lit.searchKeywords?.length
+    ? lit.searchKeywords.join(", ")
+    : query;
+  const litDbs = lit.databases
+    .filter((id) => !/fda|bfarm|mhra|eudamed|titck|ansm|aemps|swiss|health-canada|tga|pmda/i.test(id))
+    .map((id) => databaseLabel(id, locale));
+  const regDbs = lit.databases
+    .filter((id) => /fda|bfarm|mhra|eudamed|titck|ansm|aemps|swiss|health-canada|tga|pmda/i.test(id))
+    .map((id) => databaseLabel(id, locale));
+  const important = tr ? CEP_IMPORTANT_CONTENT_TR : CEP_IMPORTANT_CONTENT_EN;
+
   return [
-    tr ? "## 5. Beklenen klinik sonuç parametreleri" : "## 5. Expected clinical outcome parameters",
+    `## ${t.stage1}`,
     "",
+    `### ${t.s21}`,
     tr
-      ? "Fayda-risk değerlendirmesi ve literatür taraması aşağıdaki sonuç parametrelerine göre yapılır:"
-      : "Benefit-risk and literature appraisal use the following outcome parameters:",
+      ? "Bu bölüm, klinik değerlendirme raporunun Aşama 1 literatür taraması için planlanan protokolü tanımlar."
+      : "This section defines the planned protocol for Stage 1 literature search of the clinical evaluation report.",
     "",
-    outcomes,
+    `### ${t.s22}`,
+    tr
+      ? "Tarama; bilimsel veri tabanları, ulusal kayıtlar ve eşdeğer cihaz literatürünü kapsar. Dahil edilen çalışmalar EK-4'e, arama kanıtları EK-3'e eklenir."
+      : "Search covers scientific databases, national registries and equivalent-device literature. Included studies go to Annex 4; search evidence to Annex 3.",
     "",
-    "| Parametre | Kabul kriteri (SOTA) | Veri kaynağı |",
-    "| --- | --- | --- |",
-    tr
-      ? `| Güvenlik (advers olay, komplikasyon) | Kabul edilebilir risk seviyesi (ISO 14971) | Literatür, PMS, risk dosyası |`
-      : `| Safety (adverse events, complications) | Acceptable risk level (ISO 14971) | Literature, PMS, risk file |`,
-    tr
-      ? `| Klinik performans | Amaçlanan kullanım için yeterli etkinlik | Literatür, eşdeğerlik, PMCF |`
-      : `| Clinical performance | Adequate efficacy for intended purpose | Literature, equivalence, PMCF |`,
-    tr
-      ? `| Kullanılabilirlik | Hedef kullanıcı için güvenli kullanım | Risk dosyası, PMS |`
-      : `| Usability | Safe use for intended user | Risk file, PMS |`,
-  ].join("\n");
+    `### ${t.s23}`,
+    tr ? "- PICO tabanlı sistematik tarama (PRISMA)" : "- PICO-based systematic search (PRISMA)",
+    tr ? "- İki bağımsız değerlendirici tarama / eleme (planlanır)" : "- Dual-reviewer screening (planned)",
+    tr ? "- Tam metin değerlendirme ve kalite değerlendirmesi" : "- Full-text assessment and quality appraisal",
+    "",
+    tr ? "**PICO**" : "**PICO**",
+    tr ? `- Popülasyon: ${lit.population.trim() || "—"}` : `- Population: ${lit.population.trim() || "—"}`,
+    tr ? `- Müdahale: ${lit.intervention.trim() || "—"}` : `- Intervention: ${lit.intervention.trim() || "—"}`,
+    tr ? `- Karşılaştırma: ${lit.comparator.trim() || "—"}` : `- Comparator: ${lit.comparator.trim() || "—"}`,
+    tr ? `- Sonuçlar: ${lit.outcomes.trim() || "—"}` : `- Outcomes: ${lit.outcomes.trim() || "—"}`,
+    "",
+    `### ${t.s24}`,
+    tr ? `- Tarama tarihi: ${lit.searchDate || "—"}` : `- Search date: ${lit.searchDate || "—"}`,
+    tr ? `- Arama sorgusu: \`${query}\`` : `- Search query: \`${query}\``,
+    tr ? `- İngilizce anahtar kelimeler (max 5): ${keywords}` : `- English keywords (max 5): ${keywords}`,
+    lit.liveLiteratureSearch && lit.pubmedTotal != null
+      ? tr
+        ? `- Canlı PubMed kayıt sayısı: ${lit.pubmedTotal.toLocaleString("tr-TR")}`
+        : `- Live PubMed records: ${lit.pubmedTotal.toLocaleString()}`
+      : "",
+    "",
+    tr ? "**Bilimsel veri tabanları**" : "**Scientific databases**",
+    litDbs.length ? litDbs.map((d) => `- ${d}`).join("\n") : "—",
+    "",
+    tr ? "**Ulusal kayıtlar / vigilans**" : "**National registries / vigilance**",
+    regDbs.length ? regDbs.map((d) => `- ${d}`).join("\n") : "—",
+    "",
+    `### ${t.s25}`,
+    lit.exclusionCriteria.trim() || defaultExclusionCriteria(locale),
+    "",
+    `### ${t.s26}`,
+    lit.inclusionCriteria.trim() || defaultInclusionCriteria(locale),
+    "",
+    `### ${t.s27}`,
+    ...important.map((line) => `- ${line}`),
+    "",
+    serializePrismaFlowMarkdown(lit.prisma, locale),
+  ].filter(Boolean);
 }
 
-/** MDCG 2020-1 core sections (stored in `plan` field). */
+/** MDCG 2020-1 / Tekno Bio–ARMA style CEP (stored in `plan` field). */
 export function buildCepCore(input: CepBuildInput): string {
   const { locale, product: p, risks, planNotes } = input;
   const tr = locale === "tr";
+  const t = cepSectionTitles(locale);
   const classNote = higherClass(p.deviceClass)
     ? tr
       ? "Sınıf IIa ve üzeri: literatür ve/veya klinik veri + PMCF zorunludur."
@@ -315,40 +300,63 @@ export function buildCepCore(input: CepBuildInput): string {
     planNotes?.trim() && planNotes.includes(tr ? "Değerlendirme ekibi" : "Evaluation team")
       ? planNotes.trim()
       : [
-          tr ? "## 11. Klinik değerlendirme ekibi" : "## 11. Clinical evaluation team",
+          `## ${t.team}`,
           "",
           tr ? "- Klinik değerlendirme sorumlusu (ünvan, eğitim, deneyim)" : "- Clinical evaluation lead (qualifications, experience)",
+          tr ? "- Bağımsız klinisyen / danışman (EK-2 CV)" : "- Independent clinician / advisor (Annex 2 CV)",
           tr ? "- Risk yönetimi / tasarım temsilcisi" : "- Risk management / design representative",
           tr ? "- Düzenleyici işler ve PMS sorumlusu" : "- Regulatory affairs and PMS owner",
-          tr ? "- Gerekirse klinik danışman / PRRC" : "- Clinical advisor / PRRC as required",
         ].join("\n");
 
+  const equivBlock =
+    (input.equivalentDevicesData?.devices.length ?? 0) > 0
+      ? [
+          ...input.equivalentDevicesData!.devices.map((d) =>
+            `- ${cell(d.deviceName)} · ${cell(d.manufacturer)} · ${cell(d.regulatoryRef)}`,
+          ),
+          "",
+          tr
+            ? "_Ayrıntılı eşdeğerlik tablosu EK-7 ve CER eşdeğer ürünler bölümündedir._"
+            : "_Detailed equivalence table is in Annex 7 and CER equivalent devices section._",
+        ].join("\n")
+      : tr
+        ? "Eşdeğerlik iddiası yok veya henüz tanımlanmadı."
+        : "No equivalence claim or not yet defined.";
+
   return [
-    tr ? "## 1. Giriş ve kapsam" : "## 1. Introduction and scope",
+    `## ${t.intro}`,
     tr
-      ? `Bu Klinik Değerlendirme Planı (CEP), **MDCG 2020-1** ve MDR Ek XIV Bölüm A'ya uygun olarak **${p.name}** için hazırlanmıştır.`
-      : `This Clinical Evaluation Plan (CEP) is prepared for **${p.name}** per **MDCG 2020-1** and MDR Annex XIV Part A.`,
-    tr
-      ? "CEP, klinik değerlendirme sürecinin planlanması, veri toplama, değerlendirme ve güncelleme döngüsünü tanımlar; CER bu plana göre yürütülür."
-      : "The CEP defines planning, data collection, appraisal and update cycle for clinical evaluation; the CER is executed per this plan.",
+      ? `Bu Klinik Değerlendirme Planı, **${p.name}** için MEDDEV 2.7/1 Rev. 4 ve MDR Ek XIV Bölüm A'ya uygun olarak hazırlanmıştır. Plan; Aşama 0–4 sürecini, literatür protokolünü, veri değerlendirme/analiz yaklaşımını ve PMCF'i tanımlar.`
+      : `This Clinical Evaluation Plan for **${p.name}** is prepared per MEDDEV 2.7/1 Rev. 4 and MDR Annex XIV Part A. It defines Stages 0–4, literature protocol, data appraisal/analysis approach and PMCF.`,
     "",
-    tr ? "## 2. Cihaz tanımlama" : "## 2. Device identification",
+    `## ${t.stage0}`,
+    "",
+    `### ${t.s11}`,
+    "",
+    `#### ${t.s111}`,
+    tr ? "_Üretici bilgileri teknik dosya / şirket profilinden tamamlanır._" : "_Manufacturer details completed from technical file / company profile._",
+    "",
+    `#### ${t.s112}`,
     tr ? `- **Ticari ad:** ${p.name}` : `- **Trade name:** ${p.name}`,
     p.brand?.trim() ? (tr ? `- **Marka:** ${p.brand}` : `- **Brand:** ${p.brand}`) : "",
     p.model?.trim() ? (tr ? `- **Model:** ${p.model}` : `- **Model:** ${p.model}`) : "",
-    p.emdnCode?.trim() ? `- **EMDN:** ${p.emdnCode}` : "",
-    p.basicUdiDi?.trim() ? `- **UDI-DI:** ${p.basicUdiDi}` : tr ? "- **UDI-DI:** _Teknik dosyadan tamamlanacak_" : "- **UDI-DI:** _Complete from technical file_",
+    "",
+    `#### ${t.s113}`,
+    p.emdnCode?.trim() ? `- **EMDN:** ${p.emdnCode}` : tr ? "- **EMDN:** _Teknik dosyadan_" : "- **EMDN:** _From technical file_",
+    p.basicUdiDi?.trim() ? `- **UDI-DI:** ${p.basicUdiDi}` : "",
+    "",
+    `#### ${t.s114}`,
     tr ? `- **MDR sınıfı:** ${p.deviceClass}` : `- **MDR class:** ${p.deviceClass}`,
+    classNote,
+    "",
+    `#### ${t.s115}`,
+    tr ? "_Pazar durumu ve satış bölgeleri teknik dosyadan tamamlanır._" : "_Market status and sales regions completed from technical file._",
+    "",
+    `### ${t.s12}`,
     tr
       ? `- **Amaçlanan kullanım:** ${p.intendedPurpose?.trim() || "—"}`
       : `- **Intended purpose:** ${p.intendedPurpose?.trim() || "—"}`,
-    tr ? `- **Endikasyonlar:** ${p.indications?.trim() || "—"}` : `- **Indications:** ${p.indications?.trim() || "—"}`,
-    tr
-      ? `- **Kontrendikasyonlar:** ${p.contraindications?.trim() || "—"}`
-      : `- **Contraindications:** ${p.contraindications?.trim() || "—"}`,
-    tr
-      ? `- **Hasta popülasyonu:** ${p.patientPopulation?.trim() || "—"}`
-      : `- **Patient population:** ${p.patientPopulation?.trim() || "—"}`,
+    tr ? `- **Hasta popülasyonu:** ${p.patientPopulation?.trim() || "—"}` : `- **Patient population:** ${p.patientPopulation?.trim() || "—"}`,
     tr ? `- **Kullanıcı profili:** ${p.userProfile?.trim() || "—"}` : `- **User profile:** ${p.userProfile?.trim() || "—"}`,
     p.materials?.trim() ? (tr ? `- **Materyaller:** ${p.materials}` : `- **Materials:** ${p.materials}`) : "",
     p.isSterile
@@ -362,57 +370,39 @@ export function buildCepCore(input: CepBuildInput): string {
         : `- **Contact duration:** ${p.bodyContactDuration}`
       : "",
     "",
-    tr ? "## 2.1 Cihaz ailesi / varyant gerekçesi" : "## 2.1 Device family / variant rationale",
+    `### ${t.s13}`,
+    "",
+    `#### ${t.s131}`,
+    tr ? `- **Endikasyonlar:** ${p.indications?.trim() || "—"}` : `- **Indications:** ${p.indications?.trim() || "—"}`,
+    "",
+    `#### ${t.s132}`,
+    tr
+      ? `- **Kontrendikasyonlar:** ${p.contraindications?.trim() || "—"}`
+      : `- **Contraindications:** ${p.contraindications?.trim() || "—"}`,
+    "",
+    `### ${t.s14}`,
+    equivBlock,
+    "",
+    `### ${t.s15}`,
     variantFamilyBlock(input),
     "",
-    tr ? "## 3. Klinik veri gerektiren GSPR'ler" : "## 3. GSPRs requiring clinical data",
+    ...literatureSection(input, t),
+    "",
+    `## ${t.stage2}`,
+    "",
+    `### ${t.s31}`,
     tr
-      ? "_MDR Ek I GSPR maddeleri — klinik değerlendirme ile adreslenecekler:_"
-      : "_MDR Annex I GSPRs — to be addressed by clinical evaluation:_",
-    "",
-    tr ? "| GSPR | Gereklilik | Klinik kanıt yaklaşımı |" : "| GSPR | Requirement | Clinical evidence approach |",
-    "| --- | --- | --- |",
-    ...gsprClinicalRows(input),
-    "",
-    tr ? "## 4. Klinik değerlendirme türü" : "## 4. Type of clinical evaluation",
-    evaluationRoute(input),
-    "",
-    clinicalOutcomesBlock(input).replace(
-      tr ? "## 5. Beklenen klinik sonuç parametreleri" : "## 5. Expected clinical outcome parameters",
-      tr ? "## 4.1 Beklenen klinik sonuç parametreleri" : "## 4.1 Expected clinical outcome parameters",
-    ),
-    "",
-    tr ? "## 5. Literatür inceleme planı" : "## 5. Literature review plan",
-    input.literatureData?.preparedByMedDoc
-      ? tr
-        ? "MDRpilot literatür protokolü hazırlanmıştır — ayrıntılar **Ek A**'da. Ulusal kayıt taraması literatür sekmesinde."
-        : "MDRpilot literature protocol prepared — details in **Annex A**. National registry search in Literature tab."
-      : tr
-        ? "Literatür protokolü (PICO, veri tabanları, dahil/hariç kriterler) Literatür sekmesinde tanımlanacaktır."
-        : "Literature protocol (PICO, databases, inclusion/exclusion) to be defined in Literature tab.",
-    "",
-    tr ? "## 6. Eşdeğerlik gösterimi" : "## 6. Equivalence demonstration",
-    (input.equivalentDevicesData?.devices.length ?? 0) > 0
-      ? tr
-        ? `${input.equivalentDevicesData!.devices.length} eşdeğer/benzer cihaz tanımlandı — **Ek B**.`
-        : `${input.equivalentDevicesData!.devices.length} equivalent/similar device(s) defined — see **Annex B**.`
-      : tr
-        ? "Eşdeğerlik iddiası yok veya henüz tanımlanmadı."
-        : "No equivalence claim or not yet defined.",
-    "",
-    tr ? "## 7. Klinik araştırma" : "## 7. Clinical investigation",
-    tr
-      ? "Ön-pazar klinik araştırma planlanmamıştır / gerekli değildir (literatür + eşdeğerlik + PMS yeterli). Gerekirse bu bölüm güncellenir."
-      : "No pre-market clinical investigation planned / not required (literature + equivalence + PMS sufficient). Update if needed.",
-    "",
-    tr ? "## 8. Klinik veri değerlendirme kriterleri" : "## 8. Appraisal criteria for clinical data",
-    tr
-      ? "- Bilimsel geçerlilik, istatistiksel güvenilirlik, klinik uygunluk (MEDDEV 2.7/1 Stage 3)"
-      : "- Scientific validity, statistical reliability, clinical relevance (MEDDEV 2.7/1 Stage 3)",
-    tr ? "- Kalite: Yüksek / Orta / Düşük (PRISMA dahil çalışmalar)" : "- Quality: High / Medium / Low (PRISMA included studies)",
+      ? "- Bilimsel geçerlilik, istatistiksel güvenilirlik, klinik uygunluk (MEDDEV 2.7/1 Aşama 2)"
+      : "- Scientific validity, statistical reliability, clinical relevance (MEDDEV 2.7/1 Stage 2)",
     tr ? "- Cihaza özgü veri ağırlığı > genel veri" : "- Device-specific data weighted above general data",
     "",
-    tr ? "## 9. Klinik veri analizi planı" : "## 9. Clinical data analysis plan",
+    `### ${t.s32}`,
+    tr ? "- Kalite: Yüksek / Orta / Düşük (PRISMA dahil çalışmalar)" : "- Quality: High / Medium / Low (PRISMA included studies)",
+    tr ? "- Literatür, eşdeğerlik, PMS ve risk dosyası bulgularının katkısı" : "- Contribution of literature, equivalence, PMS and risk file findings",
+    "",
+    `## ${t.stage3}`,
+    "",
+    `### ${t.s41}`,
     tr
       ? "- Literatür ve kayıt bulgularının sentezi (CER klinik veri özeti)"
       : "- Synthesis of literature and registry findings (CER clinical data summary)",
@@ -421,42 +411,46 @@ export function buildCepCore(input: CepBuildInput): string {
     risks.length > 0 ? riskHeader : "",
     ...riskRows,
     "",
-    tr ? "## 10. PMCF planı" : "## 10. PMCF plan",
+    `## ${t.benefitRisk}`,
+    tr
+      ? "Klinik veri analizi sonrası fayda-risk değerlendirmesi CER Bölüm 5'te tamamlanır; planlanan girdiler: literatür, eşdeğerlik, PMS, risk dosyası."
+      : "Benefit-risk after clinical data analysis is completed in CER Section 5; planned inputs: literature, equivalence, PMS, risk file.",
+    "",
+    `## ${t.pmcf}`,
     input.pmsPmcfInputs?.trim()
-      ? tr
-        ? "PMCF girdileri tanımlı — özet **Ek C**'de. PMS/PMCF sekmesinden senkronize edilir."
-        : "PMCF inputs defined — summary in **Annex C**. Sync from PMS/PMCF tab."
+      ? input.pmsPmcfInputs.trim().slice(0, 4000)
       : tr
-        ? "PMCF planı PMS modülünden veya PMS/PMCF sekmesinden tamamlanacaktır (MDCG 2020-7)."
-        : "PMCF plan to be completed from PMS module or PMS/PMCF tab (MDCG 2020-7).",
+        ? "PMCF planı PMS/PMCF sekmesinden tamamlanacaktır (MDCG 2020-7)."
+        : "PMCF plan to be completed from PMS/PMCF tab (MDCG 2020-7).",
     "",
     teamBlock,
     "",
-    tr ? "## 12. Risk yönetimi dosyası" : "## 12. Risk management file",
-    tr
-      ? "Klinik değerlendirme ISO 14971 risk yönetimi dosyası ile entegre edilir. Artık riskler klinik fayda-risk değerlendirmesine girdi oluşturur."
-      : "Clinical evaluation is integrated with the ISO 14971 risk management file. Residual risks feed the clinical benefit-risk assessment.",
-    "",
-    tr ? "## 13. Takvim ve kilometre taşları" : "## 13. Schedule and milestones",
+    `## ${t.schedule}`,
     tr
       ? `- Literatür tarama: ${input.literatureData?.searchDate || "[tarih]"}`
       : `- Literature search: ${input.literatureData?.searchDate || "[date]"}`,
     tr ? "- CEP onayı: _[tarih / imza]_" : "- CEP approval: _[date / signature]_",
     tr ? "- CER ilk onay: _[tarih]_" : "- Initial CER approval: _[date]_",
-    tr ? "- Planlı gözden geçirme: en az yılda bir veya PMS sinyali / önemli değişiklik" : "- Planned review: at least annually or on PMS signal / significant change",
-    tr ? "- PSUR / PMS raporu sonrası CER güncellemesi" : "- CER update after PSUR / PMS report",
+    tr ? "- Planlı gözden geçirme: en az yılda bir veya PMS sinyali" : "- Planned review: at least annually or on PMS signal",
     "",
-    tr ? "## 14. Sınıf ve orantılılık" : "## 14. Class and proportionality",
-    classNote,
+    `## ${t.riskFile}`,
+    tr
+      ? "Klinik değerlendirme ISO 14971 risk yönetimi dosyası ile entegre edilir."
+      : "Clinical evaluation is integrated with the ISO 14971 risk management file.",
+    "",
+    tr ? "### GSPR — klinik kanıt yaklaşımı" : "### GSPR — clinical evidence approach",
+    tr ? "| GSPR | Gereklilik | Klinik kanıt yaklaşımı |" : "| GSPR | Requirement | Clinical evidence approach |",
+    "| --- | --- | --- |",
+    ...gsprClinicalRows(input),
   ]
     .filter(Boolean)
     .join("\n");
 }
 
-/** Full CEP document with annexes (export). */
+/** Full CEP document with optional equivalence / PMCF annexes (export). */
 export function buildCepDocument(input: CepBuildInput): string {
   const core = buildCepCore(input);
-  const annexes = [literatureAnnex(input), equivalenceAnnex(input), pmcfAnnex(input)].filter(Boolean);
+  const annexes = [equivalenceAnnex(input), pmcfAnnex(input)].filter(Boolean);
   if (!annexes.length) return core;
   return [core, "", "---", "", ...annexes].join("\n");
 }

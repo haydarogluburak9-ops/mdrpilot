@@ -1,27 +1,18 @@
-import {
-  buildCerDraftBannerMarkdown,
-  buildLiveVerificationNoteMarkdown,
-} from "@/lib/domain/clinical-cer-premium";
-
 export function enrichCepExportMarkdown(
   body: string,
   locale: "tr" | "en",
   productName: string,
-  options: { preparedAt?: string; searchDate?: string } = {},
+  _options: { preparedAt?: string; searchDate?: string } = {},
 ): string {
   const tr = locale === "tr";
   const blocks: string[] = [
     tr
-      ? `# Klinik Değerlendirme Planı (CEP) — ${productName}`
-      : `# Clinical Evaluation Plan (CEP) — ${productName}`,
+      ? `# Klinik Değerlendirme Planı — ${productName}`
+      : `# Clinical Evaluation Plan — ${productName}`,
     "",
     tr
-      ? "_MDCG 2020-1 · MDR Annex XIV Part A · MEDDEV 2.7/1 Rev. 4_"
-      : "_MDCG 2020-1 · MDR Annex XIV Part A · MEDDEV 2.7/1 Rev. 4_",
-    "",
-    buildCerDraftBannerMarkdown(locale, productName, options.preparedAt),
-    "",
-    buildLiveVerificationNoteMarkdown(locale, options.searchDate),
+      ? "_MEDDEV 2.7/1 Rev. 4 · MDR Annex XIV Part A · MDCG 2020-1_"
+      : "_MEDDEV 2.7/1 Rev. 4 · MDR Annex XIV Part A · MDCG 2020-1_",
     "",
     body.trim(),
     "",
