@@ -15,6 +15,8 @@ import {
 import { describeApplicableReferences } from "@/lib/domain/applicable-references";
 import { formatStandardsInText } from "@/lib/domain/standards-catalog";
 import { describeSymbols } from "@/lib/domain/iso15223-symbols";
+import { resolveTfSectionBlock } from "@/lib/domain/product-info-tf-blocks";
+import { parseEquivalentDevicesJson } from "@/lib/domain/clinical-equivalent-model";
 import { sterilizationText } from "@/lib/domain/sterilization";
 import { getMeteredAiProvider, aiProviderInfo, extractJson } from "@/lib/ai/provider-factory";
 import { AiTokenLimitError } from "@/lib/auth/errors";
@@ -52,6 +54,13 @@ interface RevisionEntry {
 
 const LANG_NAME: Record<string, string> = { tr: "Turkish", en: "English" };
 const L = (locale: string, en: string, tr: string) => (locale === "tr" ? tr : en);
+
+const TF_PRODUCT_INFO_KEYS = new Set([
+  "device-description",
+  "general-info",
+  "previous-generations",
+  "info-supplied",
+]);
 
 function describeProduct(p: any, locale: string): string {
   const methods = sterilizationText({ isSterile: p.isSterile, sterilization: p.sterilization, variantsJson: p.variantsJson });
@@ -157,6 +166,7 @@ function deterministicSection(
   locale: string,
   symbolLines: string[] = [],
   referenceLines: ReturnType<typeof describeApplicableReferences> | null = null,
+  equivalentDeviceCount = 0,
 ): string {
   const tbc = L(locale, "[TO BE CONFIRMED]", "[TEYİT EDİLECEK]");
   const intro = L(
@@ -175,7 +185,7 @@ function deterministicSection(
   // When a regulation-driven outline exists, use exactly those fixed subheadings
   // so the structure never changes between runs; otherwise fall back to a summary.
   const bodyBlocks = outline.length
-    ? outline.map((h, i) => {
+    ? outline.map((h) => {
         if (symbolLines.length && /symbols used|kullanılan semboller/i.test(h)) {
           return `## ${h}\n\n${symbolLines.map((l) => `- ${l}`).join("\n")}`;
         }
@@ -183,7 +193,14 @@ function deterministicSection(
           const refBlock = referenceBlockForHeading(h, referenceLines, locale);
           if (refBlock) return `## ${h}\n\n${refBlock}`;
         }
-        return i === 0 ? `## ${h}\n\n${productBullets}` : `## ${h}\n\n- ${tbc}`;
+        if (TF_PRODUCT_INFO_KEYS.has(key)) {
+          const block = resolveTfSectionBlock(key, h, p, locale, {
+            symbolLines,
+            equivalentDeviceCount,
+          });
+          if (block) return `## ${h}\n\n${block}`;
+        }
+        return `## ${h}\n\n- ${tbc}`;
       })
     : [
         `## ${L(locale, "Summary", "Özet")}\n\n${productBullets}`,
@@ -223,7 +240,7 @@ export async function generateTechnicalSection(
     where: { id: productId, companyId, deletedAt: null },
     include: {
       technicalSections: true,
-      clinicalEvaluation: { select: { gapMatrixJson: true } },
+      clinicalEvaluation: { select: { gapMatrixJson: true, equivalentDevicesDataJson: true } },
       company: {
         select: {
           name: true, legalName: true, country: true, address: true,
@@ -251,6 +268,9 @@ export async function generateTechnicalSection(
     section.key === "info-supplied" ? describeSymbols(product, product.company, locale) : [];
   const referenceLines =
     section.key === "standards-list" ? describeApplicableReferences(product, locale) : null;
+  const equivalentDeviceCount =
+    parseEquivalentDevicesJson(product.clinicalEvaluation?.equivalentDevicesDataJson ?? null)?.devices
+      .length ?? 0;
 
   let content = postMarketKey
     ? buildPostMarketSectionMarkdown(
@@ -260,7 +280,16 @@ export async function generateTechnicalSection(
         locale,
         product.clinicalEvaluation?.gapMatrixJson,
       )
-    : deterministicSection(section.key, section.title, displayAnnexRef, product, locale, symbolLines, referenceLines);
+    : deterministicSection(
+        section.key,
+        section.title,
+        displayAnnexRef,
+        product,
+        locale,
+        symbolLines,
+        referenceLines,
+        equivalentDeviceCount,
+      );
   let source: SectionSource = "mock";
   let model = "mock";
   let missingInformation: string[] = [];
