@@ -278,6 +278,7 @@ export async function buildPreparedLiteratureSearch(
         locale,
         searchDate,
         riskThemes,
+        searchKeywords: resolvedKeywords,
       }),
     ),
   );

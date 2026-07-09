@@ -62,28 +62,47 @@ export function buildClinicalGapMatrix(input: {
     };
   }
 
-  const litOk = Boolean(lit?.preparedByMedDoc && lit.liveLiteratureSearch && (lit.prisma?.included ?? 0) > 0);
+  const includedN = lit?.prisma?.included ?? 0;
+  const pdfN = lit?.acceptedArticles?.filter((a) => a.storageKey)?.length ?? 0;
+  const pubmedSsOk = (lit?.evidenceScreenshots?.length ?? 0) > 0;
+  const litSearchOk = Boolean(lit?.preparedByMedDoc && lit.liveLiteratureSearch && includedN > 0);
+  const litPdfOk = includedN === 0 || pdfN >= includedN;
+  const litOk = litSearchOk && pubmedSsOk && litPdfOk;
+  const litEvidence = litSearchOk
+    ? tr
+      ? `PubMed canlı; ${includedN} dahil; ${pdfN} PDF; SS ${pubmedSsOk ? "var" : "yok"}`
+      : `Live PubMed; ${includedN} included; ${pdfN} PDF; SS ${pubmedSsOk ? "yes" : "no"}`
+    : tr
+      ? "Literatür taraması eksik"
+      : "Literature search missing";
   rows.push(
     row(
       "clinical-performance",
       "Klinik performans",
       "Clinical performance",
+      litEvidence,
       litOk
-        ? tr
-          ? `PubMed canlı tarama; ${lit?.prisma?.included ?? 0} dahil çalışma`
-          : `Live PubMed; ${lit?.prisma?.included ?? 0} included studies`
+        ? "—"
         : tr
-          ? "Literatür taraması eksik"
-          : "Literature search missing",
-      litOk ? "—" : tr ? "Canlı literatür ve tam metin incelemesi gerekli" : "Live literature and full-text review required",
-      litOk ? "—" : tr ? "Canlı literatür ve tam metin incelemesi gerekli" : "Live literature and full-text review required",
+          ? "Anahtar kelime tarama SS + dahil çalışmaların tam metin PDF'i gerekli"
+          : "Keyword-search screenshot + full-text PDF for included studies required",
+      litOk
+        ? "—"
+        : tr
+          ? "Anahtar kelime tarama SS + dahil çalışmaların tam metin PDF'i gerekli"
+          : "Keyword-search screenshot + full-text PDF for included studies required",
       litOk ? "—" : tr ? "PMCF: performans endpoint izleme" : "PMCF: monitor performance endpoints",
       litOk ? "—" : tr ? "PMCF: performans endpoint izleme" : "PMCF: monitor performance endpoints",
       litOk ? "none" : "major",
     ),
   );
 
-  const registryOk = (lit?.registryResults?.length ?? 0) > 0 && lit?.registryResults?.some((r) => r.liveVerified);
+  const registryRows = lit?.registryResults ?? [];
+  const registryWithSs = registryRows.filter((r) => (r.evidenceScreenshots?.length ?? 0) > 0);
+  const registryOk =
+    registryRows.length > 0 &&
+    registryWithSs.length === registryRows.length &&
+    registryRows.some((r) => r.liveVerified || (r.evidenceUrl?.trim()?.length ?? 0) > 0);
   rows.push(
     row(
       "safety-vigilance",
@@ -91,13 +110,13 @@ export function buildClinicalGapMatrix(input: {
       "Safety / vigilance",
       registryOk
         ? tr
-          ? `${lit?.registryResults?.filter((r) => r.liveVerified).length ?? 0} canlı kayıt sorgusu`
-          : `${lit?.registryResults?.filter((r) => r.liveVerified).length ?? 0} live registry queries`
+          ? `${registryWithSs.length}/${registryRows.length} kayıt SS + deep-link`
+          : `${registryWithSs.length}/${registryRows.length} registry SS + deep-link`
         : tr
-          ? "Ulusal kayıt taraması eksik"
-          : "National registry screening missing",
-      registryOk ? "—" : tr ? "MAUDE/ulusal kayıt kanıt SS gerekli" : "MAUDE/national registry screenshot evidence required",
-      registryOk ? "—" : tr ? "MAUDE/ulusal kayıt kanıt SS gerekli" : "MAUDE/national registry screenshot evidence required",
+          ? "Ulusal kayıt taraması / kanıt SS eksik"
+          : "National registry screening / screenshot evidence missing",
+      registryOk ? "—" : tr ? "Her ulusal kayıt için deep-link + kanıt SS gerekli" : "Deep-link + screenshot evidence required per national registry",
+      registryOk ? "—" : tr ? "Her ulusal kayıt için deep-link + kanıt SS gerekli" : "Deep-link + screenshot evidence required per national registry",
       registryOk ? "—" : tr ? "PMS şikâyet trendi + vigilans" : "PMS complaint trends + vigilance",
       registryOk ? "—" : tr ? "PMS şikâyet trendi + vigilans" : "PMS complaint trends + vigilance",
       registryOk ? "none" : "major",

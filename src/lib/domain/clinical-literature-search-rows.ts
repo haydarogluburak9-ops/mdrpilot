@@ -3,6 +3,10 @@ import {
   databaseLabel,
   type LiteratureSearchData,
 } from "@/lib/domain/clinical-literature-model";
+import {
+  buildRegistrySearchUrl,
+  isSubscriptionLiteratureDb,
+} from "@/lib/integrations/registry-deep-links";
 
 const CATALOG_BY_ID_MAP = new Map(CLINICAL_DATABASE_CATALOG.map((d) => [d.id, d]));
 
@@ -19,6 +23,9 @@ export interface LiteratureDatabaseSearchRow {
   queryUrl?: string;
   summary: string;
   live: boolean;
+  /** Subscription / guide+import databases (no free live API). */
+  subscription?: boolean;
+  screenshotCount: number;
 }
 
 export interface IncludedStudySearchRow {
@@ -54,13 +61,20 @@ export function buildLiteratureDatabaseRows(
   const tr = locale === "tr";
   const litIds = data.databases.filter((id) => CATALOG_BY_ID_MAP.get(id)?.group === "literature");
   const query = data.searchQuery.trim() || "—";
+  const keywords = data.searchKeywords ?? [];
   const pubmedPdfCount = data.acceptedArticles?.length ?? 0;
+  const pubmedSsCount = data.evidenceScreenshots?.length ?? 0;
 
   return litIds.map((id) => {
     const label = databaseLabel(id, locale);
     const isPubmed = id === "pubmed";
+    const subscription = isSubscriptionLiteratureDb(id);
     const live = isPubmed && data.liveLiteratureSearch === true;
     const includedCount = includedCountForDatabase(data, id);
+    const deepLink =
+      (isPubmed && data.pubmedQueryUrl) ||
+      buildRegistrySearchUrl(id, data.searchQuery.trim() || query, keywords) ||
+      undefined;
 
     if (live) {
       return {
@@ -71,33 +85,42 @@ export function buildLiteratureDatabaseRows(
         recordsFound: data.pubmedTotal,
         includedCount,
         pdfCount: pubmedPdfCount,
-        queryUrl: data.pubmedQueryUrl,
+        queryUrl: deepLink,
         live: true,
+        subscription: false,
+        screenshotCount: pubmedSsCount,
         summary:
           data.literatureSummary?.trim() ||
           (tr
-            ? `${label}: ${data.pubmedTotal?.toLocaleString("tr-TR") ?? "—"} kayıt tarandı, ${includedCount} çalışma dahil edildi.`
-            : `${label}: ${data.pubmedTotal?.toLocaleString() ?? "—"} records screened, ${includedCount} studies included.`),
+            ? `${label}: ${data.pubmedTotal?.toLocaleString("tr-TR") ?? "—"} kayıt tarandı, ${includedCount} çalışma dahil edildi. Kanıt SS: ${pubmedSsCount}.`
+            : `${label}: ${data.pubmedTotal?.toLocaleString() ?? "—"} records screened, ${includedCount} studies included. Evidence SS: ${pubmedSsCount}.`),
       };
     }
 
     return {
       databaseId: id,
       label,
-      query: isPubmed ? query : "—",
-      status: data.preparedByMedDoc ? ("manual_required" as const) : ("pending" as const),
+      query: isPubmed || subscription ? (data.searchQuery.trim() || query) : "—",
+      status: data.preparedByMedDoc || subscription ? ("manual_required" as const) : ("pending" as const),
       recordsFound: undefined,
       includedCount,
-      pdfCount: 0,
+      pdfCount: isPubmed ? pubmedPdfCount : 0,
+      queryUrl: deepLink,
       live: false,
+      subscription,
+      screenshotCount: isPubmed ? pubmedSsCount : 0,
       summary:
         includedCount > 0
           ? tr
-            ? `${label}: ${includedCount} çalışma bu kaynak için kayıtlı (manuel tarama).`
-            : `${label}: ${includedCount} study/studies recorded for this source (manual search).`
-          : tr
-            ? `${label}: canlı tarama yapılmadı — abonelikli veri tabanında ayrı sorgu ve kanıt eklenmelidir.`
-            : `${label}: not searched live — run a separate query via subscription database and attach evidence.`,
+            ? `${label}: ${includedCount} çalışma bu kaynak için kayıtlı (manuel / abonelik tarama).`
+            : `${label}: ${includedCount} study/studies recorded for this source (manual / subscription search).`
+          : subscription
+            ? tr
+              ? `${label}: abonelikli veri tabanı — rehber + import; deep-link ile sorgulayın, sonuç SS ekleyin.`
+              : `${label}: subscription database — guide + import; open deep-link, attach result screenshot.`
+            : tr
+              ? `${label}: canlı tarama yapılmadı — ayrı sorgu ve kanıt SS eklenmelidir.`
+              : `${label}: not searched live — run a separate query and attach screenshot evidence.`,
     };
   });
 }

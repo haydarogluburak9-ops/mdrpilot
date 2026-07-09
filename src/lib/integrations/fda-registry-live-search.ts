@@ -1,6 +1,6 @@
 import "server-only";
 import { fda510kDetailUrl, searchFda510kLive } from "@/lib/integrations/fda-510k-live-search";
-import { registryEvidenceUrl } from "@/lib/domain/clinical-cer-premium";
+import { buildRegistrySearchUrl } from "@/lib/integrations/registry-deep-links";
 import type { RegistrySearchResult, RegistrySearchStatus } from "@/lib/domain/clinical-literature-model";
 
 const OPENFDA_EVENT = "https://api.fda.gov/device/event.json";
@@ -102,10 +102,8 @@ export async function searchFdaRecallsLive(
   return { ...result, query: q };
 }
 
-function portalSearchUrl(registryId: string, query: string): string {
-  const base = registryEvidenceUrl(registryId);
-  if (!base) return query;
-  return base;
+function portalSearchUrl(registryId: string, query: string, keywords: string[] = []): string {
+  return buildRegistrySearchUrl(registryId, query, keywords);
 }
 
 export async function buildLiveRegistryResult(input: {
@@ -115,14 +113,17 @@ export async function buildLiveRegistryResult(input: {
   locale: "tr" | "en";
   searchDate: string;
   riskThemes: string;
+  searchKeywords?: string[];
 }): Promise<RegistrySearchResult> {
-  const { registryId, productName, purpose, locale, searchDate, riskThemes } = input;
+  const { registryId, productName, purpose, locale, searchDate, searchKeywords = [] } = input;
   const tr = locale === "tr";
   const label = registryId;
+  const keywords = searchKeywords.length ? searchKeywords : buildDeviceSearchTerms(productName, purpose);
 
   if (registryId === "fda-maude") {
     const live = await searchFdaMaudeLive(productName, purpose);
     const status = statusFromCount(live.total);
+    const portal = portalSearchUrl(registryId, productName, keywords);
     return {
       registryId,
       query: live.query,
@@ -132,9 +133,9 @@ export async function buildLiveRegistryResult(input: {
         : `Live FDA MAUDE (${searchDate}): ${live.total.toLocaleString()} adverse event records. Query: \`${live.query}\`.${live.hits.length ? ` Sample: ${live.hits[0]}` : ""}`,
       recordsScreened: live.total,
       cerComment: tr
-        ? `Canlı MAUDE: ${live.total} kayıt; ${productName} için ${status === "no_signal" ? "belirgin sinyal yok" : "manuel inceleme gerekli"}.`
-        : `Live MAUDE: ${live.total} records; ${status === "no_signal" ? "no clear signal" : "manual review required"} for ${productName}.`,
-      evidenceUrl: live.apiUrl,
+        ? `Canlı MAUDE: ${live.total} kayıt; ${productName} için ${status === "no_signal" ? "belirgin sinyal yok" : "manuel inceleme gerekli"}. Portal kanıt SS ekleyin.`
+        : `Live MAUDE: ${live.total} records; ${status === "no_signal" ? "no clear signal" : "manual review required"} for ${productName}. Attach portal screenshot evidence.`,
+      evidenceUrl: portal,
       liveVerified: true,
       liveQueryUrl: live.apiUrl,
       liveRecordCount: live.total,
@@ -145,6 +146,7 @@ export async function buildLiveRegistryResult(input: {
   if (registryId === "fda-recalls") {
     const live = await searchFdaRecallsLive(productName, purpose);
     const status = statusFromCount(live.total);
+    const portal = portalSearchUrl(registryId, productName, keywords);
     return {
       registryId,
       query: live.query,
@@ -154,9 +156,9 @@ export async function buildLiveRegistryResult(input: {
         : `Live FDA recalls (${searchDate}): ${live.total.toLocaleString()} records.${live.hits.length ? ` Sample: ${live.hits[0]}` : " No active recall signal."}`,
       recordsScreened: live.total,
       cerComment: tr
-        ? `Canlı FDA geri çağırma taraması — ${live.total} kayıt eşleşti.`
-        : `Live FDA recall search — ${live.total} matching records.`,
-      evidenceUrl: live.apiUrl,
+        ? `Canlı FDA geri çağırma taraması — ${live.total} kayıt eşleşti. Portal kanıt SS ekleyin.`
+        : `Live FDA recall search — ${live.total} matching records. Attach portal screenshot evidence.`,
+      evidenceUrl: portal,
       liveVerified: true,
       liveQueryUrl: live.apiUrl,
       liveRecordCount: live.total,
@@ -170,6 +172,7 @@ export async function buildLiveRegistryResult(input: {
     const sample = live.records
       .slice(0, 3)
       .map((r) => `${r.kNumber} ${r.deviceName} (${r.applicant})`);
+    const portal = portalSearchUrl(registryId, productName, keywords);
     return {
       registryId,
       query: live.queryUsed,
@@ -181,7 +184,7 @@ export async function buildLiveRegistryResult(input: {
       cerComment: tr
         ? `Canlı 510(k) taraması — predicate/eşdeğer pazar geçmişi için ${live.records.length} örnek kayıt listelendi.`
         : `Live 510(k) search — ${live.records.length} sample predicate records listed.`,
-      evidenceUrl: live.records[0] ? fda510kDetailUrl(live.records[0].kNumber) : live.apiUrl,
+      evidenceUrl: live.records[0] ? fda510kDetailUrl(live.records[0].kNumber) : portal,
       liveVerified: live.live,
       liveQueryUrl: live.apiUrl,
       liveRecordCount: live.total,
@@ -190,19 +193,20 @@ export async function buildLiveRegistryResult(input: {
   }
 
   const query = `${productName} ${purpose}`.trim();
+  const portal = portalSearchUrl(registryId, query, keywords);
   return {
     registryId,
     query,
     status: "review_required",
     summary: tr
-      ? `${label} için otomatik canlı API yok; portal sorgusu gerekli (${searchDate}). Sorgu: \`${query}\`. Ekran görüntüsü kanıtı ekleyin.`
-      : `No live API for ${label}; portal search required (${searchDate}). Query: \`${query}\`. Attach screenshot evidence.`,
+      ? `${label} için otomatik canlı API yok; deep-link ile portal sorgusu (${searchDate}). Sorgu: \`${query}\`. Playwright veya manuel ekran görüntüsü ekleyin.`
+      : `No live API for ${label}; use deep-link portal search (${searchDate}). Query: \`${query}\`. Attach Playwright or manual screenshot evidence.`,
     recordsScreened: undefined,
     cerComment: tr
       ? `Manuel ${label} taraması ve kanıt ekran görüntüsü zorunludur.`
       : `Manual ${label} search and screenshot evidence required.`,
-    evidenceUrl: portalSearchUrl(registryId, query),
+    evidenceUrl: portal,
     liveVerified: false,
-    liveQueryUrl: portalSearchUrl(registryId, query),
+    liveQueryUrl: portal,
   };
 }

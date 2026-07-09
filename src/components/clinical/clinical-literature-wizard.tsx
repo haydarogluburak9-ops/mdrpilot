@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Loader2, Save, Sparkles, ArrowRight, Wand2, X, ImagePlus, Trash2 } from "lucide-react";
+import { Loader2, Save, Sparkles, ArrowRight, Wand2, X, ImagePlus, Trash2, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -390,6 +390,30 @@ export function ClinicalLiteratureWizard({
     }
   }
 
+  function withEvidenceScreenshot(
+    prev: LiteratureSearchData,
+    screenshot: NonNullable<LiteratureSearchData["evidenceScreenshots"]>[number],
+    registryId?: string,
+  ): LiteratureSearchData {
+    if (registryId) {
+      return {
+        ...prev,
+        registryResults: (prev.registryResults ?? []).map((row) =>
+          row.registryId === registryId
+            ? {
+                ...row,
+                evidenceScreenshots: [...(row.evidenceScreenshots ?? []), screenshot],
+              }
+            : row,
+        ),
+      };
+    }
+    return {
+      ...prev,
+      evidenceScreenshots: [...(prev.evidenceScreenshots ?? []), screenshot],
+    };
+  }
+
   async function uploadEvidence(target: string, file: File, registryId?: string) {
     setUploadingTarget(target);
     setError(null);
@@ -407,24 +431,9 @@ export function ClinicalLiteratureWizard({
         return;
       }
       if (!body.screenshot) return;
-      if (registryId) {
-        setData((d) => ({
-          ...d,
-          registryResults: (d.registryResults ?? []).map((row) =>
-            row.registryId === registryId
-              ? {
-                  ...row,
-                  evidenceScreenshots: [...(row.evidenceScreenshots ?? []), body.screenshot],
-                }
-              : row,
-          ),
-        }));
-      } else {
-        setData((d) => ({
-          ...d,
-          evidenceScreenshots: [...(d.evidenceScreenshots ?? []), body.screenshot],
-        }));
-      }
+      const next = withEvidenceScreenshot(data, body.screenshot, registryId);
+      setData(next);
+      await persistLiteratureData(next);
     } catch {
       setError(t("clinical.lit.evidenceUploadError"));
     } finally {
@@ -432,11 +441,44 @@ export function ClinicalLiteratureWizard({
     }
   }
 
-  function removeEvidence(target: string, screenshotId: string, registryId?: string) {
+  async function captureEvidence(target: string, url: string, registryId?: string) {
+    if (!url?.trim()) {
+      setError(t("clinical.lit.captureUrlMissing"));
+      return;
+    }
+    setUploadingTarget(`capture:${target}`);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/products/${productId}/clinical-evaluation/literature/evidence/capture`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ target, url }),
+        },
+      );
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(typeof body.error === "string" ? body.error : t("clinical.lit.captureError"));
+        return;
+      }
+      if (!body.screenshot) return;
+      const next = withEvidenceScreenshot(data, body.screenshot, registryId);
+      setData(next);
+      await persistLiteratureData(next);
+    } catch {
+      setError(t("clinical.lit.captureError"));
+    } finally {
+      setUploadingTarget(null);
+    }
+  }
+
+  async function removeEvidence(target: string, screenshotId: string, registryId?: string) {
+    let next: LiteratureSearchData;
     if (registryId) {
-      setData((d) => ({
-        ...d,
-        registryResults: (d.registryResults ?? []).map((row) =>
+      next = {
+        ...data,
+        registryResults: (data.registryResults ?? []).map((row) =>
           row.registryId === registryId
             ? {
                 ...row,
@@ -444,12 +486,18 @@ export function ClinicalLiteratureWizard({
               }
             : row,
         ),
-      }));
+      };
     } else {
-      setData((d) => ({
-        ...d,
-        evidenceScreenshots: (d.evidenceScreenshots ?? []).filter((s) => s.id !== screenshotId),
-      }));
+      next = {
+        ...data,
+        evidenceScreenshots: (data.evidenceScreenshots ?? []).filter((s) => s.id !== screenshotId),
+      };
+    }
+    setData(next);
+    try {
+      await persistLiteratureData(next);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("clinical.lit.saveError"));
     }
   }
 
@@ -461,34 +509,55 @@ export function ClinicalLiteratureWizard({
     target,
     registryId,
     shots,
+    captureUrl,
   }: {
     target: string;
     registryId?: string;
     shots: NonNullable<LiteratureSearchData["evidenceScreenshots"]>;
+    captureUrl?: string;
   }) {
     if (!canEdit && shots.length === 0) return null;
+    const capturing = uploadingTarget === `capture:${target}`;
+    const uploading = uploadingTarget === target;
     return (
       <div className="space-y-1">
         {canEdit && (
-          <label className="inline-flex cursor-pointer items-center gap-1 text-[11px] text-primary underline">
-            {uploadingTarget === target ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              <ImagePlus className="h-3 w-3" />
-            )}
-            {t("clinical.lit.addScreenshot")}
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              disabled={uploadingTarget !== null}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void uploadEvidence(target, file, registryId);
-                e.target.value = "";
-              }}
-            />
-          </label>
+          <div className="flex flex-wrap items-center gap-2">
+            {captureUrl ? (
+              <button
+                type="button"
+                disabled={uploadingTarget !== null}
+                onClick={() => void captureEvidence(target, captureUrl, registryId)}
+                className="inline-flex items-center gap-1 text-[11px] text-primary underline disabled:opacity-50"
+              >
+                {capturing ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Camera className="h-3 w-3" />
+                )}
+                {t("clinical.lit.captureScreenshot")}
+              </button>
+            ) : null}
+            <label className="inline-flex cursor-pointer items-center gap-1 text-[11px] text-primary underline">
+              {uploading ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <ImagePlus className="h-3 w-3" />
+              )}
+              {t("clinical.lit.addScreenshot")}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                disabled={uploadingTarget !== null}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void uploadEvidence(target, file, registryId);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
         )}
         {shots.length > 0 && (
           <div className="flex flex-wrap gap-2">
@@ -503,7 +572,7 @@ export function ClinicalLiteratureWizard({
                   <button
                     type="button"
                     className="absolute -right-1 -top-1 rounded-full bg-destructive p-0.5 text-destructive-foreground"
-                    onClick={() => removeEvidence(target, ss.id, registryId)}
+                    onClick={() => void removeEvidence(target, ss.id, registryId)}
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -517,20 +586,17 @@ export function ClinicalLiteratureWizard({
   }
 
   function registryEvidenceCell(row: RegistrySearchResult) {
+    const portalUrl = row.evidenceUrl?.trim() || undefined;
+    const apiUrl =
+      row.liveQueryUrl?.trim() && row.liveQueryUrl !== portalUrl
+        ? row.liveQueryUrl
+        : undefined;
+    const captureUrl = portalUrl || apiUrl;
     return (
       <>
-        {row.liveQueryUrl ? (
+        {portalUrl ? (
           <a
-            href={row.liveQueryUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary underline break-all block"
-          >
-            {t("clinical.lit.openLiveQuery")}
-          </a>
-        ) : row.evidenceUrl ? (
-          <a
-            href={row.evidenceUrl}
+            href={portalUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary underline break-all block"
@@ -538,10 +604,21 @@ export function ClinicalLiteratureWizard({
             {t("clinical.lit.registryCol.openRegistry")}
           </a>
         ) : null}
+        {apiUrl ? (
+          <a
+            href={apiUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline break-all block text-[10px]"
+          >
+            {t("clinical.lit.openLiveQuery")}
+          </a>
+        ) : null}
         <EvidenceScreenshots
           target={row.registryId}
           registryId={row.registryId}
           shots={row.evidenceScreenshots ?? []}
+          captureUrl={captureUrl}
         />
       </>
     );
@@ -769,7 +846,11 @@ export function ClinicalLiteratureWizard({
           <div className="space-y-1">
             <FieldLabel>{t("clinical.lit.evidenceScreenshots")}</FieldLabel>
             <p className="text-[11px] text-muted-foreground">{t("clinical.lit.evidenceScreenshotsHint")}</p>
-            <EvidenceScreenshots target="pubmed" shots={data.evidenceScreenshots ?? []} />
+            <EvidenceScreenshots
+              target="pubmed"
+              shots={data.evidenceScreenshots ?? []}
+              captureUrl={data.pubmedQueryUrl}
+            />
           </div>
         </div>
       )}
@@ -847,6 +928,7 @@ export function ClinicalLiteratureWizard({
           <div className="space-y-4">
             <div className="space-y-2">
               <FieldLabel>{t("clinical.lit.databasesLiterature")}</FieldLabel>
+              <p className="text-xs text-muted-foreground">{t("clinical.lit.databasesLiteratureHint")}</p>
               <DatabaseChips ids={literatureDbs} />
             </div>
             <div className="space-y-2">

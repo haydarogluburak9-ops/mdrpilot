@@ -86,6 +86,11 @@ export function LiteratureDatabaseTable({
                       {t("clinical.lit.livePubmed")}
                     </span>
                   )}
+                  {row.subscription && (
+                    <span className="inline-flex w-fit rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-950 dark:bg-amber-950/50 dark:text-amber-100">
+                      {t("clinical.lit.subscriptionDb")}
+                    </span>
+                  )}
                 </div>
               </td>
               <td className="px-3 py-2 font-mono text-[11px] max-w-[140px] break-all">
@@ -97,7 +102,9 @@ export function LiteratureDatabaseTable({
                     rel="noopener noreferrer"
                     className="mt-1 block text-primary underline"
                   >
-                    {t("clinical.lit.openPubmedQuery")}
+                    {row.live
+                      ? t("clinical.lit.openPubmedQuery")
+                      : t("clinical.lit.openDbSearch")}
                   </a>
                 )}
               </td>
@@ -112,15 +119,22 @@ export function LiteratureDatabaseTable({
               <td className="px-3 py-2 text-muted-foreground">{row.includedCount}</td>
               <td className="px-3 py-2 text-[11px]">
                 {row.databaseId === "pubmed" ? (
-                  row.pdfCount > 0 ? (
-                    <span className="text-emerald-700 dark:text-emerald-400">
-                      {t("clinical.lit.pdfCountBadge")
-                        .replace("{n}", String(row.pdfCount))
-                        .replace("{total}", String(row.includedCount))}
+                  <div className="space-y-0.5">
+                    {row.pdfCount > 0 ? (
+                      <span className="block text-emerald-700 dark:text-emerald-400">
+                        {t("clinical.lit.pdfCountBadge")
+                          .replace("{n}", String(row.pdfCount))
+                          .replace("{total}", String(row.includedCount))}
+                      </span>
+                    ) : (
+                      <span className="block text-muted-foreground">{t("clinical.lit.noPdfYet")}</span>
+                    )}
+                    <span className="block text-muted-foreground">
+                      {t("clinical.lit.ssCountBadge").replace("{n}", String(row.screenshotCount))}
                     </span>
-                  ) : (
-                    <span className="text-muted-foreground">{t("clinical.lit.noPdfYet")}</span>
-                  )
+                  </div>
+                ) : row.subscription ? (
+                  <span className="text-muted-foreground">{t("clinical.lit.subscriptionImportHint")}</span>
                 ) : (
                   "—"
                 )}

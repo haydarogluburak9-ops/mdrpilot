@@ -58,7 +58,8 @@ export const CLINICAL_DATABASE_CATALOG: ClinicalDatabaseOption[] = [
 
 const CATALOG_BY_ID = new Map(CLINICAL_DATABASE_CATALOG.map((d) => [d.id, d]));
 
-export const DEFAULT_LITERATURE_DATABASE_IDS = ["pubmed", "embase", "cochrane"] as const;
+/** Live-capable free databases selected by default. Subscription DBs (Embase/Cochrane/…) are opt-in. */
+export const DEFAULT_LITERATURE_DATABASE_IDS = ["pubmed"] as const;
 
 export const DEFAULT_REGULATORY_DATABASE_IDS = [
   "fda-maude",
@@ -692,12 +693,20 @@ export function serializeLiteratureStrategyMarkdown(
                   ? ` [canlı: ${r.liveRecordCount}]`
                   : ` [live: ${r.liveRecordCount}]`
                 : "";
+            const ssNote =
+              (r.evidenceScreenshots?.length ?? 0) > 0
+                ? tr
+                  ? ` [SS: ${r.evidenceScreenshots!.length}]`
+                  : ` [SS: ${r.evidenceScreenshots!.length}]`
+                : tr
+                  ? " [SS eksik]"
+                  : " [SS missing]";
             const hits =
               (r.sampleHits?.length ?? 0) > 0
                 ? ` ${tr ? "Örnek:" : "Sample:"} ${r.sampleHits!.slice(0, 2).join("; ")}`
                 : "";
             const cell = (v: string) => v.replace(/\|/g, "/").replace(/\n/g, " ").trim();
-            return `| ${cell(label + liveNote)} | \`${cell(r.query)}\` | ${cell(status)} | ${cell(r.summary + hits)} |`;
+            return `| ${cell(label + liveNote + ssNote)} | \`${cell(r.query)}\` | ${cell(status)} | ${cell(r.summary + hits)} |`;
           }),
         ].join("\n")
       : "",
