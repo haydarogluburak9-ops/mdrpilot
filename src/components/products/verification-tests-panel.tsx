@@ -191,6 +191,36 @@ export function VerificationTestsPanel({
                   onChange={(e) => updateTest(test.id, { protocolRef: e.target.value })}
                 />
               </div>
+              <div className="grid gap-2 sm:grid-cols-4">
+                <input
+                  className="rounded-md border border-input bg-background px-3 py-1.5 text-xs"
+                  placeholder={t("vv.acceptanceCriteria")}
+                  value={test.acceptanceCriteria ?? ""}
+                  disabled={!canEdit}
+                  onChange={(e) => updateTest(test.id, { acceptanceCriteria: e.target.value })}
+                />
+                <input
+                  className="rounded-md border border-input bg-background px-3 py-1.5 text-xs"
+                  placeholder={t("vv.measuredValue")}
+                  value={test.measuredValue ?? ""}
+                  disabled={!canEdit}
+                  onChange={(e) => updateTest(test.id, { measuredValue: e.target.value })}
+                />
+                <input
+                  className="rounded-md border border-input bg-background px-3 py-1.5 text-xs"
+                  placeholder={t("vv.units")}
+                  value={test.units ?? ""}
+                  disabled={!canEdit}
+                  onChange={(e) => updateTest(test.id, { units: e.target.value })}
+                />
+                <input
+                  className="rounded-md border border-input bg-background px-3 py-1.5 text-xs"
+                  placeholder={t("vv.sampleSize")}
+                  value={test.sampleSize ?? ""}
+                  disabled={!canEdit}
+                  onChange={(e) => updateTest(test.id, { sampleSize: e.target.value })}
+                />
+              </div>
               <textarea
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs min-h-[60px]"
                 placeholder={t("vv.resultSummary")}

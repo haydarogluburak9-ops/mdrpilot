@@ -20,6 +20,11 @@ export interface VerificationTestRecord {
   resultSummary?: string;
   performedAt?: string;
   evidenceFileIds?: string[];
+  /** Quantitative V&V fields (optional — used in TF section tables). */
+  acceptanceCriteria?: string;
+  measuredValue?: string;
+  units?: string;
+  sampleSize?: string;
 }
 
 export const VERIFICATION_TEST_CATEGORIES: VerificationTestCategory[] = [
@@ -104,4 +109,34 @@ export function mergeVerificationTests(
     if (!byId.has(d.id)) byId.set(d.id, d);
   }
   return Array.from(byId.values());
+}
+
+/** Markdown table for technical-file verification-validation section drafts. */
+export function serializeVerificationTestsMarkdown(
+  tests: VerificationTestRecord[],
+  locale: string,
+): string {
+  const tr = locale === "tr";
+  if (!tests.length) {
+    return tr
+      ? "_Henüz doğrulama / validasyon testi tanımlanmadı._"
+      : "_No verification / validation tests defined yet._";
+  }
+  const headers = tr
+    ? "| Test | Kategori | Standart | Kabul kriteri | Ölçülen | Durum | Özet |"
+    : "| Test | Category | Standard | Acceptance | Measured | Status | Summary |";
+  const sep = "|---|---|---|---|---|---|---|";
+  const rows = tests.map((t) => {
+    const cells = [
+      t.title,
+      t.category,
+      t.standardRef ?? "—",
+      t.acceptanceCriteria ?? "—",
+      [t.measuredValue, t.units].filter(Boolean).join(" ") || "—",
+      t.status,
+      t.resultSummary ?? "—",
+    ].map((c) => String(c).replace(/\|/g, "/").replace(/\n/g, " "));
+    return `| ${cells.join(" | ")} |`;
+  });
+  return [headers, sep, ...rows].join("\n");
 }

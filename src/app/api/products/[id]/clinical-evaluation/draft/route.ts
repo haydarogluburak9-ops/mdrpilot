@@ -24,8 +24,9 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     const locale = parsed.data.locale ?? "tr";
-    const evaluation = await generateClinicalEvaluationDraft(ctx.companyId, params.id, locale);
-    if (!evaluation) return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    const draft = await generateClinicalEvaluationDraft(ctx.companyId, params.id, locale);
+    if (!draft?.evaluation) return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    const { evaluation, aiSource } = draft;
 
     await writeAuditLog({
       action: "clinical_evaluation.draft",
@@ -33,11 +34,11 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       userId: ctx.user.id,
       entity: "ClinicalEvaluation",
       entityId: evaluation.id,
-      metadata: { productId: params.id, locale },
+      metadata: { productId: params.id, locale, aiSource },
       ip: ipFromRequest(req),
     });
 
-    return NextResponse.json({ evaluation });
+    return NextResponse.json({ evaluation, aiSource });
   } catch (err) {
     const { status, message } = statusForError(err);
     if (status === 500) console.error("[api/clinical-evaluation/draft POST]", err);

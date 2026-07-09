@@ -17,6 +17,10 @@ import { formatStandardsInText } from "@/lib/domain/standards-catalog";
 import { describeSymbols } from "@/lib/domain/iso15223-symbols";
 import { resolveTfSectionBlock } from "@/lib/domain/product-info-tf-blocks";
 import { parseEquivalentDevicesJson } from "@/lib/domain/clinical-equivalent-model";
+import {
+  parseVerificationTests,
+  serializeVerificationTestsMarkdown,
+} from "@/lib/domain/verification-tests";
 import { sterilizationText } from "@/lib/domain/sterilization";
 import { getMeteredAiProvider, aiProviderInfo, extractJson } from "@/lib/ai/provider-factory";
 import { AiTokenLimitError } from "@/lib/auth/errors";
@@ -167,6 +171,7 @@ function deterministicSection(
   symbolLines: string[] = [],
   referenceLines: ReturnType<typeof describeApplicableReferences> | null = null,
   equivalentDeviceCount = 0,
+  verificationMarkdown: string | null = null,
 ): string {
   const tbc = L(locale, "[TO BE CONFIRMED]", "[TEYİT EDİLECEK]");
   const intro = L(
@@ -199,6 +204,13 @@ function deterministicSection(
             equivalentDeviceCount,
           });
           if (block) return `## ${h}\n\n${block}`;
+        }
+        if (
+          key === "verification-validation" &&
+          verificationMarkdown &&
+          /test method|acceptance|results summary|test yöntem|kabul|sonuç/i.test(h)
+        ) {
+          return `## ${h}\n\n${verificationMarkdown}`;
         }
         return `## ${h}\n\n- ${tbc}`;
       })
@@ -271,6 +283,14 @@ export async function generateTechnicalSection(
   const equivalentDeviceCount =
     parseEquivalentDevicesJson(product.clinicalEvaluation?.equivalentDevicesDataJson ?? null)?.devices
       .length ?? 0;
+  const verificationMarkdown =
+    section.key === "verification-validation"
+      ? (() => {
+          const extras = (section.sectionExtrasJson ?? {}) as { verificationTests?: unknown };
+          const tests = parseVerificationTests(extras.verificationTests);
+          return serializeVerificationTestsMarkdown(tests, locale);
+        })()
+      : null;
 
   let content = postMarketKey
     ? buildPostMarketSectionMarkdown(
@@ -289,6 +309,7 @@ export async function generateTechnicalSection(
         symbolLines,
         referenceLines,
         equivalentDeviceCount,
+        verificationMarkdown,
       );
   let source: SectionSource = "mock";
   let model = "mock";

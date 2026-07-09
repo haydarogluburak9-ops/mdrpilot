@@ -27,12 +27,18 @@
     "test:qm-wizard": "tsx scripts/test-quality-manual-wizard.ts",
     "test:consultant-audit": "tsx scripts/test-consultant-audit.ts",
     "test:demo": "tsx scripts/test-demo.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install chromium",
     "offload:d": "powershell -ExecutionPolicy Bypass -File scripts/offload-to-d.ps1"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1083.0",
+    "@aws-sdk/s3-request-presigner": "^3.1083.0",
     "@prisma/client": "^5.22.0",
     "archiver": "^7.0.1",
     "bcryptjs": "^2.4.3",
@@ -42,6 +48,7 @@
     "docx": "^8.5.0",
     "exceljs": "^4.4.0",
     "framer-motion": "^11.11.17",
+    "ioredis": "^5.11.1",
     "jszip": "^3.10.1",
     "lucide-react": "^0.460.0",
     "mammoth": "^1.12.0",
@@ -58,22 +65,27 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/archiver": "^6.0.4",
     "@types/bcryptjs": "^2.4.6",
+    "@types/ioredis": "^4.28.10",
     "@types/node": "^20.17.6",
     "@types/pdf-parse": "^1.1.5",
     "@types/pdfkit": "^0.13.9",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^6.0.3",
     "autoprefixer": "^10.4.20",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.18",
+    "jsdom": "^29.1.1",
     "postcss": "^8.4.49",
     "prisma": "^5.22.0",
     "tailwindcss": "^3.4.15",
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.19.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^4.1.10"
   }
 }
