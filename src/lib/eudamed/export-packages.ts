@@ -1,11 +1,13 @@
 export type UdiExportPayload = {
   tradeName?: string | null;
   udiDi?: string | null;
+  basicUdiDi?: string | null;
   udiPi?: string | null;
   deviceClass?: string | null;
   emdn?: string | null;
   gmdn?: string | null;
   issuingAgency?: string | null;
+  eudamedDeviceId?: string | null;
 };
 
 function escXml(s: string): string {
@@ -26,12 +28,14 @@ export function buildUdiDeviceXml(payload: UdiExportPayload, company: { name: st
   </Manufacturer>
   <Device>
     <TradeName>${escXml(payload.tradeName ?? "")}</TradeName>
+    ${payload.basicUdiDi ? `<BasicUDI-DI>${escXml(payload.basicUdiDi)}</BasicUDI-DI>` : ""}
     <UDI-DI>${escXml(payload.udiDi ?? "")}</UDI-DI>
     <UDI-PI>${escXml(payload.udiPi ?? "")}</UDI-PI>
     <DeviceClass>${escXml(payload.deviceClass ?? "")}</DeviceClass>
     <EMDN>${escXml(payload.emdn ?? "")}</EMDN>
     <GMDN>${escXml(payload.gmdn ?? "")}</GMDN>
     <IssuingAgency>${escXml(payload.issuingAgency ?? "GS1")}</IssuingAgency>
+    ${payload.eudamedDeviceId ? `<EUDAMEDDeviceID>${escXml(payload.eudamedDeviceId)}</EUDAMEDDeviceID>` : ""}
   </Device>
 </UDIDeviceRegistration>`;
 }
@@ -41,23 +45,27 @@ export function buildUdiDeviceCsv(payload: UdiExportPayload, company: { name: st
     "manufacturer",
     "srn",
     "trade_name",
+    "basic_udi_di",
     "udi_di",
     "udi_pi",
     "device_class",
     "emdn",
     "gmdn",
     "issuing_agency",
+    "eudamed_device_id",
   ];
   const row = [
     company.name,
     company.srnNumber ?? "",
     payload.tradeName ?? "",
+    payload.basicUdiDi ?? "",
     payload.udiDi ?? "",
     payload.udiPi ?? "",
     payload.deviceClass ?? "",
     payload.emdn ?? "",
     payload.gmdn ?? "",
     payload.issuingAgency ?? "GS1",
+    payload.eudamedDeviceId ?? "",
   ];
   const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
   return [headers.join(","), row.map(esc).join(",")].join("\n");

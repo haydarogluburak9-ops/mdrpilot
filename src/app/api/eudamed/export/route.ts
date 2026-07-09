@@ -35,6 +35,7 @@ export async function GET(req: Request) {
           udiDi: true,
           basicUdiDi: true,
           emdnCode: true,
+          eudamedDeviceId: true,
         },
       });
       if (!product) return NextResponse.json({ error: "Product not found" }, { status: 404 });
@@ -42,8 +43,10 @@ export async function GET(req: Request) {
       const payload = {
         tradeName: product.name,
         udiDi: product.udiDi ?? product.basicUdiDi,
+        basicUdiDi: product.basicUdiDi,
         deviceClass: product.deviceClass,
         emdn: product.emdnCode,
+        eudamedDeviceId: product.eudamedDeviceId,
         issuingAgency: "GS1",
       };
 
