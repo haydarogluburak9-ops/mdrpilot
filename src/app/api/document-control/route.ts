@@ -5,6 +5,7 @@ import {
   loadControlledDocuments,
   listApprovalHistory,
 } from "@/lib/document-control/service";
+import { isAppLocale, type Lang } from "@/lib/i18n/locales";
 
 export const runtime = "nodejs";
 
@@ -14,13 +15,15 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const productId = url.searchParams.get("productId")?.trim() || undefined;
     const history = url.searchParams.get("history") === "1";
+    const langParam = url.searchParams.get("lang")?.trim();
+    const lang: Lang = isAppLocale(langParam) ? langParam : "en";
 
     if (history) {
       const rows = await listApprovalHistory(ctx.companyId);
       return NextResponse.json({ history: rows });
     }
 
-    const documents = await loadControlledDocuments(ctx.companyId, productId);
+    const documents = await loadControlledDocuments(ctx.companyId, productId, lang);
     return NextResponse.json({ documents });
   } catch (err) {
     const { status, message } = statusForError(err);

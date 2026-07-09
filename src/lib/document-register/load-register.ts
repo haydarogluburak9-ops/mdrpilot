@@ -52,7 +52,7 @@ export async function loadDocumentRegister(
   });
   if (!company) throw new NotFoundError();
 
-  await scaffoldCompanyQms(companyId, ["ISO 13485", "ISO 9001"]);
+  await scaffoldCompanyQms(companyId, ["ISO 13485"]);
 
   let productName: string | null = null;
   let technicalFile: DocumentRegisterRow[] = [];
@@ -100,7 +100,10 @@ export async function loadDocumentRegister(
     where: {
       companyId,
       deletedAt: null,
-      NOT: { code: { in: [...QMS_REGISTER_EXCLUDED_CODES] } },
+      NOT: [
+        { code: { in: [...QMS_REGISTER_EXCLUDED_CODES] } },
+        { code: { startsWith: "9001-" } },
+      ],
     },
     orderBy: { code: "asc" },
     select: {

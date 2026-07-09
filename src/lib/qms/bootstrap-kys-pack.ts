@@ -126,7 +126,7 @@ export async function runBootstrapKysPack(params: {
   const locale = params.locale ?? "tr";
   const generateAi = params.generateAi !== false;
 
-  await scaffoldCompanyQms(params.companyId, ["ISO 13485", "ISO 9001"]);
+  await scaffoldCompanyQms(params.companyId, ["ISO 13485"]);
   const deduped = await dedupeCompanyQmsByCode(params.companyId);
 
   const sopsGenerated: string[] = [];

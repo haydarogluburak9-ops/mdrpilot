@@ -209,7 +209,7 @@ export async function importQmsFromUploadedFiles(params: {
   locale: "tr" | "en";
   overwrite?: boolean;
 }): Promise<QmsImportResult> {
-  await scaffoldCompanyQms(params.companyId, ["ISO 13485", "ISO 9001"]);
+  await scaffoldCompanyQms(params.companyId, ["ISO 13485"]);
 
   const register = await prisma.qMSDocument.findMany({
     where: { companyId: params.companyId, deletedAt: null },
@@ -334,7 +334,7 @@ export async function importQmsToProcedure(params: {
   overwrite?: boolean;
   targetCode?: string;
 }): Promise<QmsImportResult> {
-  await scaffoldCompanyQms(params.companyId, ["ISO 13485", "ISO 9001"]);
+  await scaffoldCompanyQms(params.companyId, ["ISO 13485"]);
   const procedureCode = params.procedureCode.trim().toUpperCase();
 
   const register = await prisma.qMSDocument.findMany({

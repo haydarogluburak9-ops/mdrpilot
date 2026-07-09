@@ -10,6 +10,26 @@ import {
 import { inferParentProcedureCode } from "@/lib/qms/procedure-children";
 
 /**
+ * Soft-delete empty ISO 9001 stub rows (`9001-*`) that were auto-scaffolded.
+ * MDRpilot defaults to ISO 13485 / MDR; ISO 9001 stubs clutter document control
+ * with English titles. Keeps rows that already have content.
+ */
+export async function retireEmptyIso9001Stubs(companyId: string): Promise<number> {
+  const result = await prisma.qMSDocument.updateMany({
+    where: {
+      companyId,
+      deletedAt: null,
+      standard: "ISO 9001",
+      code: { startsWith: "9001-" },
+      status: "MISSING",
+      OR: [{ content: null }, { content: "" }],
+    },
+    data: { deletedAt: new Date() },
+  });
+  return result.count;
+}
+
+/**
  * Create a company's initial QMS document register (procedure list) so a brand
  * new company immediately sees the full ISO 13485 (and optionally ISO 9001)
  * documented-procedure checklist with status MISSING. Idempotent: existing
@@ -21,6 +41,7 @@ export async function scaffoldCompanyQms(
 ): Promise<number> {
   const normalized = standards.map((s) => s.toUpperCase());
   const wants13485 = normalized.some((s) => s.includes("13485")) || normalized.length === 0;
+  // Only scaffold ISO 9001 when explicitly requested — not by default.
   const wants9001 = normalized.some((s) => s.includes("9001"));
 
   const existing = await prisma.qMSDocument.findMany({
@@ -102,6 +123,11 @@ export async function scaffoldCompanyQms(
   }
 
   await dedupeCompanyQmsByCode(companyId);
+
+  // Drop legacy empty ISO 9001 stubs unless this call explicitly wants 9001.
+  if (!wants9001) {
+    await retireEmptyIso9001Stubs(companyId);
+  }
 
   // Backfill layer + parent on legacy rows (idempotent).
   const allDocs = await prisma.qMSDocument.findMany({

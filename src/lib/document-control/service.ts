@@ -2,6 +2,9 @@ import "server-only";
 import { prisma } from "@/lib/db";
 import type { DocumentSourceType } from "@prisma/client";
 import type { DocStatus } from "@/lib/domain/types";
+import { qmsDocTitle } from "@/lib/i18n/qms-doc-titles";
+import type { Lang } from "@/lib/i18n/locales";
+import { retireEmptyIso9001Stubs } from "@/lib/qms/scaffold";
 
 export type ControlledDocumentRow = {
   sourceType: DocumentSourceType;
@@ -26,11 +29,19 @@ export type ControlledDocumentRow = {
 export async function loadControlledDocuments(
   companyId: string,
   productId?: string,
+  lang: Lang = "en",
 ): Promise<ControlledDocumentRow[]> {
+  // Hide legacy empty ISO 9001 stubs from document control.
+  await retireEmptyIso9001Stubs(companyId);
+
   const rows: ControlledDocumentRow[] = [];
 
   const qmsDocs = await prisma.qMSDocument.findMany({
-    where: { companyId, deletedAt: null },
+    where: {
+      companyId,
+      deletedAt: null,
+      NOT: { code: { startsWith: "9001-" } },
+    },
       select: {
         id: true,
         code: true,
@@ -43,11 +54,12 @@ export async function loadControlledDocuments(
     orderBy: { code: "asc" },
   });
   for (const d of qmsDocs) {
+    const code = d.code ?? d.id;
     rows.push({
       sourceType: "QMS",
       sourceId: d.id,
-      code: d.code ?? d.id,
-      title: d.title,
+      code,
+      title: qmsDocTitle(code, d.title, lang),
       revisionNo: d.revisionNo,
       status: d.status as DocStatus,
       ownerName: d.preparedBy,

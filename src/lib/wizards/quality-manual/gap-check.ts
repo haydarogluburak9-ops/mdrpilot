@@ -532,7 +532,7 @@ const QM_FORM_STEPS_FLAT = [
 
 /** Pulls company QMS documents to display alongside the procedures step. */
 export async function listCompanyQmsDocs(companyId: string) {
-  await scaffoldCompanyQms(companyId, ["ISO 13485", "ISO 9001"]);
+  await scaffoldCompanyQms(companyId, ["ISO 13485"]);
 
   const docs = await prisma.qMSDocument.findMany({
     where: { companyId, deletedAt: null },

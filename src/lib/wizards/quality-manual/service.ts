@@ -101,7 +101,7 @@ export async function updateWizardSession(params: {
     ? Math.min(Math.max(1, params.currentStep), QM_TOTAL_STEPS)
     : existing.currentStep;
 
-  await scaffoldCompanyQms(params.companyId, ["ISO 13485", "ISO 9001"]);
+  await scaffoldCompanyQms(params.companyId, ["ISO 13485"]);
   const qmsDocs = await listCompanyQmsDocs(params.companyId);
   const companyProfile = await loadCompanyProfileFields(params.companyId);
   const answersWithKys = enrichAnswersFromKys(mergedAnswers, qmsDocs, step, true, "tr", companyProfile);

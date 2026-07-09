@@ -57,7 +57,7 @@ export function DocumentControlView({
   canApprove: boolean;
   canWorkflow: boolean;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [documents, setDocuments] = useState<ControlledDoc[]>([]);
   const [history, setHistory] = useState<HistoryRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +70,10 @@ export function DocumentControlView({
 
   async function load() {
     setLoading(true);
-    const q = productId ? `?productId=${productId}` : "";
+    const params = new URLSearchParams();
+    if (productId) params.set("productId", productId);
+    params.set("lang", lang);
+    const q = `?${params.toString()}`;
     const [docsRes, histRes] = await Promise.all([
       fetch(`/api/document-control${q}`),
       fetch("/api/document-control?history=1"),
@@ -101,7 +104,8 @@ export function DocumentControlView({
 
   useEffect(() => {
     load();
-  }, [productId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when product or UI language changes
+  }, [productId, lang]);
 
   useEffect(() => {
     if (selected) {

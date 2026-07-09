@@ -456,14 +456,17 @@ export interface QmsDoc {
 
 export async function listQmsDocuments(companyId: string, standard?: string): Promise<QmsDoc[]> {
   // Ensure new catalog procedures (e.g. SOP-ORG) appear without manual db:sync-qms.
-  await scaffoldCompanyQms(companyId, ["ISO 13485", "ISO 9001"]);
+  await scaffoldCompanyQms(companyId, ["ISO 13485"]);
 
   const rows = await prisma.qMSDocument.findMany({
     where: {
       companyId,
       deletedAt: null,
       ...(standard ? { standard } : {}),
-      NOT: { code: { in: [...QMS_REGISTER_EXCLUDED_CODES] } },
+      NOT: [
+        { code: { in: [...QMS_REGISTER_EXCLUDED_CODES] } },
+        { code: { startsWith: "9001-" } },
+      ],
     },
     orderBy: { code: "asc" },
     select: {

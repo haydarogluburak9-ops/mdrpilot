@@ -30,7 +30,7 @@ export async function bulkGenerateQmsDocuments(params: {
   onlyEmpty?: boolean;
   maxDocs?: number;
 }): Promise<BulkQmsGenerateResult> {
-  await scaffoldCompanyQms(params.companyId, ["ISO 13485", "ISO 9001"]);
+  await scaffoldCompanyQms(params.companyId, ["ISO 13485"]);
 
   const answers = await loadQmsWizardAnswers(params.companyId);
   const excluded = new Set<string>(QMS_REGISTER_EXCLUDED_CODES);
