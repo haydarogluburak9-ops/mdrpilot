@@ -17,6 +17,7 @@ export interface SendEmailInput {
 /** Send transactional email. Logs to console in dev when no provider is configured. */
 export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; provider: string }> {
   const from = env.email.from;
+  const replyTo = env.email.supportTo;
 
   if (env.email.resendApiKey) {
     const res = await fetch("https://api.resend.com/emails", {
@@ -28,6 +29,7 @@ export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; p
       body: JSON.stringify({
         from,
         to: [input.to],
+        reply_to: replyTo,
         subject: input.subject,
         html: input.html,
         text: input.text,
